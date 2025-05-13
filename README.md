@@ -193,6 +193,15 @@ For developers contributing to pytest-fixturecheck, we use pre-commit hooks to e
 
 See [PRE_COMMIT_HOOKS.md](PRE_COMMIT_HOOKS.md) for details on the available hooks and how to use them.
 
+## Project Tags
+
+This project is tagged with the following keywords to improve discoverability:
+- #pytest - A pytest plugin for fixture validation
+- #testing - Helps improve test quality and reliability
+- #fixtures - Specifically focuses on validating pytest fixtures
+- #python - Written in and for Python
+- #validation - Provides validation tools for fixture objects
+
 ## License
 
 MIT

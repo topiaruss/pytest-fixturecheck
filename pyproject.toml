@@ -11,6 +11,7 @@ authors = [
     {name = "Russ"}
 ]
 license = {text = "MIT"}
+keywords = ["pytest", "testing", "fixtures", "python", "pytest-plugin", "validation"]
 classifiers = [
     "Development Status :: 3 - Alpha",
     "Framework :: Pytest",
