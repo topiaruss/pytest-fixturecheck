@@ -3,6 +3,15 @@
 import pytest
 import asyncio
 from unittest.mock import MagicMock, patch
+import inspect
+
+# Try to import pytest_asyncio, skip tests if not available
+try:
+    import pytest_asyncio
+    PYTEST_ASYNCIO_AVAILABLE = True
+except ImportError:
+    PYTEST_ASYNCIO_AVAILABLE = False
+    pytest.skip("pytest_asyncio not installed, skipping tests", allow_module_level=True)
 
 from pytest_fixturecheck import fixturecheck
 from pytest_fixturecheck.utils import is_async_function, is_coroutine

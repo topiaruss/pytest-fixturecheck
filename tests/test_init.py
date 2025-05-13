@@ -47,7 +47,7 @@ def test_exported_symbols():
     
     # Test version
     assert isinstance(__version__, str)
-    assert __version__ == "0.3.0-dev"
+    assert __version__ == "0.3.0"
     
     # Test __all__ list
     expected_symbols = [
