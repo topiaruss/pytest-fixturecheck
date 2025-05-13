@@ -64,6 +64,11 @@ This file outlines the next steps for the pytest-fixturecheck project after rele
    - Support for complex property validation logic (e.g., range validation, custom patterns)
    - Add validators for property types
 
+7. **Fix Python 3.12 AsyncIO Compatibility**
+   - Investigate and fix issues with pytest-asyncio tests on Python 3.12
+   - Currently, asyncio tests are skipped in CI for Python 3.12 due to import errors
+   - This may require updates to how pytest-asyncio is integrated or conditional test skipping
+
 ## Contribution Opportunities
 
 Below are specific areas where contributions would be valuable:
