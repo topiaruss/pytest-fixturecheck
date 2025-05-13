@@ -82,3 +82,13 @@ repos:
             "--max-line-length=100",
           ]
         stages: [manual]
+
+  - repo: local
+    hooks:
+      - id: version-sync
+        name: Verify version numbers are in sync
+        description: Check that the version in pyproject.toml is reported correctly
+        entry: python .pre-commit-hooks/sync_version.py
+        language: python
+        files: ^pyproject\.toml$
+        additional_dependencies: [tomli]

@@ -51,6 +51,8 @@ dev = [
     "pydocstyle",
     "pylint",
     "pylint-pytest",
+    "tomli",
+    "tomli_w",
 ]
 
 [project.urls]

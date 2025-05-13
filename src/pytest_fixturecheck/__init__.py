@@ -1,5 +1,7 @@
 """pytest-fixturecheck - A pytest plugin to validate fixtures before tests."""
 
+import importlib.metadata
+
 from .decorator import fixturecheck
 from .django import django_model_has_fields, django_model_validates, is_django_model
 from .utils import creates_validator
@@ -16,7 +18,12 @@ from .validators_fix import (
     with_property_values,
 )
 
-__version__ = "0.3.3"
+# Get version from package metadata
+try:
+    __version__ = importlib.metadata.version("pytest-fixturecheck")
+except importlib.metadata.PackageNotFoundError:
+    # Package is not installed, use a default version
+    __version__ = "0.3.3"
 
 __all__ = [
     "fixturecheck",

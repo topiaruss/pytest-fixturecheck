@@ -1,4 +1,4 @@
-.PHONY: clean install test test-all test-specific lint mypy format build publish tox pre-commit
+.PHONY: clean install test test-all test-specific lint mypy format build publish tox pre-commit version-patch version-minor version-major
 
 clean:
 	rm -rf build/ dist/ *.egg-info/ .pytest_cache/ .coverage htmlcov/ .tox/ __pycache__/ */__pycache__/ */*/__pycache__/
@@ -63,6 +63,15 @@ build:
 
 publish:
 	twine upload dist/*
+
+version-patch:
+	python scripts/bump_version.py patch
+
+version-minor:
+	python scripts/bump_version.py minor
+
+version-major:
+	python scripts/bump_version.py major
 
 %:
 	@:
