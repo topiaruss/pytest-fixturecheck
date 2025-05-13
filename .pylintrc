@@ -1,0 +1,43 @@
+[MASTER]
+load-plugins=pylint_pytest
+ignore=tests/example_*.py
+
+[MESSAGES CONTROL]
+disable=
+    C0103, # Variable name doesn't conform to snake_case naming style
+    C0111, # Missing module docstring
+    C0330, # Wrong hanging indentation
+    C0326, # Bad whitespace
+    W0511, # fixme
+    R0903, # Too few public methods
+    R0913, # Too many arguments
+    R0914, # Too many local variables
+    W0212, # Access to a protected member
+    W0621, # Redefining name from outer scope
+    W0703, # Catching too general exception
+    E1101, # No member for C extension
+    R0801, # Similar lines
+    R0902, # Too many instance attributes
+    R0201, # Method could be a function
+
+[FORMAT]
+max-line-length=100
+
+[SIMILARITIES]
+min-similarity-lines=7
+ignore-comments=yes
+ignore-docstrings=yes
+ignore-imports=yes
+
+[DESIGN]
+max-args=10
+max-attributes=15
+max-bool-expr=5
+max-branches=15
+max-locals=20
+max-returns=6
+max-statements=50
+max-parents=7
+
+[TYPECHECK]
+ignored-classes=pytest 

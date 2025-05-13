@@ -45,6 +45,12 @@ dev = [
     "twine",
     "pytest-cov",
     "pytest-asyncio>=0.21.0",
+    "pre-commit",
+    "bandit",
+    "pyupgrade",
+    "pydocstyle",
+    "pylint",
+    "pylint-pytest",
 ]
 
 [project.urls]
@@ -52,3 +58,7 @@ repository = "https://github.com/topiaruss/pytest-fixturecheck"
 
 [project.entry-points.pytest11]
 fixturecheck = "pytest_fixturecheck.plugin"
+
+[tool.bandit]
+exclude_dirs = ["tests", ".tox", ".venv"]
+skips = ["B101", "B104"]  # Skip assert warnings and hardcoded binding

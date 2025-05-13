@@ -15,6 +15,34 @@ Thank you for considering contributing to pytest-fixturecheck! This document pro
    ```bash
    pip install -e ".[dev]"
    ```
+5. Set up pre-commit hooks:
+   ```bash
+   pre-commit install
+   ```
+
+## Pre-commit Hooks
+
+We use pre-commit hooks to ensure code quality and consistency. The hooks include:
+
+- Code formatting (Black, isort)
+- Linting (Flake8, Pylint)
+- Type checking (MyPy)
+- Security scanning (Bandit)
+- Python syntax upgrades (pyupgrade)
+- Docstring validation (pydocstyle)
+- Various file checks (trailing whitespace, merge conflicts, etc.)
+
+To run all pre-commit hooks manually:
+
+```bash
+pre-commit run --all-files
+```
+
+To update the pre-commit hooks:
+
+```bash
+pre-commit autoupdate
+```
 
 ## Running Tests
 

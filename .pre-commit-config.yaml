@@ -8,6 +8,11 @@ repos:
       - id: check-added-large-files
       - id: check-toml
       - id: debug-statements
+      - id: detect-private-key
+      - id: check-ast # Ensures Python files are valid syntax
+      - id: check-merge-conflict
+      - id: mixed-line-ending
+        args: [--fix=lf] # Force Linux style line endings
 
   - repo: https://github.com/pycqa/isort
     rev: 5.13.2
@@ -34,3 +39,36 @@ repos:
       - id: mypy
         additional_dependencies: [types-requests]
         exclude: tests/example_.*\.py$
+
+  - repo: https://github.com/asottile/pyupgrade
+    rev: v3.15.0
+    hooks:
+      - id: pyupgrade
+        args: [--py38-plus]
+        exclude: tests/example_.*\.py$
+
+  - repo: https://github.com/PyCQA/bandit
+    rev: 1.7.6
+    hooks:
+      - id: bandit
+        args: ["-c", "pyproject.toml"]
+        additional_dependencies: ["bandit[toml]"]
+        exclude: tests/
+
+  - repo: https://github.com/pycqa/pydocstyle
+    rev: 6.3.0
+    hooks:
+      - id: pydocstyle
+        exclude: tests/example_.*\.py$
+
+  - repo: https://github.com/PyCQA/pylint
+    rev: v3.0.3
+    hooks:
+      - id: pylint
+        exclude: tests/example_.*\.py$
+        additional_dependencies: ["pylint-pytest"]
+        args: [
+            "--disable=C0103,C0111", # Disable specific messages
+            "--good-names=i,j,k,ex,Run,_",
+            "--max-line-length=100",
+          ]
