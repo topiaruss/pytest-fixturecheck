@@ -11,7 +11,7 @@
          |___/                                                                                  
 ```
 
-[![PyPI version](https://badge.fury.io/py/pytest-fixturecheck.svg)](https://badge.fury.io/py/pytest-fixturecheck)
+[![PyPI version](https://img.shields.io/pypi/v/pytest-fixturecheck.svg)](https://pypi.org/project/pytest-fixturecheck/)
 [![Python Versions](https://img.shields.io/pypi/pyversions/pytest-fixturecheck.svg)](https://pypi.org/project/pytest-fixturecheck/)
 [![CI](https://github.com/topiaruss/pytest-fixturecheck/actions/workflows/ci.yml/badge.svg)](https://github.com/topiaruss/pytest-fixturecheck/actions/workflows/ci.yml)
 [![codecov](https://codecov.io/gh/topiaruss/pytest-fixturecheck/branch/main/graph/badge.svg)](https://codecov.io/gh/topiaruss/pytest-fixturecheck)
