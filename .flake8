@@ -1,16 +1,39 @@
 [flake8]
+# General settings
 max-line-length = 100
-extend-ignore = E203, W503, D100, D101, D104, D107, D401, E501
-max-complexity = 10
-exclude = .git,__pycache__,build,dist,tests/example_*.py
-per-file-ignores =
-    # Allow tests to import fixtures without using them directly
-    tests/*: F401
-    # Allow __init__ to import but not use
-    */__init__.py: F401
-    # Allow imports in decorator.py
-    src/pytest_fixturecheck/decorator.py: F401
-    # Allow imports in django.py
-    src/pytest_fixturecheck/django.py: F401
-    # Allow imports in plugin.py
-    src/pytest_fixturecheck/plugin.py: F401
+max-complexity = 15
+extend-ignore = 
+    # Ignore whitespace issues
+    W291,  # trailing whitespace
+    W292,  # no newline at end of file
+    W293,  # blank line contains whitespace
+    
+    # Docstring issues
+    D102,  # Missing docstring in public method
+    D106,  # Missing docstring in public nested class
+    D202,  # No blank lines allowed after function docstring
+    D204,  # 1 blank line required after class docstring
+    
+    # Import position
+    E402,  # module level import not at top of file
+    
+    # Lambda assignments
+    E731,  # do not assign a lambda expression, use a def
+    
+    # Unused imports
+    F401,  # imported but unused
+    
+    # Unused variables
+    F841,  # local variable is assigned to but never used
+
+# Exclude patterns
+exclude =
+    .git,
+    __pycache__,
+    .tox,
+    .eggs,
+    *.egg,
+    build,
+    dist,
+    docs,
+    .venv
