@@ -1,83 +1,91 @@
 # Contributing to pytest-fixturecheck
 
-Thank you for considering contributing to pytest-fixturecheck! This document outlines the process for contributing to the project.
+Thank you for considering contributing to pytest-fixturecheck! This document provides guidelines and steps for contributing to the project.
 
 ## Development Setup
 
-1. Fork and clone the repository:
-
-```bash
-git clone https://github.com/yourusername/pytest-fixturecheck.git
-cd pytest-fixturecheck
-```
-
-2. Create a virtual environment and install development dependencies:
-
-```bash
-# Using uv (recommended)
-uv venv
-source .venv/bin/activate
-uv pip install -e ".[dev]"
-
-# Or using standard pip
-python -m venv venv
-source venv/bin/activate
-pip install -e ".[dev]"
-```
-
-3. Install pre-commit hooks:
-
-```bash
-pip install pre-commit
-pre-commit install
-```
+1. Fork the repository
+2. Clone your forked repository: `git clone https://github.com/yourusername/pytest-fixturecheck.git`
+3. Create a virtual environment and activate it:
+   ```bash
+   python -m venv .venv
+   source .venv/bin/activate  # On Windows: .venv\Scripts\activate
+   ```
+4. Install development dependencies:
+   ```bash
+   pip install -e ".[dev]"
+   ```
 
 ## Running Tests
 
-Run the tests using pytest:
+Run the tests using tox:
 
 ```bash
-# Run all tests
-make test-all
+tox
+```
 
-# Run a specific test
-make test-specific tests/test_plugin.py
+Or just using pytest:
+
+```bash
+pytest
 ```
 
 ## Code Style
 
-This project uses:
+We use:
 - Black for code formatting
-- isort for import sorting
-- flake8 for linting
-- mypy for type checking
+- Flake8 for linting
+- MyPy for type checking
 
-The pre-commit hooks will run these automatically when you commit changes.
+You can run these checks with:
+
+```bash
+tox -e lint
+tox -e mypy
+```
 
 ## Pull Request Process
 
-1. Ensure your code passes all tests and pre-commit checks
-2. Add or update tests for any new or changed functionality
-3. Update documentation if necessary
-4. Submit a pull request with a clear description of the changes
-
-## Adding New Features
-
-When adding new features, please follow these guidelines:
-
-1. Start by opening an issue describing the feature
-2. Add appropriate tests for new functionality
-3. Update the README.md with examples if necessary
-4. Add appropriate type hints
+1. Create a branch for your feature or bugfix
+2. Make your changes
+3. Run tests and ensure they pass
+4. Update documentation as needed
+5. Submit a pull request
 
 ## Release Process
 
-The maintainers will handle releases following this process:
+To release a new version:
 
-1. Update version in pyproject.toml
-2. Create and merge a release PR
-3. Tag the release on GitHub
-4. Build and upload to PyPI
+1. Update version in:
+   - `src/pytest_fixturecheck/__init__.py`
+   - `pyproject.toml`
+2. Update `CHANGELOG.md` with the new version and changes
+3. Update license format if needed (use `license = "MIT"` in pyproject.toml)
+4. Build the package:
+   ```bash
+   python -m build
+   ```
+5. Check the built package for issues (warnings, etc.)
+6. Tag the release: `git tag v0.x.y`
+7. Push the tag: `git push --tags`
+8. Upload to PyPI:
+   ```bash
+   twine upload dist/*0.x.y*
+   ```
+
+## Code of Conduct
+
+- Be respectful and inclusive
+- Focus on constructive criticism
+- Work together to improve the project
+
+## Getting Help
+
+If you have questions about contributing, feel free to:
+- Open an issue with your question
+- Reach out to the maintainers
+
+Thank you for your contribution!
 
 ## Django Integration
 
