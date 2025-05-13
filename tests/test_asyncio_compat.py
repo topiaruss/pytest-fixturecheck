@@ -2,18 +2,9 @@
 
 import pytest
 import asyncio
-import sys
-
-# Try to import pytest_asyncio, skip tests if not available
-try:
-    import pytest_asyncio
-    PYTEST_ASYNCIO_AVAILABLE = True
-except ImportError:
-    PYTEST_ASYNCIO_AVAILABLE = False
-    pytest.skip("pytest_asyncio not installed, skipping tests", allow_module_level=True)
-
-from pytest_fixturecheck import fixturecheck
 import inspect
+import pytest_asyncio
+from pytest_fixturecheck import fixturecheck
 
 # Mark all tests in this module as async
 pytestmark = pytest.mark.asyncio

@@ -4,11 +4,6 @@ import pytest
 import asyncio
 from pytest_fixturecheck import fixturecheck
 
-# Skip all tests if asyncio mark is not available
-asyncio_mark = getattr(pytest.mark, "asyncio", None)
-if asyncio_mark is None:
-    pytest.skip("pytest.mark.asyncio not available, skipping tests", allow_module_level=True)
-
 # Simplified async test with direct fixture usage (no verification)
 @pytest.fixture
 async def simple_async_fixture():
