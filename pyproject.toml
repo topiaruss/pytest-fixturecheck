@@ -10,7 +10,7 @@ readme = "README.md"
 authors = [
     {name = "Russ"}
 ]
-license = "MIT"
+license = {text = "MIT"}
 classifiers = [
     "Development Status :: 3 - Alpha",
     "Framework :: Pytest",
