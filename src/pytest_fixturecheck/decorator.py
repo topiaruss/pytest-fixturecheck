@@ -116,7 +116,7 @@ def _default_validator(obj: Any, is_collection_phase: bool = False) -> None:
     If the object is a Django model, validate its fields.
     """
     try:
-        from .django import validate_model_fields, DJANGO_AVAILABLE
+        from .django import DJANGO_AVAILABLE, validate_model_fields
 
         if DJANGO_AVAILABLE:
             # Check if it's a Django model
@@ -183,8 +183,9 @@ def with_model_validation(*field_names: str) -> Callable[[F], F]:
             return  # Skip during collection phase
 
         try:
-            from .django import DJANGO_AVAILABLE, Model
             from django.core.exceptions import FieldDoesNotExist
+
+            from .django import DJANGO_AVAILABLE, Model
 
             if not DJANGO_AVAILABLE:
                 raise ImportError("Django is not available")
@@ -215,12 +216,23 @@ def with_property_values(**expected_values: Any) -> Callable[[F], F]:
 
     This uses the updated check_property_values that works correctly with keyword arguments.
 
+    You can use strict=False to have validation issue warnings instead of exceptions.
+
     Usage:
     @pytest.fixture
     @fixturecheck.with_property_values(is_active=True, username="testuser")
     def user(db):
         return User.objects.create_user(...)
+
+    # Non-strict validation (warnings instead of errors)
+    @pytest.fixture
+    @fixturecheck.with_property_values(strict=False, is_active=True)
+    def user(db):
+        return User.objects.create_user(...)
     """
+    # Use the check_property_values function from validators_fix.py
+    from .validators_fix import check_property_values
+
     return lambda fixture: fixturecheck(check_property_values(**expected_values))(
         fixture
     )

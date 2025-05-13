@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.3.3 (2024-07-21)
+
+### Bug Fixes
+- Fixed the `strict` parameter in property validators to correctly control validation behavior
+  - When `strict=True` (default): Raises exceptions for mismatched properties
+  - When `strict=False`: Issues warnings for mismatched properties instead of raising exceptions
+- Added comprehensive tests to verify the strict parameter behavior
+- Updated documentation for property validators to include the strict parameter usage
+
 ## 0.3.2 (2024-07-14)
 
 ### Bug Fixes
@@ -71,5 +80,5 @@
 
 ### Initial Release
 - Basic fixture validation
-- Auto-fixing of common issues 
-- Simple validator functions 
+- Auto-fixing of common issues
+- Simple validator functions
