@@ -230,9 +230,7 @@ def with_property_values(**expected_values: Any) -> Callable[[F], F]:
     def user(db):
         return User.objects.create_user(...)
     """
-    # Use the check_property_values function from validators_fix.py
-    from .validators_fix import check_property_values
-
+    # Use the check_property_values function that was imported at the top of the file
     return lambda fixture: fixturecheck(check_property_values(**expected_values))(
         fixture
     )
