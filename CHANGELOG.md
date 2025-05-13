@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.3.1 (2024-07-13)
+
+### Bug Fixes
+- Fixed plugin configuration by properly registering the fixturecheck-auto-skip option with addini
+- Added pytest-asyncio as an optional dependency to support async fixtures testing
+- Improved handling of fixtures with discovery issues
+- Updated documentation with notes about fixture discovery limitations
+
 ## 0.3.0 (2024-07-12)
 
 ### New Features
