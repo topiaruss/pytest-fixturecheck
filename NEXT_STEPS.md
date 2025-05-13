@@ -40,6 +40,8 @@ This file outlines the next steps for the pytest-fixturecheck project after rele
 1. **Enhanced Fixture Discovery**
    - Automatic discovery of fixtures without requiring the decorator
    - Optional auto-validation of all fixtures
+   - Investigate and fix the fixture discovery issue in tests/test_property_values_fix.py where fixtures
+     decorated with @fixturecheck are not being properly discovered by pytest
 
 2. **Type Checking**
    - Add validators for type annotations

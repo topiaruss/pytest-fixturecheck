@@ -62,21 +62,17 @@ def my_fixture():
 
 ## Best Practices
 
-1. **Decorator Order**: Always place the `@pytest.fixture` decorator before the `@fixturecheck` or `@with_property_values` decorator to avoid fixture collection issues.
+1. **Decorator Order**: The order of `@pytest.fixture` and `@fixturecheck` decorators can affect fixture discovery. The safest approach is to place the `@pytest.fixture` decorator before the `@fixturecheck` decorator.
 
 ```python
-# Correct order
+# Recommended order
 @pytest.fixture
 @fixturecheck(check_property_values(name="test"))
-def my_fixture():
-    return TestObject(name="test")
-
-# Incorrect order (may cause fixture collection issues)
-@fixturecheck(check_property_values(name="test"))
-@pytest.fixture
 def my_fixture():
     return TestObject(name="test")
 ```
+
+However, be aware that in some cases you may encounter fixture discovery issues as seen in tests/test_property_values_fix.py, which required skipping the test due to a pytest fixture discovery limitation.
 
 2. **Choose the Right Validator**:
    - Use `property_values_validator` when you want to pass a dictionary of properties.
