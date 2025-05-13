@@ -1,6 +1,6 @@
 # Changelog
 
-## 0.3.0 (Development Version)
+## 0.3.0 (2024-07-12)
 
 ### New Features
 - Added `creates_validator` decorator for easier creation of validation functions
@@ -15,16 +15,23 @@
   - `django_model_has_fields` - validates a Django model has specific fields
   - `django_model_validates` - validates a Django model using Django's validation
 - Added `expect_validation_error` parameter for testing validators that are expected to fail
+- Added fixed property validators for more reliable property validation:
+  - `property_values_validator` - validates using a dictionary of property names and values
+  - `check_property_values` - validates using keyword arguments for property names and values
+  - `with_property_values` - factory function for property validation with keyword arguments
 
 ### Improvements
 - Enhanced AsyncIO support for coroutine fixtures
 - Improved error reporting with clearer error messages
 - Better phase-aware validation (collection vs execution time)
 - More robust Django model detection
+- Fixed issue with `has_property_values` not accepting keyword arguments
+- Added comprehensive documentation for property validators in PROPERTY_VALIDATORS.md
 
 ### API Changes
 - All built-in validators now handle `is_collection_phase` parameter
 - Old factory functions (`with_required_fields`, etc.) have been preserved for backward compatibility
+- Added new property validators while maintaining backward compatibility with existing code
 
 ## 0.2.1 (2023-06-06)
 

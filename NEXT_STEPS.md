@@ -1,8 +1,8 @@
-# Next Steps for pytest-fixturecheck v0.3.0
+# Next Steps for pytest-fixturecheck v0.4.0
 
-This file outlines the next steps for the pytest-fixturecheck project after implementing the major features for version 0.3.0.
+This file outlines the next steps for the pytest-fixturecheck project after releasing version 0.3.0.
 
-## Implemented Features
+## Completed in Version 0.3.0
 
 1. **Enhanced Validator Framework**
    - Added `creates_validator` decorator for easy validator creation
@@ -27,22 +27,13 @@ This file outlines the next steps for the pytest-fixturecheck project after impl
    - Simplified API for common validation tasks
    - Maintained backward compatibility with existing validators
 
-## Before Release
-
-Before releasing version 0.3.0, the following should be completed:
-
-1. **Additional Tests**
-   - Add more tests for edge cases, especially with Django validators
-   - Test interactions with other pytest plugins
-
-2. **Documentation**
-   - Complete documentation for all new features
-   - Add example code for common use cases
-   - Update the README with clear examples
-
-3. **Fix Known Issues**
-   - There seem to be some issues with test collection when using custom validators
-   - Fixture discovery might need improvement
+6. **Fixed Property Value Validators**
+   - Fixed issues with `has_property_values` not accepting keyword arguments
+   - Added three new validators for property validation:
+     - `property_values_validator` - Takes a dictionary of property names and values
+     - `check_property_values` - Takes keyword arguments for property names and values
+     - `with_property_values` - A factory function to replace `fixturecheck.with_property_values`
+   - Comprehensive test coverage for property validators (72%)
 
 ## Future Enhancements for v0.4.0
 
@@ -65,6 +56,11 @@ Before releasing version 0.3.0, the following should be completed:
 5. **Configuration Options**
    - More granular configuration options
    - Project-wide validation rules
+
+6. **Property Validators Enhancements**
+   - Add support for nested property validation
+   - Support for complex property validation logic (e.g., range validation, custom patterns)
+   - Add validators for property types
 
 ## Contribution Opportunities
 
@@ -93,6 +89,7 @@ Below are specific areas where contributions would be valuable:
 6. **Enhance Documentation**
    - Add more examples in docstrings
    - Create usage examples for common scenarios
+   - Document best practices for using the property validators
 
 ## Development Workflow
 
@@ -116,4 +113,4 @@ To release a new version:
 3. Build the package: `python -m build`
 4. Test the built package in a fresh environment
 5. Upload to PyPI: `twine upload dist/*`
-6. Tag the release in git: `git tag v0.3.0 && git push --tags` 
+6. Tag the release in git: `git tag v0.4.0 && git push --tags` 
