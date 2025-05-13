@@ -60,7 +60,7 @@ To release a new version:
    - `src/pytest_fixturecheck/__init__.py`
    - `pyproject.toml`
 2. Update `CHANGELOG.md` with the new version and changes
-3. Update license format if needed (use `license = "MIT"` in pyproject.toml)
+3. Update license format if needed (use `license = {text = "MIT"}` in pyproject.toml for backward compatibility with Python 3.8)
 4. Build the package:
    ```bash
    python -m build
