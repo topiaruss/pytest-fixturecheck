@@ -54,7 +54,7 @@ def user():
 ## Using Built-in Validators
 
 ```python
-from pytest_fixturecheck import fixturecheck, is_instance_of, has_required_fields
+from pytest_fixturecheck import fixturecheck, is_instance_of, has_required_fields, check_property_values
 
 @pytest.fixture
 @fixturecheck(is_instance_of(User))
@@ -67,6 +67,12 @@ def user_fixture():
 def complete_user_fixture():
     # This fixture must return an object with username and email fields
     return User(username="testuser", email="user@example.com")
+
+@pytest.fixture
+@fixturecheck(check_property_values(username="testuser", is_active=True))
+def active_user_fixture():
+    # This fixture must return an object with username="testuser" and is_active=True
+    return User(username="testuser", is_active=True)
 ```
 
 ## Django Support
@@ -116,6 +122,36 @@ def validated_user():
     return User(username="testuser", email="user@example.com")
 ```
 
+## Property Validation
+
+There are three ways to validate property values:
+
+```python
+from pytest_fixturecheck import (
+    fixturecheck, property_values_validator, check_property_values, with_property_values
+)
+
+# 1. Using a dictionary with property_values_validator
+@pytest.fixture
+@fixturecheck(property_values_validator({"name": "test", "value": 42}))
+def object_fixture():
+    return TestObject(name="test", value=42)
+
+# 2. Using keyword arguments with check_property_values
+@pytest.fixture
+@fixturecheck(check_property_values(name="test", value=42))
+def object_fixture2():
+    return TestObject(name="test", value=42)
+
+# 3. Using the factory function with_property_values
+@pytest.fixture
+@with_property_values(name="test", value=42)
+def object_fixture3():
+    return TestObject(name="test", value=42)
+```
+
+For more details on property validation, see [PROPERTY_VALIDATORS.md](PROPERTY_VALIDATORS.md).
+
 ## Testing Validators
 
 ```python
@@ -134,7 +170,10 @@ def fixture_missing_field():
 - `is_instance_of(type_or_types)` - Validates object is an instance of the specified type(s)
 - `has_required_fields(*field_names)` - Validates object has the specified fields
 - `has_required_methods(*method_names)` - Validates object has the specified methods
-- `has_property_values(**expected_values)` - Validates object properties match expected values
+- `has_property_values(**expected_values)` - Validates object properties match expected values (legacy)
+- `property_values_validator(expected_values_dict)` - Validates object properties with a dictionary
+- `check_property_values(**expected_values)` - Validates object properties with keyword arguments
+- `with_property_values(**expected_values)` - Factory function for property validation
 - `combines_validators(*validators)` - Combines multiple validators
 - `django_model_has_fields(*field_names)` - Validates Django model has the specified fields
 - `django_model_validates()` - Validates Django model passes Django's validation

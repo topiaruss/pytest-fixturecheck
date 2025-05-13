@@ -12,6 +12,9 @@ from pytest_fixturecheck import (
     is_django_model,
     django_model_has_fields,
     django_model_validates,
+    property_values_validator,
+    check_property_values,
+    with_property_values,
     __version__,
     __all__,
 )
@@ -32,6 +35,11 @@ def test_exported_symbols():
     assert callable(has_property_values)
     assert callable(combines_validators)
     
+    # Fixed property validators
+    assert callable(property_values_validator)
+    assert callable(check_property_values)
+    assert callable(with_property_values)
+    
     # Django validators
     assert callable(is_django_model)
     assert callable(django_model_has_fields)
@@ -49,6 +57,9 @@ def test_exported_symbols():
         "has_required_fields",
         "has_required_methods",
         "has_property_values",
+        "property_values_validator",
+        "check_property_values",
+        "with_property_values",
         "combines_validators",
         "is_django_model",
         "django_model_has_fields",

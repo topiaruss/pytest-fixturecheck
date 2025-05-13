@@ -9,6 +9,7 @@ ValidatorFunc = Callable[[Any, bool], None]
 # Import validators and utils
 from . import validators
 from .utils import creates_validator
+from .validators_fix import check_property_values
 
 
 def fixturecheck(
@@ -199,7 +200,7 @@ def with_property_values(**expected_values: Any) -> Callable[[F], F]:
     """
     Factory function to create a validator that checks for expected property values.
     
-    This is a compatibility wrapper for validators.has_property_values.
+    This uses the updated check_property_values that works correctly with keyword arguments.
     
     Usage:
     @pytest.fixture
@@ -207,7 +208,7 @@ def with_property_values(**expected_values: Any) -> Callable[[F], F]:
     def user(db):
         return User.objects.create_user(...)
     """
-    return lambda fixture: fixturecheck(validators.has_property_values(**expected_values))(fixture)
+    return lambda fixture: fixturecheck(check_property_values(**expected_values))(fixture)
 
 
 # Add the validators module to fixturecheck
