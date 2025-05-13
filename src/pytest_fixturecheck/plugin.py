@@ -32,11 +32,8 @@ def pytest_configure(config: Any) -> None:
     config.addinivalue_line(
         "markers", "fixturecheck: mark a test as using fixture validation"
     )
-    # Add configuration option for auto-skip
-    config.addinivalue_line(
-        "fixturecheck-auto-skip",
-        "Automatically skip tests with invalid fixtures instead of failing (true/false)"
-    )
+    # Note: We don't need to call addinivalue_line for fixturecheck-auto-skip
+    # since it's already registered as a bool type option in pytest_addoption
 
 
 def is_async_fixture(fixturedef: Any) -> bool:
