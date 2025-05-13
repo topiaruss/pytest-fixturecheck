@@ -33,7 +33,7 @@ except ImportError:
     Field = StubField  # type: ignore
 
 
-def validate_model_fields(obj: Any) -> None:
+def validate_model_fields(obj: Any, is_collection_phase: bool = False) -> None:
     """
     Validate that all fields accessed in a Django model fixture exist.
 
@@ -41,7 +41,8 @@ def validate_model_fields(obj: Any) -> None:
     but fixture code hasn't been updated.
 
     Args:
-        obj: The object returned by the fixture, expected to be a Django model
+        obj: The object returned by the fixture or the fixture function itself
+        is_collection_phase: Whether this is being called during collection phase
 
     Raises:
         ImportError: If Django is not installed
@@ -53,6 +54,27 @@ def validate_model_fields(obj: Any) -> None:
             "Django integration requires Django to be installed. "
             "Please install Django or remove the validate_model_fields validator."
         )
+
+    # During collection phase, we statically analyze the fixture function
+    if is_collection_phase:
+        if not callable(obj):
+            return
+            
+        # Get the source code of the fixture function
+        source_lines, _ = inspect.getsourcelines(obj)
+        source = "".join(source_lines)
+        
+        # Try to detect model class names from the source code
+        import re
+        model_classes = re.findall(r'(\w+)\(\s*[\w=\'",\s]+\)', source)
+        for model_name in model_classes:
+            # This is just a basic check during collection time
+            # We'll do more thorough validation at execution time
+            pass
+        
+        # We don't do actual validation during collection phase
+        # just static analysis if needed
+        return
 
     # Skip validation if object isn't a Django model
     if not isinstance(obj, Model):

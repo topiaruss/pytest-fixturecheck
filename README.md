@@ -38,6 +38,14 @@ This causes confusing test failures because the error appears in the test using 
 - **Simple API**: Just add a decorator to fixtures you want validated
 - **Zero Overhead**: Only runs during collection, doesn't slow down normal testing
 
+## What's New in v0.2.0
+
+- **Auto-detection of Django models**: No validator needed for basic Django model validation
+- **Decorator order flexibility**: Works with `@fixturecheck` before or after `@pytest.fixture`
+- **Factory functions**: Simplified validation with built-in validators
+- **Auto-skip functionality**: Optionally skip tests with broken fixtures instead of failing
+- **Phase-aware validation**: Validators can access both the fixture function and its return value
+
 ## Installation
 
 ```bash
@@ -59,23 +67,129 @@ def author():
     return Author.objects.create(name="Marian Brook")
 ```
 
-This will execute the fixture once during collection time to verify it can run without errors.
+This will execute the fixture once during collection time to verify it can run without errors. With Django models, it will automatically validate field access without requiring a custom validator.
 
-### Django Models Example
-
-With Django models, you can use the Django-specific handler to validate model field access:
+### Advanced Usage with Factory Functions
 
 ```python
-from pytest_fixturecheck import fixturecheck
-from pytest_fixturecheck.django import validate_model_fields
-
-@fixturecheck(validate_model_fields)
+# Validate that specific fields exist and are non-None
 @pytest.fixture
-def book(author, publisher):
+@fixturecheck.with_required_fields("username", "email")
+def user(db):
+    return User.objects.create_user(username="testuser", email="test@example.com")
+
+# Validate that specific methods exist and are callable
+@fixturecheck.with_required_methods("save", "delete")
+@pytest.fixture
+def book(db):
+    return Book.objects.create(title="Test Book")
+
+# Validate that specific model fields exist
+@pytest.fixture
+@fixturecheck.with_model_validation("title", "author", "publisher")
+def book(db):
+    return Book.objects.create(title="Test Book")
+
+# Validate property values
+@pytest.fixture
+@fixturecheck.with_property_values(is_active=True, is_staff=False)
+def staff_user(db):
+    return User.objects.create_user(username="staffuser", is_active=True, is_staff=False)
+```
+
+### Custom Validators
+
+You can create custom validators that validate both the fixture function (during collection) and the fixture result:
+
+```python
+def validate_user_permissions(obj, is_collection_phase):
+    if is_collection_phase:
+        # Validate the fixture function itself
+        # This runs during test collection
+        pass
+    else:
+        # Validate the fixture result
+        # This runs during fixture execution
+        if not hasattr(obj, 'has_perm'):
+            raise AttributeError("User missing permission method")
+            
+        # Check that user has expected permissions
+        if not obj.has_perm('auth.add_user'):
+            raise ValueError("User missing required permission")
+
+@pytest.fixture
+@fixturecheck(validate_user_permissions)
+def admin_user(db):
+    return User.objects.create_superuser(
+        username="admin", email="admin@example.com", password="password"
+    )
+```
+
+### Auto-Skip Functionality
+
+You can configure pytest-fixturecheck to skip tests with broken fixtures instead of failing completely. Add this to your `pytest.ini`:
+
+```ini
+[pytest]
+fixturecheck-auto-skip = true
+```
+
+When enabled, tests using broken fixtures will be skipped with a clear reason showing the fixture error.
+
+## Django Integration Examples
+
+Here's a complete example showing common Django fixture patterns with validation:
+
+```python
+# conftest.py
+import pytest
+from pytest_fixturecheck import fixturecheck
+from myapp.models import Author, Publisher, Book
+
+@pytest.fixture
+@fixturecheck  # Auto-detects Django models - no validator needed!
+def author(db):
+    """Create a test author."""
+    return Author.objects.create(name="Jane Austen")
+
+@pytest.fixture
+@fixturecheck  # Auto-detects Django models
+def publisher(db):
+    """Create a test publisher."""
+    return Publisher.objects.create(name="Classic Books Ltd")
+
+@pytest.fixture
+@fixturecheck.with_model_validation("title", "author", "publisher")
+def book(db, author, publisher):
+    """Create a test book with validated fields."""
     return Book.objects.create(
-        title="Echoes of the Riverbank",
+        title="Pride and Prejudice",
         author=author,
         publisher=publisher,
+        year_published=1813
+    )
+
+# Use a custom validator for complex validation logic
+def validate_book_relations(obj, is_collection_phase):
+    if is_collection_phase:
+        return  # Skip during collection phase
+        
+    # Validate that the book has the right relations
+    if not hasattr(obj, 'author') or not obj.author:
+        raise ValueError("Book must have an author")
+        
+    if not hasattr(obj, 'publisher') or not obj.publisher:
+        raise ValueError("Book must have a publisher")
+            
+@pytest.fixture
+@fixturecheck(validate_book_relations)
+def sequel(db, book):
+    """Create a sequel book with relation validation."""
+    return Book.objects.create(
+        title="Sense and Sensibility",
+        author=book.author,
+        publisher=book.publisher,
+        year_published=1811
     )
 ```
 
