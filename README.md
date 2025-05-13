@@ -13,8 +13,8 @@
 
 [![PyPI version](https://badge.fury.io/py/pytest-fixturecheck.svg)](https://badge.fury.io/py/pytest-fixturecheck)
 [![Python Versions](https://img.shields.io/pypi/pyversions/pytest-fixturecheck.svg)](https://pypi.org/project/pytest-fixturecheck/)
-[![CI](https://github.com/yourusername/pytest-fixturecheck/actions/workflows/ci.yml/badge.svg)](https://github.com/yourusername/pytest-fixturecheck/actions/workflows/ci.yml)
-[![codecov](https://codecov.io/gh/yourusername/pytest-fixturecheck/branch/main/graph/badge.svg)](https://codecov.io/gh/yourusername/pytest-fixturecheck)
+[![CI](https://github.com/topiaruss/pytest-fixturecheck/actions/workflows/ci.yml/badge.svg)](https://github.com/topiaruss/pytest-fixturecheck/actions/workflows/ci.yml)
+[![codecov](https://codecov.io/gh/topiaruss/pytest-fixturecheck/branch/main/graph/badge.svg)](https://codecov.io/gh/topiaruss/pytest-fixturecheck)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
 
@@ -107,7 +107,7 @@ Fix these fixture issues before running your tests.
 
 ## Visual Demo
 
-![pytest-fixturecheck in action](https://github.com/yourusername/pytest-fixturecheck/raw/main/docs/images/fixturecheck-demo.gif)
+![pytest-fixturecheck in action](https://github.com/topiaruss/pytest-fixturecheck/raw/main/docs/images/fixturecheck-demo.gif)
 
 *The GIF above shows how pytest-fixturecheck catches a broken fixture during test collection, before any tests run.*
 
@@ -137,7 +137,7 @@ To set up the development environment:
 
 ```bash
 # Clone the repository
-git clone https://github.com/yourusername/pytest-fixturecheck.git
+git clone https://github.com/topiaruss/pytest-fixturecheck.git
 cd pytest-fixturecheck
 
 # Install development dependencies

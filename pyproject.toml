@@ -44,7 +44,7 @@ dev = [
 ]
 
 [project.urls]
-repository = "https://github.com/yourusername/pytest-fixturecheck"
+repository = "https://github.com/topiaruss/pytest-fixturecheck"
 
 [project.entry-points.pytest11]
 fixturecheck = "pytest_fixturecheck.plugin"
