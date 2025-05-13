@@ -113,7 +113,7 @@ Fix these fixture issues before running your tests.
 
 ## Compatible With
 
-- Python 3.7+
+- Python 3.8+
 - pytest 6.0.0+
 - Django 3.0+ (optional, for Django-specific validation)
 
