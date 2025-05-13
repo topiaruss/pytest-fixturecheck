@@ -1,17 +1,18 @@
 """Tests for the fixed validators."""
 
 import pytest
+
 from pytest_fixturecheck import fixturecheck
 from pytest_fixturecheck.validators_fix import (
-    property_values_validator,
     check_property_values,
-    with_property_values
+    property_values_validator,
+    with_property_values,
 )
 
 
 class TestObject:
     """Test object with properties."""
-    
+
     def __init__(self, name="test", value=42):
         self.name = name
         self.value = value
@@ -29,10 +30,10 @@ def test_property_values_validator():
     """Test the property_values_validator function."""
     # Create a validator
     validator = property_values_validator({"name": "test", "value": 42})
-    
+
     # Test with a matching object
     validator(TestObject(), False)
-    
+
     # Test with a non-matching object
     with pytest.raises(ValueError):
         validator(TestObject(name="wrong"), False)
@@ -43,10 +44,10 @@ def test_check_property_values():
     """Test the check_property_values function."""
     # Create a validator with keyword arguments
     validator = check_property_values(name="test", value=42)
-    
+
     # Test with a matching object
     validator(TestObject(), False)
-    
+
     # Test with a non-matching object
     with pytest.raises(ValueError):
         validator(TestObject(name="wrong"), False)
@@ -88,4 +89,4 @@ def test_fixture_with_check_property_values(fixture_with_check_property_values):
 def test_fixture_with_factory(fixture_with_factory):
     """Test using the fixture_with_factory."""
     assert fixture_with_factory.name == "fixture3"
-    assert fixture_with_factory.value == 42 
+    assert fixture_with_factory.value == 42

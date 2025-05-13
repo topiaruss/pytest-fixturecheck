@@ -1,12 +1,17 @@
 """Test for the fixed property values validator."""
 
 import pytest
-from pytest_fixturecheck import fixturecheck, property_values_validator, with_property_values
+
+from pytest_fixturecheck import (
+    fixturecheck,
+    property_values_validator,
+    with_property_values,
+)
 
 
 class TestObject:
     """Test object with properties."""
-    
+
     def __init__(self, name="test", value=42):
         self.name = name
         self.value = value
@@ -16,13 +21,13 @@ def test_property_values_validator():
     """Test the property_values_validator function."""
     # Create a validator
     validator = property_values_validator({"name": "test", "value": 42})
-    
+
     # Create a test object
     obj = TestObject()
-    
+
     # Should pass validation
     validator(obj, False)
-    
+
     # Should fail with wrong value
     with pytest.raises(ValueError):
         validator(TestObject(name="wrong"), False)
@@ -51,4 +56,4 @@ def factory_validated_fixture():
 
 def test_with_factory_validated_fixture(factory_validated_fixture):
     """Test using the fixture with our fixed factory function."""
-    assert factory_validated_fixture.name == "factory_test" 
+    assert factory_validated_fixture.name == "factory_test"

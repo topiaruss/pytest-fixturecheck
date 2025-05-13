@@ -1,12 +1,13 @@
 """Minimal test file with a property validator."""
 
 import pytest
+
 from pytest_fixturecheck import fixturecheck
 
 
 class TestObject:
     """Test object with properties."""
-    
+
     def __init__(self, name="test", value=42):
         self.name = name
         self.value = value
@@ -52,4 +53,4 @@ def test_simple_object(simple_object):
 def test_validated_object(validated_object):
     """Test using the validated fixture."""
     assert validated_object.name == "test"
-    assert validated_object.value == 42 
+    assert validated_object.value == 42

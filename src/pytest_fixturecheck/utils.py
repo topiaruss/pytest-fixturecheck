@@ -1,7 +1,7 @@
 """Utility functions for pytest-fixturecheck."""
 
 import inspect
-from typing import Any, Callable, TypeVar, Optional
+from typing import Any, Callable, Optional, TypeVar
 
 # Type variables for better typing
 F = TypeVar("F", bound=Callable[..., Any])

@@ -11,4 +11,4 @@ def simple_fixture():
 
 def test_simple_fixture(simple_fixture):
     """Test using a simple fixture."""
-    assert simple_fixture == "hello world" 
+    assert simple_fixture == "hello world"

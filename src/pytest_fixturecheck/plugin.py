@@ -7,7 +7,6 @@ import pytest
 
 from .utils import is_async_function, is_coroutine
 
-
 # Check if pytest-asyncio is installed
 PYTEST_ASYNCIO_INSTALLED = False
 try:
@@ -281,7 +280,7 @@ def report_fixture_errors(failed_fixtures: List[Tuple]) -> None:
             fixture_file = inspect.getfile(fixturedef.func)
             fixture_lineno = inspect.getsourcelines(fixturedef.func)[1]
             location = f"{fixture_file}:{fixture_lineno}"
-        except (TypeError, IOError, OSError):
+        except (TypeError, OSError):
             location = "<unknown location>"
 
         print(f"\nFixture '{fixture_name}' in {location} failed validation:")

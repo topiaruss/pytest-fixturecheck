@@ -3,42 +3,43 @@
 These tests will only run if Django is installed.
 """
 
-import pytest
 import sys
+
+import pytest
 
 # Import the django validators
 from pytest_fixturecheck import (
-    fixturecheck,
-    is_django_model,
+    creates_validator,
     django_model_has_fields,
     django_model_validates,
-    creates_validator,
+    fixturecheck,
+    is_django_model,
 )
 
 # Skip all tests if Django is not installed
 try:
     import django
     from django.conf import settings
-    
+
     # Configure minimal Django settings for tests
     if not settings.configured:
         settings.configure(
             DATABASES={
-                'default': {
-                    'ENGINE': 'django.db.backends.sqlite3',
-                    'NAME': ':memory:',
+                "default": {
+                    "ENGINE": "django.db.backends.sqlite3",
+                    "NAME": ":memory:",
                 }
             },
             INSTALLED_APPS=[
-                'django.contrib.auth',
-                'django.contrib.contenttypes',
+                "django.contrib.auth",
+                "django.contrib.contenttypes",
             ],
         )
         django.setup()
-        
+
     from django.contrib.auth.models import User
     from django.db import models
-    
+
     DJANGO_AVAILABLE = True
 except ImportError:
     DJANGO_AVAILABLE = False
@@ -47,16 +48,18 @@ except ImportError:
 
 # Define a test model if Django is available
 if DJANGO_AVAILABLE:
+
     class Book(models.Model):
         """A simple Book model for testing."""
+
         title = models.CharField(max_length=100)
         author = models.CharField(max_length=100)
         published_date = models.DateField(null=True, blank=True)
-        
+
         class Meta:
             # Make this an unmanaged model so we don't try to create db tables
             managed = False
-            app_label = 'tests'
+            app_label = "tests"
 
 
 @pytest.fixture
@@ -64,39 +67,45 @@ def setup_django_db():
     """Setup Django database if available."""
     if not DJANGO_AVAILABLE:
         return
-    
+
     from django.db import connection
+
     with connection.cursor() as cursor:
         # Create a book table in the in-memory database
-        cursor.execute('''
+        cursor.execute(
+            """
             CREATE TABLE IF NOT EXISTS "tests_book" (
                 "id" integer NOT NULL PRIMARY KEY AUTOINCREMENT,
                 "title" varchar(100) NOT NULL,
                 "author" varchar(100) NOT NULL,
                 "published_date" date NULL
             )
-        ''')
+        """
+        )
 
 
 # Create a safer validator that properly handles django_model_has_fields
 def has_model_fields(*fields):
     """Validator that checks if a Django model has the required fields."""
+
     def validator(obj, is_collection_phase=False):
         # Skip validation completely during collection phase
         if is_collection_phase:
             return
-            
-        # Only check non-function objects during execution phase    
+
+        # Only check non-function objects during execution phase
         if not callable(obj) and DJANGO_AVAILABLE:
             if not is_django_model(obj):
                 raise TypeError(f"Expected a Django model, got {type(obj).__name__}")
-                
+
             for field in fields:
                 try:
                     obj._meta.get_field(field)
                 except Exception as e:
-                    raise AttributeError(f"Required field '{field}' not found on {obj.__class__.__name__}")
-    
+                    raise AttributeError(
+                        f"Required field '{field}' not found on {obj.__class__.__name__}"
+                    )
+
     return validator
 
 
@@ -107,11 +116,8 @@ def sample_book(setup_django_db):
     """A fixture that returns a Book model instance."""
     if not DJANGO_AVAILABLE:
         return None
-    
-    return Book.objects.create(
-        title="Test Book",
-        author="Test Author"
-    )
+
+    return Book.objects.create(title="Test Book", author="Test Author")
 
 
 @pytest.mark.skipif(not DJANGO_AVAILABLE, reason="Django not installed")
@@ -121,11 +127,8 @@ def valid_book(setup_django_db):
     """A fixture that returns a valid Book model instance."""
     if not DJANGO_AVAILABLE:
         return None
-    
-    return Book.objects.create(
-        title="Valid Book",
-        author="Valid Author"
-    )
+
+    return Book.objects.create(title="Valid Book", author="Valid Author")
 
 
 # Create a custom Django validator using creates_validator
@@ -134,7 +137,7 @@ def validate_book_title(book):
     """Validate that a book has a title starting with 'Test'."""
     if not is_django_model(book):
         return  # Skip validation if not a Django model (during collection)
-    
+
     if not book.title.startswith("Test"):
         raise ValueError("Book title must start with 'Test'")
 
@@ -146,11 +149,8 @@ def custom_validated_book(setup_django_db):
     """A fixture that returns a Book model validated with a custom validator."""
     if not DJANGO_AVAILABLE:
         return None
-    
-    return Book.objects.create(
-        title="Test Custom Book",
-        author="Custom Author"
-    )
+
+    return Book.objects.create(title="Test Custom Book", author="Custom Author")
 
 
 # A fixture we expect to fail validation
@@ -161,11 +161,8 @@ def book_with_missing_field(setup_django_db):
     """A fixture that should fail validation but passes the test due to expect_validation_error."""
     if not DJANGO_AVAILABLE:
         return None
-    
-    return Book.objects.create(
-        title="Invalid Book",
-        author="Invalid Author"
-    )
+
+    return Book.objects.create(title="Invalid Book", author="Invalid Author")
 
 
 # Tests
@@ -182,7 +179,7 @@ def test_django_model_validates(sample_book):
     """Test that django_model_validates validator works."""
     assert sample_book.title == "Test Book"
     assert sample_book.author == "Test Author"
-    
+
     # Now manually validate the model using the validator
     django_model_validates()(sample_book)
 
@@ -193,13 +190,13 @@ def test_custom_validator(sample_book):
     """Test that a custom validator created with creates_validator works."""
     assert sample_book.title == "Test Book"
     assert sample_book.author == "Test Author"
-    
+
     # Create a custom validator and apply it
     @creates_validator
     def test_validator(book):
         if not book.title.startswith("Test"):
             raise ValueError("Book title must start with 'Test'")
-    
+
     # This should not raise an exception
     test_validator(sample_book)
 
@@ -210,4 +207,4 @@ def test_expect_validation_error(book_with_missing_field):
     assert book_with_missing_field.title == "Invalid Book"
     assert book_with_missing_field.author == "Invalid Author"
     with pytest.raises(AttributeError):
-        book_with_missing_field.nonexistent_field 
+        book_with_missing_field.nonexistent_field

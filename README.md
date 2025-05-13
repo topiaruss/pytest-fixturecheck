@@ -189,7 +189,7 @@ fixturecheck-auto-skip = true  # Automatically skip tests with invalid fixtures 
 
 ## Development and Pre-commit Hooks
 
-For developers contributing to pytest-fixturecheck, we use pre-commit hooks to ensure code quality and consistency. 
+For developers contributing to pytest-fixturecheck, we use pre-commit hooks to ensure code quality and consistency.
 
 See [PRE_COMMIT_HOOKS.md](PRE_COMMIT_HOOKS.md) for details on the available hooks and how to use them.
 

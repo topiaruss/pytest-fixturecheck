@@ -1,14 +1,15 @@
 """Test file that demonstrates the phase-aware validation in pytest-fixturecheck."""
 
-import pytest
 from typing import Any, Callable
+
+import pytest
 
 from pytest_fixturecheck import fixturecheck
 
 
 def phase_aware_validator(obj: Any, is_collection_phase: bool = False) -> None:
     """A validator that behaves differently based on the phase.
-    
+
     During collection phase, it checks that the function has a docstring.
     During execution phase, it validates the return value.
     """
@@ -27,12 +28,12 @@ def phase_aware_validator(obj: Any, is_collection_phase: bool = False) -> None:
 
 class TestPhaseAwareValidation:
     """Test phase-aware validation functionality."""
-    
+
     @pytest.fixture
     def simple_fixture(self):
         """A simple fixture that returns a string."""
         return "hello world"
-    
+
     def test_simple_fixture(self, simple_fixture):
         """Test that a simple fixture works."""
-        assert simple_fixture == "hello world" 
+        assert simple_fixture == "hello world"

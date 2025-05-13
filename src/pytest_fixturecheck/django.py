@@ -5,7 +5,7 @@ These validators help identify common issues with Django model fixtures.
 """
 
 import inspect
-from typing import Any, List, Optional, Type, Union, Callable
+from typing import Any, Callable, List, Optional, Type, Union
 
 from .utils import creates_validator
 

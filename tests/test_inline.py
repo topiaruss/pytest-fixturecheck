@@ -1,13 +1,16 @@
 """Test file with validator and fixtures defined inline."""
 
-import pytest
 import inspect
+
+import pytest
+
 from pytest_fixturecheck import fixturecheck
 
 
 # Define a simple class for testing
 class User:
     """A simple user class for testing."""
+
     def __init__(self, username=None):
         self.username = username
 
@@ -69,4 +72,4 @@ def test_validated(validated_fixture):
 
 def test_expected_to_fail(expected_to_fail):
     """Test using a fixture expected to fail validation."""
-    assert expected_to_fail.username is None 
+    assert expected_to_fail.username is None

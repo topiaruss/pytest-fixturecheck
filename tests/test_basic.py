@@ -1,6 +1,7 @@
 """Basic test for pytest-fixturecheck functionality."""
 
 import pytest
+
 from pytest_fixturecheck import fixturecheck
 
 
@@ -24,4 +25,4 @@ def test_simple_fixture(simple_fixture):
 
 def test_checked_fixture(checked_fixture):
     """Test that a fixture with the fixturecheck decorator works."""
-    assert checked_fixture == "checked hello world" 
+    assert checked_fixture == "checked hello world"

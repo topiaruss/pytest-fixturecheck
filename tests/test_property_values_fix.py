@@ -1,12 +1,13 @@
 """Test for a simplified property values validator."""
 
 import pytest
+
 from pytest_fixturecheck import fixturecheck
 
 
 class TestObject:
     """Test object with properties."""
-    
+
     def __init__(self, name="test", value=42):
         self.name = name
         self.value = value
@@ -17,10 +18,10 @@ def direct_check_properties(obj, is_collection_phase=False):
     """Check that properties have the expected values directly."""
     if is_collection_phase:
         return
-        
+
     if not isinstance(obj, TestObject):
         return
-        
+
     if obj.name != "test":
         raise ValueError(f"Expected name=test, got {obj.name}")
     if obj.value != 42:
@@ -37,10 +38,10 @@ def test_custom_validator():
     """Test our custom property validator."""
     # Create a test object
     obj = TestObject()
-    
+
     # Test the validator directly
     direct_check_properties(obj, False)  # Should not raise
-    
+
     # Test with a wrong value - this should raise a ValueError
     wrong_obj = TestObject(name="wrong")
     with pytest.raises(ValueError):
@@ -59,4 +60,4 @@ def my_valid_object():
 def test_fixture_with_validator(my_valid_object):
     """Test using the fixture with our validator."""
     assert my_valid_object.name == "test"
-    assert my_valid_object.value == 42 
+    assert my_valid_object.value == 42

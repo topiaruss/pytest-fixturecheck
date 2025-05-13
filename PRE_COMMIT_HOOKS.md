@@ -109,4 +109,4 @@ We've set most hooks to the "manual" stage to avoid blocking commits while we cl
 
 1. Run hooks manually to fix existing issues
 2. Gradually move hooks from manual to the default stage as the codebase improves
-3. Eventually have all hooks run automatically on commit 
+3. Eventually have all hooks run automatically on commit

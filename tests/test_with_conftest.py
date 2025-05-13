@@ -16,4 +16,4 @@ def test_invalid_user(invalid_user):
 def test_missing_email_user(missing_email_user):
     """Test that a fixture missing an expected field doesn't fail the test when we expect it to fail."""
     assert missing_email_user.username == "testuser"
-    assert not hasattr(missing_email_user, "email") 
+    assert not hasattr(missing_email_user, "email")

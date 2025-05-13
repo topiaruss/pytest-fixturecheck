@@ -141,4 +141,4 @@ def test_with_factory_validated_fixture(factory_validated_fixture):
 
 ## Compatibility
 
-The original `has_property_values` function is still available for backward compatibility, but it's recommended to use the new validators for new code. 
+The original `has_property_values` function is still available for backward compatibility, but it's recommended to use the new validators for new code.

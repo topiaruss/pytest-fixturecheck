@@ -1,13 +1,15 @@
 """Test file for the expect_validation_error parameter."""
 
-import pytest
 import inspect
+
+import pytest
+
 from pytest_fixturecheck import fixturecheck, has_required_fields
 
 
 class User:
     """A simple user class for testing."""
-    
+
     def __init__(self, username=None):
         self.username = username
 
@@ -44,4 +46,4 @@ def test_valid_user(valid_user):
 
 def test_invalid_user(invalid_user):
     """Test that an invalid user still works with expect_validation_error=True."""
-    assert invalid_user.username is None 
+    assert invalid_user.username is None

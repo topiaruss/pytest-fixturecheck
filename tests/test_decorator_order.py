@@ -1,6 +1,7 @@
 """Test file that demonstrates that decorator order doesn't matter."""
 
 import pytest
+
 from pytest_fixturecheck import fixturecheck
 
 
@@ -27,4 +28,4 @@ def test_fixture_order1(fixture_order1):
 
 def test_fixture_order2(fixture_order2):
     """Test that fixture with @pytest.fixture first works."""
-    assert fixture_order2 == "order2" 
+    assert fixture_order2 == "order2"

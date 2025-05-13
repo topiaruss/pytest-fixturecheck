@@ -21,11 +21,11 @@ class User:
         self.email = email
         self.is_active = is_active
         self._meta = type('_meta', (), {'get_field': lambda self, name: None})
-        
+
     def save(self):
         """Save the user."""
         pass
-        
+
     def delete(self):
         """Delete the user."""
         pass
@@ -37,7 +37,7 @@ class Book:
         self.title = title
         self.author = author
         self._meta = type('_meta', (), {'get_field': lambda self, name: None})
-        
+
     def save(self):
         """Save the book."""
         pass
@@ -98,10 +98,10 @@ def validate_user_email(obj, is_collection_phase):
     """Custom validator that checks the email domain."""
     if is_collection_phase:
         return  # No validation during collection phase
-        
+
     if not hasattr(obj, 'email'):
         raise AttributeError("User object missing email field")
-        
+
     if not obj.email.endswith('@example.com'):
         raise ValueError(f"Email {obj.email} must end with @example.com")
 
@@ -113,7 +113,7 @@ def custom_validated_user():
     return User(username="customuser", email="custom@example.com")
 
 
-# 
+#
 # Example Tests
 #
 
@@ -165,4 +165,4 @@ def broken_user():
 
 def test_broken_user(broken_user):
     """This test should be skipped if auto-skip is enabled."""
-    assert broken_user.username == "wronguser"  # This will never execute with auto-skip 
+    assert broken_user.username == "wronguser"  # This will never execute with auto-skip

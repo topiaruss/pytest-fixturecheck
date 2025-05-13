@@ -4,7 +4,7 @@ This module provides factory functions for creating common validators.
 """
 
 import inspect
-from typing import Any, Callable, List, Optional, Type, Union, Tuple, Dict
+from typing import Any, Callable, Dict, List, Optional, Tuple, Type, Union
 
 from .utils import creates_validator
 

@@ -133,4 +133,4 @@ To release a new version:
 3. Build the package: `python -m build`
 4. Test the built package in a fresh environment
 5. Upload to PyPI: `twine upload dist/*`
-6. Tag the release in git: `git tag v0.4.0 && git push --tags` 
+6. Tag the release in git: `git tag v0.4.0 && git push --tags`

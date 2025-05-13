@@ -40,4 +40,4 @@ max-statements=50
 max-parents=7
 
 [TYPECHECK]
-ignored-classes=pytest 
+ignored-classes=pytest
