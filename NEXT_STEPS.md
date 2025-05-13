@@ -66,6 +66,34 @@ Before releasing version 0.3.0, the following should be completed:
    - More granular configuration options
    - Project-wide validation rules
 
+## Contribution Opportunities
+
+Below are specific areas where contributions would be valuable:
+
+1. **Improve Coverage for django.py (currently at 12%)**
+   - Add tests for Django model validation functions
+   - Create proper test fixtures with Django model mocks
+
+2. **Increase Coverage for plugin.py (currently at 35%)**
+   - Test pytest plugin hooks
+   - Cover the fixture collection and execution phases
+
+3. **Add Tests for Edge Cases in decorator.py**
+   - Test validation with more complex nested fixtures
+   - Test error handling and reporting
+
+4. **Improve AsyncIO Support Testing**
+   - Add more comprehensive tests for async fixtures
+   - Test concurrent validation scenarios
+
+5. **Add Integration Tests**
+   - Test the plugin with real-world fixture scenarios
+   - Test performance with many fixtures
+
+6. **Enhance Documentation**
+   - Add more examples in docstrings
+   - Create usage examples for common scenarios
+
 ## Development Workflow
 
 The recommended workflow for contributing to the project:

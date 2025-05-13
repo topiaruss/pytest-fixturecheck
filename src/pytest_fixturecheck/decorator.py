@@ -51,23 +51,42 @@ def fixturecheck(
     Returns:
         A decorated fixture function or a decorator function
     """
-    # Called as @fixturecheck
-    if callable(fixture_or_validator) and validator is None:
-        fixture = cast(F, fixture_or_validator)
+    # Called as @fixturecheck with no arguments - apply to the function directly
+    if fixture_or_validator is not None and callable(fixture_or_validator) and not hasattr(fixture_or_validator, '__self__') and validator is None:
+        # Check if this looks like a validator function (has the right signature)
+        if len(inspect.signature(fixture_or_validator).parameters) >= 2:
+            # This is a validator function - create a decorator to apply later
+            validation_func = cast(ValidatorFunc, fixture_or_validator)
 
-        @functools.wraps(fixture)
-        def wrapped_fixture(*args: Any, **kwargs: Any) -> Any:
-            return fixture(*args, **kwargs)
+            def decorator(fixture: F) -> F:
+                @functools.wraps(fixture)
+                def wrapped_fixture(*args: Any, **kwargs: Any) -> Any:
+                    return fixture(*args, **kwargs)
 
-        # Mark this fixture for validation
-        wrapped_fixture._fixturecheck = True  # type: ignore
-        # Use the default validator (auto-detect Django models)
-        wrapped_fixture._validator = _default_validator  # type: ignore
-        wrapped_fixture._expect_validation_error = expect_validation_error  # type: ignore
-        return cast(F, wrapped_fixture)
+                # Mark this fixture for validation
+                wrapped_fixture._fixturecheck = True  # type: ignore
+                wrapped_fixture._validator = validation_func  # type: ignore
+                wrapped_fixture._expect_validation_error = expect_validation_error  # type: ignore
+                return cast(F, wrapped_fixture)
 
-    # Called as @fixturecheck(validator_func)
+            return decorator
+        else:
+            # This is a fixture function - wrap it directly
+            fixture = cast(F, fixture_or_validator)
+
+            @functools.wraps(fixture)
+            def wrapped_fixture(*args: Any, **kwargs: Any) -> Any:
+                return fixture(*args, **kwargs)
+
+            # Mark this fixture for validation
+            wrapped_fixture._fixturecheck = True  # type: ignore
+            # Use the default validator
+            wrapped_fixture._validator = _default_validator  # type: ignore
+            wrapped_fixture._expect_validation_error = expect_validation_error  # type: ignore
+            return cast(F, wrapped_fixture)
+    # Called as @fixturecheck() or with a non-callable validator
     else:
+        # This is for cases like @fixturecheck() or @fixturecheck(None)
         validation_func = cast(Optional[ValidatorFunc], fixture_or_validator)
 
         def decorator(fixture: F) -> F:
