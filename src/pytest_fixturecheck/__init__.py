@@ -16,7 +16,7 @@ from .validators_fix import (
     with_property_values,
 )
 
-__version__ = "0.3.2"
+__version__ = "0.3.3"
 
 __all__ = [
     "fixturecheck",
