@@ -20,12 +20,11 @@ from .validators_fix import (
     with_property_values,
 )
 
-__version__ = "0.3.1"
+__version__ = "0.3.2"
 
 __all__ = [
     "fixturecheck",
     "creates_validator",
-    
     # Validators
     "is_instance_of",
     "has_required_fields",
@@ -33,9 +32,8 @@ __all__ = [
     "has_property_values",  # Keep for backward compatibility
     "property_values_validator",  # Fixed property validator that works with a dictionary
     "check_property_values",  # Fixed property validator that works with keyword arguments
-    "with_property_values",    # Fixed with_property_values factory function
+    "with_property_values",  # Fixed with_property_values factory function
     "combines_validators",
-    
     # Django validators
     "is_django_model",
     "django_model_has_fields",

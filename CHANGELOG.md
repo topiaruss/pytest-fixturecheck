@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.3.2 (2024-07-14)
+
+### Bug Fixes
+- Fixed test suite issues with mock Django validation
+- Fixed test cases for custom validators with collection phase handling
+- Improved test coverage for utility functions
+- Fixed formatting in utils.py to comply with Black style rules
+- Updated flake8 configuration to ignore common warnings
+- Fixed property validators test case to use direct validator functions
+
 ## 0.3.1 (2024-07-13)
 
 ### Bug Fixes

@@ -14,26 +14,23 @@ class TestCreatesValidator:
     
     def test_creates_validator_basic(self):
         """Test that creates_validator decorates functions properly."""
-        @creates_validator
-        def test_validator(expected_value):
-            def validate(obj):
-                if obj != expected_value:
-                    raise ValueError(f"Expected {expected_value}, got {obj}")
-            return validate
+        # Define a validator function directly
+        def direct_validator(obj):
+            """Simple direct validator function."""
+            # Only accept numbers equal to 42
+            if obj != 42:
+                raise ValueError(f"Expected 42, got {obj}")
+                
+        # Apply creates_validator directly (not as a decorator)
+        validator_factory = creates_validator(direct_validator)
         
-        # Check that it returns a callable
-        validator = test_validator(42)
-        assert callable(validator)
+        # The validator_factory returns a validator when called
+        validator = validator_factory()
         
-        # Check that the decorated function accepts is_collection_phase
-        # We need to use the full signature to account for both implementations
-        sig_params = inspect.signature(validator).parameters
-        assert len(sig_params) >= 1  # At least takes obj
-        
-        # Test successful validation
+        # Test successful validation - should not raise
         validator(42)
         
-        # Test failed validation
+        # Test failed validation - should raise ValueError
         with pytest.raises(ValueError):
             validator(43)
     

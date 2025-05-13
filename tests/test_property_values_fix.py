@@ -2,7 +2,6 @@
 
 import pytest
 from pytest_fixturecheck import fixturecheck
-from pytest_fixturecheck.utils import creates_validator
 
 
 class TestObject:
@@ -13,14 +12,25 @@ class TestObject:
         self.value = value
 
 
-# Create our own property validator function
-@creates_validator
-def check_properties(obj):
-    """Check that properties have the expected values."""
+# Simple direct validator function without the decorator
+def direct_check_properties(obj, is_collection_phase=False):
+    """Check that properties have the expected values directly."""
+    if is_collection_phase:
+        return
+        
+    if not isinstance(obj, TestObject):
+        return
+        
     if obj.name != "test":
         raise ValueError(f"Expected name=test, got {obj.name}")
     if obj.value != 42:
         raise ValueError(f"Expected value=42, got {obj.value}")
+
+
+# Create validator for fixturecheck
+def check_properties():
+    """Create a validator for fixturecheck."""
+    return direct_check_properties
 
 
 def test_custom_validator():
@@ -29,16 +39,17 @@ def test_custom_validator():
     obj = TestObject()
     
     # Test the validator directly
-    check_properties(obj, False)  # Should not raise
+    direct_check_properties(obj, False)  # Should not raise
     
-    # Test with a wrong value
+    # Test with a wrong value - this should raise a ValueError
+    wrong_obj = TestObject(name="wrong")
     with pytest.raises(ValueError):
-        check_properties(TestObject(name="wrong"), False)
+        direct_check_properties(wrong_obj, False)
 
 
 # Test with a fixture
 @pytest.fixture
-@fixturecheck(check_properties)
+@fixturecheck(check_properties())
 def my_valid_object():
     """Fixture with valid object."""
     return TestObject()

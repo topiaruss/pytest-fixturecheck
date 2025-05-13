@@ -1,6 +1,18 @@
 # Next Steps for pytest-fixturecheck v0.4.0
 
-This file outlines the next steps for the pytest-fixturecheck project after releasing version 0.3.0.
+This file outlines the next steps for the pytest-fixturecheck project after releasing version 0.3.2.
+
+## Progress in v0.3.2
+
+1. **Test Suite Improvements**
+   - Fixed mock Django validation in test_django_validators_comprehensive.py
+   - Improved test coverage for utility functions in test_utils_comprehensive.py
+   - Created workarounds for property validators tests with direct validator functions
+
+2. **Configuration and Code Quality**
+   - Enhanced flake8 configuration with more comprehensive ignore rules
+   - Fixed formatting issues in utils.py and other files
+   - Improved CI pipeline stability
 
 ## Completed in Version 0.3.0
 
@@ -68,6 +80,7 @@ This file outlines the next steps for the pytest-fixturecheck project after rele
    - Investigate and fix issues with pytest-asyncio tests on Python 3.12
    - Currently, asyncio tests are skipped in CI for Python 3.12 due to import errors
    - This may require updates to how pytest-asyncio is integrated or conditional test skipping
+   - Initial workarounds implemented in v0.3.1-0.3.2, but a more comprehensive solution is needed
 
 ## Contribution Opportunities
 

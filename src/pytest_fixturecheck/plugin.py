@@ -12,6 +12,7 @@ from .utils import is_async_function, is_coroutine
 PYTEST_ASYNCIO_INSTALLED = False
 try:
     import pytest_asyncio
+
     PYTEST_ASYNCIO_INSTALLED = True
 except ImportError:
     pass
@@ -41,22 +42,22 @@ def is_async_fixture(fixturedef: Any) -> bool:
     # Check if the fixture function is a coroutine function
     if is_async_function(fixturedef.func):
         return True
-    
+
     # Check for pytest-asyncio specific attributes
     if hasattr(fixturedef, "unittest") and "async" in str(fixturedef.unittest).lower():
         return True
-    
+
     # Check fixture name patterns that typically indicate async fixtures
     if fixturedef.argname.startswith("async_"):
         return True
-    
+
     # Direct check of pytest-asyncio fixture detection if available
     if PYTEST_ASYNCIO_INSTALLED:
         try:
             return hasattr(fixturedef, "_pytest_asyncio_scope")
         except (AttributeError, ImportError):
             pass
-            
+
     return False
 
 
@@ -73,7 +74,9 @@ def pytest_fixture_setup(fixturedef: Any, request: Any) -> None:
         current_func = fixture_func
         while hasattr(current_func, "__wrapped__"):
             if getattr(current_func, "_fixturecheck", False):
-                fixture_func = current_func  # Use the wrapped function with fixturecheck
+                fixture_func = (
+                    current_func  # Use the wrapped function with fixturecheck
+                )
                 break
             current_func = current_func.__wrapped__
 
@@ -84,7 +87,7 @@ def pytest_fixture_setup(fixturedef: Any, request: Any) -> None:
             request.config._fixturecheck_fixtures = set()
 
         request.config._fixturecheck_fixtures.add(fixturedef)
-        
+
         # Pre-mark async fixtures to skip execution validation
         if is_async_fixture(fixturedef):
             setattr(fixturedef, "_fixturecheck_skip", True)
@@ -117,30 +120,40 @@ def pytest_collection_finish(session: Any) -> None:
                     if getattr(current_func, "_fixturecheck", False):
                         # Found the wrapper with fixturecheck
                         validator = getattr(current_func, "_validator", None)
-                        expect_validation_error = getattr(current_func, "_expect_validation_error", False)
+                        expect_validation_error = getattr(
+                            current_func, "_expect_validation_error", False
+                        )
                         break
                     current_func = current_func.__wrapped__
                 else:
                     # No wrapper had _fixturecheck
                     validator = getattr(fixture_func, "_validator", None)
-                    expect_validation_error = getattr(fixture_func, "_expect_validation_error", False)
+                    expect_validation_error = getattr(
+                        fixture_func, "_expect_validation_error", False
+                    )
             else:
                 validator = getattr(fixture_func, "_validator", None)
-                expect_validation_error = getattr(fixture_func, "_expect_validation_error", False)
+                expect_validation_error = getattr(
+                    fixture_func, "_expect_validation_error", False
+                )
 
             # First, run validator on the fixture function itself if there's a validator
             if validator is not None:
                 try:
                     # Pass the function object and True to indicate collection phase
                     validator(fixture_func, True)
-                    
+
                     # If we expected validation error but didn't get one
                     if expect_validation_error:
-                        failed_fixtures.append((
-                            fixturedef, 
-                            AssertionError("Expected validation error but none occurred during collection phase"),
-                            "No validation error during collection phase"
-                        ))
+                        failed_fixtures.append(
+                            (
+                                fixturedef,
+                                AssertionError(
+                                    "Expected validation error but none occurred during collection phase"
+                                ),
+                                "No validation error during collection phase",
+                            )
+                        )
                 except Exception as e:
                     # If we were expecting an error, this is good - don't record it as a failure
                     if expect_validation_error:
@@ -149,51 +162,62 @@ def pytest_collection_finish(session: Any) -> None:
                         # Unexpected error - record it
                         failed_fixtures.append((fixturedef, e, traceback.format_exc()))
                         continue
-                
+
             # Skip validation for unittest fixtures, async fixtures, and other special types
-            if (hasattr(fixturedef, "unittest") or 
-                getattr(fixturedef, "_fixturecheck_skip", False) or
-                is_async_fixture(fixturedef)):
+            if (
+                hasattr(fixturedef, "unittest")
+                or getattr(fixturedef, "_fixturecheck_skip", False)
+                or is_async_fixture(fixturedef)
+            ):
                 continue
-                
+
             # Create a request context for this fixture
             try:
                 request = session._fixturemanager.getfixturerequest(session)
-                
+
                 # Execute the fixture
                 try:
                     result = fixturedef.execute(request)
-                    
+
                     # Handle coroutine objects (returned by async fixtures)
                     if is_coroutine(result):
                         # Mark it to skip validation - can't execute coroutines during collection
                         setattr(fixturedef, "_fixturecheck_skip", True)
                         continue
-                    
+
                     # If there's a validator function, run it on the fixture result
                     if validator is not None and result is not None:
                         try:
                             # Pass the result and False to indicate execution phase
                             validator(result, False)
-                            
+
                             # If we expected a validation error but didn't get one
                             if expect_validation_error:
-                                failed_fixtures.append((
-                                    fixturedef, 
-                                    AssertionError("Expected validation error but none occurred during execution phase"),
-                                    "No validation error during execution phase"
-                                ))
+                                failed_fixtures.append(
+                                    (
+                                        fixturedef,
+                                        AssertionError(
+                                            "Expected validation error but none occurred during execution phase"
+                                        ),
+                                        "No validation error during execution phase",
+                                    )
+                                )
                         except Exception as e:
                             # If we were expecting an error, this is good
                             if expect_validation_error:
                                 continue
                             else:
                                 # Unexpected error - record it
-                                failed_fixtures.append((fixturedef, e, traceback.format_exc()))
+                                failed_fixtures.append(
+                                    (fixturedef, e, traceback.format_exc())
+                                )
                                 continue
                 except Exception as e:
                     # Special handling for pytest-asyncio fixtures and other async-related errors
-                    if any(x in str(e).lower() for x in ["asyncio", "coroutine", "awaitable", "async"]):
+                    if any(
+                        x in str(e).lower()
+                        for x in ["asyncio", "coroutine", "awaitable", "async"]
+                    ):
                         # Skip asyncio fixtures - they can't be executed during collection
                         setattr(fixturedef, "_fixturecheck_skip", True)
                         continue
@@ -213,7 +237,7 @@ def pytest_collection_finish(session: Any) -> None:
             # If we were expecting an error, this is fine
             if expect_validation_error:
                 continue
-                
+
             # Capture and store the error
             failed_fixtures.append((fixturedef, e, traceback.format_exc()))
 
@@ -228,15 +252,17 @@ def pytest_collection_finish(session: Any) -> None:
                 _mark_dependent_tests_for_skip(session, fixturedef, error)
 
 
-def _mark_dependent_tests_for_skip(session: Any, fixturedef: Any, error: Exception) -> None:
+def _mark_dependent_tests_for_skip(
+    session: Any, fixturedef: Any, error: Exception
+) -> None:
     """Mark tests that depend on the failing fixture for skipping."""
     fixture_name = fixturedef.argname
-    
+
     # Create a skip marker with the error message
     skip_marker = pytest.mark.skip(
         reason=f"Fixture '{fixture_name}' failed validation: {error.__class__.__name__}: {error}"
     )
-    
+
     # Apply the marker to tests that use this fixture
     for item in session.items:
         if fixture_name in item.fixturenames:
@@ -258,9 +284,7 @@ def report_fixture_errors(failed_fixtures: List[Tuple]) -> None:
         except (TypeError, IOError, OSError):
             location = "<unknown location>"
 
-        print(
-            f"\nFixture '{fixture_name}' in {location} failed validation:"
-        )
+        print(f"\nFixture '{fixture_name}' in {location} failed validation:")
         print(f"  {error.__class__.__name__}: {error}")
 
         # Print a simplified traceback

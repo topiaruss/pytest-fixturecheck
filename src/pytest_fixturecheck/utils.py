@@ -15,8 +15,11 @@ def creates_validator(func: Callable) -> Callable:
     import functools  # Import locally to avoid unused import warning
 
     @functools.wraps(func)
-    def validator_wrapper(*args: Any, **kwargs: Any) -> Optional[Callable[[Any, bool], None]]:
+    def validator_wrapper(
+        *args: Any, **kwargs: Any
+    ) -> Optional[Callable[[Any, bool], None]]:
         """Wrap the validator function to return a validator function."""
+
         # Validator function to be returned by the wrapper
         @functools.wraps(func)
         def validator(obj: Any, is_collection_phase: bool = False) -> None:

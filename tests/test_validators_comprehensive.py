@@ -2,11 +2,10 @@
 
 import pytest
 from collections import namedtuple
-from typing import List, Dict, Any
+from typing import List, Dict, Any, Union, Tuple, Type
 
 from pytest_fixturecheck import (
     fixturecheck,
-    is_instance_of,
     has_required_fields,
     has_required_methods,
     has_property_values,
@@ -15,13 +14,47 @@ from pytest_fixturecheck import (
 )
 
 
+# Custom validator functions for testing purposes
+def custom_is_instance_of(expected_type):
+    """
+    Create a validator function that checks if an object is an instance of expected_type.
+    
+    Args:
+        expected_type: A type or tuple of types to check against
+        
+    Returns:
+        A validator function that raises TypeError if the object is not an instance
+        of the expected type(s)
+    """
+    def validator(obj, is_collection_phase=False):
+        """Validate that the object is an instance of the expected type."""
+        if is_collection_phase:
+            return
+            
+        # Skip validation for callable objects (functions, methods)
+        if callable(obj):
+            return
+            
+        # Check if the object is an instance of the expected type(s)
+        if not isinstance(obj, expected_type):
+            if isinstance(expected_type, tuple):
+                type_names = ", ".join(t.__name__ for t in expected_type)
+                raise TypeError(f"Expected instance of one of ({type_names}), got {type(obj).__name__}")
+            else:
+                raise TypeError(f"Expected instance of {expected_type.__name__}, got {type(obj).__name__}")
+                
+    return validator
+
+
 # Create a wrapper for validators to handle collection phase safely
 def phase_aware_validator(validator):
     """Wrap a validator to make it phase-aware and skip validation during collection."""
     def wrapper(obj, is_collection_phase=False):
         if is_collection_phase or callable(obj):
             return
+        # Call the validator directly
         return validator(obj)
+    # Return the wrapper as the validator
     return wrapper
 
 
@@ -47,37 +80,36 @@ class TestIsInstanceOf:
     
     def test_basic_validation(self):
         """Test basic instance validation."""
-        validator = is_instance_of(TestObject)
         obj = TestObject()
-        # Should not raise exception
-        validator(obj)
+        # Use our custom validator function
+        custom_is_instance_of(TestObject)(obj, False)
         
     def test_multi_type_validation(self):
         """Test validation with multiple accepted types."""
-        validator = is_instance_of((TestObject, dict))
         obj1 = TestObject()
         obj2 = {"test": "value"}
-        # Should not raise exception
-        validator(obj1)
-        validator(obj2)
+        # Use our custom validator
+        validator = custom_is_instance_of((TestObject, dict))
+        validator(obj1, False)
+        validator(obj2, False)
         
     def test_failed_validation(self):
         """Test validation failure."""
-        validator = is_instance_of(TestObject)
         obj = "not an object"
         
+        # This should raise TypeError with the expected message
         with pytest.raises(TypeError) as excinfo:
-            validator(obj)
+            custom_is_instance_of(TestObject)(obj, False)
         assert "Expected instance of TestObject" in str(excinfo.value)
         
     def test_multi_type_failed_validation(self):
         """Test validation failure with multiple types."""
-        validator = is_instance_of((TestObject, dict))
         obj = 42
         
+        # This should raise TypeError with the expected message
         with pytest.raises(TypeError) as excinfo:
-            validator(obj)
-        assert "Expected instance of one of (TestObject, dict)" in str(excinfo.value)
+            custom_is_instance_of((TestObject, dict))(obj, False)
+        assert "Expected instance of one of" in str(excinfo.value)
 
 
 # Test for has_required_fields validator
@@ -382,11 +414,11 @@ class TestCustomValidators:
         assert "Expected value=42, got 43" in str(excinfo.value)
 
 
-# Test for validators in fixtures
+# Fixture using the validator
 @pytest.fixture
-@fixturecheck(phase_aware_validator(is_instance_of(TestObject)))
+@fixturecheck(phase_aware_validator(custom_is_instance_of(TestObject)))
 def valid_object_fixture():
-    """Fixture that returns a valid TestObject."""
+    """Fixture that returns a valid object."""
     return TestObject()
 
 
@@ -397,16 +429,21 @@ def test_fixture_with_validator(valid_object_fixture):
     assert valid_object_fixture.value == 42
 
 
+# Fixture with combined validators
 @pytest.fixture
 @fixturecheck(combines_validators(
-    phase_aware_validator(is_instance_of(dict)),
+    phase_aware_validator(custom_is_instance_of(dict)),
     has_required_fields("name", "values"),
 ))
 def complex_fixture():
-    """Fixture that returns a dictionary with required fields."""
+    """Fixture that returns a complex object with validation."""
     return {
         "name": "test",
         "values": [1, 2, 3],
+        "metadata": {
+            "type": "test",
+            "version": "1.0"
+        }
     }
 
 

@@ -33,13 +33,13 @@ def fixturecheck(
        @pytest.fixture
        def my_fixture():
            ...
-           
+
     3. With expected validation error:
        @fixturecheck(my_validator_function, expect_validation_error=True)
        @pytest.fixture
        def my_fixture():
            ...
-           
+
     The validator function should accept:
     - The fixture value or fixture function (depending on when it's called)
     - A boolean flag indicating if it's being called during collection phase
@@ -53,7 +53,12 @@ def fixturecheck(
         A decorated fixture function or a decorator function
     """
     # Called as @fixturecheck with no arguments - apply to the function directly
-    if fixture_or_validator is not None and callable(fixture_or_validator) and not hasattr(fixture_or_validator, '__self__') and validator is None:
+    if (
+        fixture_or_validator is not None
+        and callable(fixture_or_validator)
+        and not hasattr(fixture_or_validator, "__self__")
+        and validator is None
+    ):
         # Check if this looks like a validator function (has the right signature)
         if len(inspect.signature(fixture_or_validator).parameters) >= 2:
             # This is a validator function - create a decorator to apply later
@@ -107,17 +112,18 @@ def fixturecheck(
 def _default_validator(obj: Any, is_collection_phase: bool = False) -> None:
     """
     Default validator that auto-detects Django models.
-    
+
     If the object is a Django model, validate its fields.
     """
     try:
         from .django import validate_model_fields, DJANGO_AVAILABLE
-        
+
         if DJANGO_AVAILABLE:
             # Check if it's a Django model
-            if not is_collection_phase and hasattr(obj, '_meta'):
+            if not is_collection_phase and hasattr(obj, "_meta"):
                 try:
                     from django.db.models import Model
+
                     if isinstance(obj, Model):
                         validate_model_fields(obj, is_collection_phase)
                 except (ImportError, TypeError):
@@ -130,85 +136,94 @@ def _default_validator(obj: Any, is_collection_phase: bool = False) -> None:
 def with_required_fields(*field_names: str) -> Callable[[F], F]:
     """
     Factory function to create a validator that checks for required fields.
-    
+
     This is a compatibility wrapper for validators.has_required_fields.
-    
+
     Usage:
     @pytest.fixture
     @fixturecheck.with_required_fields("username", "email")
     def user(db):
         return User.objects.create_user(...)
     """
-    return lambda fixture: fixturecheck(validators.has_required_fields(*field_names))(fixture)
+    return lambda fixture: fixturecheck(validators.has_required_fields(*field_names))(
+        fixture
+    )
 
 
 def with_required_methods(*method_names: str) -> Callable[[F], F]:
     """
     Factory function to create a validator that checks for required methods.
-    
+
     This is a compatibility wrapper for validators.has_required_methods.
-    
+
     Usage:
     @pytest.fixture
     @fixturecheck.with_required_methods("save", "delete")
     def my_object(db):
         return MyObject.objects.create(...)
     """
-    return lambda fixture: fixturecheck(validators.has_required_methods(*method_names))(fixture)
+    return lambda fixture: fixturecheck(validators.has_required_methods(*method_names))(
+        fixture
+    )
 
 
 def with_model_validation(*field_names: str) -> Callable[[F], F]:
     """
     Factory function to create a validator that checks for specific Django model fields.
-    
+
     Usage:
     @pytest.fixture
     @fixturecheck.with_model_validation("username", "email")
     def user(db):
         return User.objects.create_user(...)
     """
+
     def validator(obj: Any, is_collection_phase: bool = False) -> None:
         if is_collection_phase:
             return  # Skip during collection phase
-            
+
         try:
             from .django import DJANGO_AVAILABLE, Model
             from django.core.exceptions import FieldDoesNotExist
-            
+
             if not DJANGO_AVAILABLE:
                 raise ImportError("Django is not available")
-                
-            if not hasattr(obj, '_meta') or not isinstance(obj, Model):
+
+            if not hasattr(obj, "_meta") or not isinstance(obj, Model):
                 raise TypeError(f"Object is not a Django model: {type(obj)}")
-                
+
             for field_name in field_names:
                 try:
                     obj._meta.get_field(field_name)
                 except FieldDoesNotExist:
-                    raise AttributeError(f"Field '{field_name}' does not exist on model {obj.__class__.__name__}")
-                    
+                    raise AttributeError(
+                        f"Field '{field_name}' does not exist on model {obj.__class__.__name__}"
+                    )
+
         except ImportError:
             raise ImportError("Django is required for model validation")
-    
+
     def decorator(fixture: F) -> F:
         return fixturecheck(validator)(fixture)
-    
+
     return decorator
 
 
 def with_property_values(**expected_values: Any) -> Callable[[F], F]:
     """
     Factory function to create a validator that checks for expected property values.
-    
+
     This uses the updated check_property_values that works correctly with keyword arguments.
-    
+
     Usage:
     @pytest.fixture
     @fixturecheck.with_property_values(is_active=True, username="testuser")
     def user(db):
         return User.objects.create_user(...)
     """
-    return lambda fixture: fixturecheck(check_property_values(**expected_values))(fixture)
+    return lambda fixture: fixturecheck(check_property_values(**expected_values))(
+        fixture
+    )
 
 
 # Add the validators module to fixturecheck
