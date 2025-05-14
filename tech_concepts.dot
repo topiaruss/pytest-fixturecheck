@@ -1,0 +1,98 @@
+digraph TechConcepts {
+  // Graph styling
+  graph [fontname="Arial", rankdir=LR, splines=true, overlap=false, nodesep=0.8];
+  node [fontname="Arial", shape=box, style="filled,rounded", fillcolor=lightblue, fontsize=12];
+  edge [fontname="Arial", fontsize=10];
+
+  // Main categories
+  VersionControl [label="Version Control", shape=ellipse, fillcolor=lightgreen];
+  PackageManagement [label="Package Management", shape=ellipse, fillcolor=lightgreen];
+  Testing [label="Testing", shape=ellipse, fillcolor=lightgreen];
+  CodeQuality [label="Code Quality", shape=ellipse, fillcolor=lightgreen];
+  Documentation [label="Documentation", shape=ellipse, fillcolor=lightgreen];
+  DevTools [label="Development Tools", shape=ellipse, fillcolor=lightgreen];
+  Concepts [label="Python Concepts", shape=ellipse, fillcolor=lightgreen];
+  Automation [label="Automation", shape=ellipse, fillcolor=lightgreen];
+
+  // Version Control tools
+  Git [label="Git"];
+  GitHub [label="GitHub"];
+  
+  // Package Management tools
+  PyPI [label="PyPI"];
+  Twine [label="Twine"];
+  SetupTools [label="setuptools"];
+  Build [label="build"];
+  PyProject [label="pyproject.toml"];
+  UV [label="uv"];
+  VirtualEnv [label="virtualenv"];
+  
+  // Testing tools and concepts
+  Pytest [label="Pytest"];
+  FixtureCheck [label="pytest-fixturecheck"];
+  Fixtures [label="Fixtures"];
+  TestCollection [label="Test Collection"];
+  UnitTests [label="Unit Tests"];
+  Validators [label="Validators"];
+  
+  // Code Quality tools
+  Black [label="Black"];
+  Linting [label="Linting"];
+  PreCommit [label="pre-commit hooks"];
+  
+  // Documentation 
+  Markdown [label="Markdown"];
+  Changelog [label="CHANGELOG.md"];
+  DocString [label="Docstrings"];
+  ReadMe [label="README.md"];
+  
+  // Development Tools
+  Terminal [label="Terminal"];
+  Make [label="Makefile"];
+  
+  // Python Concepts
+  SemVer [label="Semantic Versioning"];
+  Decorators [label="Decorators"];
+  AdvancedValidators [label="Advanced Validators"];
+  TypeChecking [label="Type Checking"];
+  Assertions [label="Assertions"];
+  DynamicImport [label="Dynamic Imports"];
+  ModuleStructure [label="Module Structure"];
+  
+  // Automation
+  CI [label="CI Workflows"];
+  GitHooks [label="Git Hooks"];
+
+  // Connections from categories to tools
+  VersionControl -> {Git, GitHub};
+  PackageManagement -> {PyPI, Twine, SetupTools, Build, PyProject, UV, VirtualEnv};
+  Testing -> {Pytest, FixtureCheck, Fixtures, TestCollection, UnitTests, Validators};
+  CodeQuality -> {Black, Linting, PreCommit};
+  Documentation -> {Markdown, Changelog, DocString, ReadMe};
+  DevTools -> {Terminal, Make};
+  Concepts -> {SemVer, Decorators, AdvancedValidators, TypeChecking, Assertions, DynamicImport, ModuleStructure};
+  Automation -> {CI, GitHooks};
+  
+  // Cross-category relationships
+  Git -> GitHub [label="pushes to"];
+  Build -> PyPI [label="packages for"];
+  Twine -> PyPI [label="uploads to"];
+  UV -> PyPI [label="installs from"];
+  Pytest -> FixtureCheck [label="extended by"];
+  Fixtures -> Validators [label="validated by"];
+  SemVer -> Changelog [label="tracks in"];
+  Black -> Linting [label="performs"];
+  CI -> Linting [label="runs"];
+  PreCommit -> Git [label="extends"];
+  GitHooks -> PreCommit [label="includes"];
+  Black -> CI [label="used in"];
+  Make -> Testing [label="automates"];
+  PyProject -> PackageManagement [label="configures"];
+  SetupTools -> Build [label="powers"];
+  
+  // Additional interesting relationships
+  AdvancedValidators -> TypeChecking [label="uses"];
+  ModuleStructure -> DynamicImport [label="employs"];
+  Decorators -> Validators [label="creates"];
+  FixtureCheck -> Decorators [label="uses"];
+} 
