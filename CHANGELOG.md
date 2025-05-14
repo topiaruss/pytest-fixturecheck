@@ -1,6 +1,6 @@
 # Changelog
 
-## 0.3.4 (2025-05-14)
+## 0.3.4 (2024-05-14)
 
 ### New Features
 - Added advanced validators for more complex validation scenarios:

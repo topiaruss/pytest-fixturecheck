@@ -36,7 +36,7 @@ try:
     __version__ = importlib.metadata.version("pytest-fixturecheck")
 except importlib.metadata.PackageNotFoundError:
     # Package is not installed, use a default version
-    __version__ = "0.3.3"
+    __version__ = "0.3.4"
 
 __all__ = [
     "fixturecheck",
