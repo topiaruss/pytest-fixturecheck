@@ -8,7 +8,7 @@ version = "0.3.3"
 description = "A pytest plugin to check fixture validity before test execution"
 readme = "README.md"
 authors = [
-    {name = "Russ"}
+    {name = "Russ Ferriday"}
 ]
 license = {text = "MIT"}
 keywords = ["pytest", "testing", "fixtures", "python", "pytest-plugin", "validation"]

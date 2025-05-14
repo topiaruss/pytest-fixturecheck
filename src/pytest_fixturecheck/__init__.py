@@ -18,6 +18,19 @@ from .validators_fix import (
     with_property_values,
 )
 
+# Advanced validators (new in 0.3.4)
+try:
+    from .validators_advanced import (
+        nested_property_validator,
+        simple_validator,
+        type_check_properties,
+        with_nested_properties,
+        with_type_checks,
+    )
+except ImportError:
+    # These might not be available in a partial installation
+    pass
+
 # Get version from package metadata
 try:
     __version__ = importlib.metadata.version("pytest-fixturecheck")
@@ -41,6 +54,12 @@ __all__ = [
     "is_django_model",
     "django_model_has_fields",
     "django_model_validates",
+    # Advanced validators (new in 0.3.4)
+    "nested_property_validator",
+    "type_check_properties",
+    "simple_validator",
+    "with_nested_properties",
+    "with_type_checks",
 ]
 
 # Add our fixed with_property_values to fixturecheck

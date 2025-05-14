@@ -178,6 +178,18 @@ def fixture_missing_field():
 - `django_model_has_fields(*field_names)` - Validates Django model has the specified fields
 - `django_model_validates()` - Validates Django model passes Django's validation
 
+### Advanced Validators
+
+For more complex validation scenarios, pytest-fixturecheck offers advanced validators:
+
+- `nested_property_validator(**expected_values)` - Validates nested properties using dot notation (e.g., `config__resolution`)
+- `type_check_properties(**expected_values)` - Validates both property values and their types
+- `simple_validator(validator_func)` - Simplified API for creating custom validators
+- `with_nested_properties(**expected_values)` - Factory function for nested property validation
+- `with_type_checks(**expected_values)` - Factory function for type checking validation
+
+For more details on advanced validators, see [ADVANCED_VALIDATORS.md](ADVANCED_VALIDATORS.md).
+
 ## Configuration Options
 
 In your pytest.ini:

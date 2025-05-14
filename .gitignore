@@ -19,6 +19,19 @@ ENV/
 .pytest_cache/
 .coverage
 htmlcov/
+coverage.xml
+.tox/
+junit-*.xml
+pytest-*.xml
+
+# Type checking
+.mypy_cache/
+.pytype/
+
+# Linting
+.ruff_cache/
+.flake8report/
+pylint-report.txt
 
 # IDE files
 .idea/

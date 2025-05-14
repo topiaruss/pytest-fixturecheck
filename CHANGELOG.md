@@ -1,5 +1,23 @@
 # Changelog
 
+## 0.3.4 (2025-05-14)
+
+### New Features
+- Added advanced validators for more complex validation scenarios:
+  - `nested_property_validator` - validates nested object properties using dot notation
+  - `type_check_properties` - validates both property values and their types
+  - `simple_validator` - simplified API for creating custom validators
+- Added factory functions for advanced validators:
+  - `with_nested_properties` - validates nested properties with a simple decorator
+  - `with_type_checks` - validates property types with a simple decorator
+- Added comprehensive documentation in ADVANCED_VALIDATORS.md
+
+### Bug Fixes
+- Fixed issues with advanced validators when used directly in test code
+- Added documentation about limitations when using validators outside of decorators
+- Updated test suite to handle version compatibility issues
+- Fixed test cases to avoid direct usage of validator functions
+
 ## 0.3.3 (2024-07-21)
 
 ### Bug Fixes
