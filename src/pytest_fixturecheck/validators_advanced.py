@@ -111,7 +111,7 @@ def type_check_properties(**expected_values: Any) -> Callable[[Any, bool], None]
             For type checking only, use the special syntax: "property_name__type": type
             For both value and type checking, provide both entries.
             Can include strict=False to issue warnings instead of raising exceptions.
-            
+
     Returns:
         A validator function that checks property types
 
@@ -206,10 +206,12 @@ def type_check_properties(**expected_values: Any) -> Callable[[Any, bool], None]
     return validator
 
 
-def simple_validator(validator_func: Callable[[Any], None]) -> Callable[[Any], Callable]:
+def simple_validator(
+    validator_func: Callable[[Any], None],
+) -> Callable[[Any], Callable]:
     """
     A decorator that simplifies creating validators by handling the collection phase logic automatically.
-    
+
     Args:
         validator_func: A function that validates an object but doesn't handle collection phase
 
@@ -221,35 +223,36 @@ def simple_validator(validator_func: Callable[[Any], None]) -> Callable[[Any], C
         def validate_user(user):
             if not hasattr(user, "username"):
                 raise AttributeError("User must have username")
-        
+
         @pytest.fixture
         @validate_user
         def user_fixture():
             return User("testuser")
     """
+
     def wrapped_validator(obj: Any, is_collection_phase: bool = False) -> None:
         if is_collection_phase:
             return
         validator_func(obj)
-    
+
     # Apply the creates_validator decorator to get proper function attributes
     wrapped_validator = creates_validator(wrapped_validator)
-    
+
     def decorator(func: Callable) -> Callable:
         return fixturecheck(wrapped_validator)(func)
-    
+
     return decorator
 
 
 def with_nested_properties(**expected_values: Any) -> Callable[[Any], Any]:
     """
     Factory function to create a fixture decorator that validates nested properties.
-    
+
     Args:
         **expected_values: Property paths and their expected values.
             Can use '__' for nested properties, e.g., 'config__resolution'="1280x720"
             Can include strict=False to issue warnings instead of raising exceptions.
-            
+
     Returns:
         A decorator to apply to fixtures
 
@@ -263,23 +266,23 @@ def with_nested_properties(**expected_values: Any) -> Callable[[Any], Any]:
             return Camera("Test Camera", Config("1280x720", 30))
     """
     validator = nested_property_validator(**expected_values)
-    
+
     def decorator(func: Callable) -> Callable:
         return fixturecheck(validator)(func)
-    
+
     return decorator
 
 
 def with_type_checks(**expected_values: Any) -> Callable[[Any], Any]:
     """
     Factory function to create a fixture decorator that validates property types.
-    
+
     Args:
         **expected_values: Property names and their expected values or types.
             For type checking only, use the special syntax: "property_name__type": type
             For both value and type checking, provide both entries.
             Can include strict=False to issue warnings instead of raising exceptions.
-            
+
     Returns:
         A decorator to apply to fixtures
 
@@ -295,8 +298,8 @@ def with_type_checks(**expected_values: Any) -> Callable[[Any], Any]:
             return User("testuser", 30)
     """
     validator = type_check_properties(**expected_values)
-    
+
     def decorator(func: Callable) -> Callable:
         return fixturecheck(validator)(func)
-    
-    return decorator 
+
+    return decorator
