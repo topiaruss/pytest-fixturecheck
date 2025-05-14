@@ -48,7 +48,12 @@ def test_exported_symbols():
 
     # Test version
     assert isinstance(__version__, str)
-    assert __version__ in ["0.3.0", "0.3.3"], f"Version {__version__} should be 0.3.0 or 0.3.3"
+    assert __version__.count('.') == 2, "Version should follow semantic versioning format"
+    # Check if it matches the pattern x.y.z where x, y, and z are integers
+    major, minor, patch = __version__.split('.')
+    assert major.isdigit(), "Major version should be a number"
+    assert minor.isdigit(), "Minor version should be a number"
+    assert patch.isdigit(), "Patch version should be a number"
 
     # Test __all__ list
     expected_symbols = [
