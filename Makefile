@@ -1,4 +1,4 @@
-.PHONY: clean install test test-all test-specific lint mypy format build publish tox pre-commit version-patch version-minor version-major release tag
+.PHONY: clean install test test-all test-specific lint mypy format build publish tox pre-commit version-patch version-minor version-major release tag update-badge
 
 clean:
 	rm -rf build/ dist/ *.egg-info/ .pytest_cache/ .coverage htmlcov/ .tox/ __pycache__/ */__pycache__/ */*/__pycache__/
@@ -58,6 +58,10 @@ tox-mypy:
 tox-django:
 	tox -e django
 
+# Update the PyPI badge in README.md to match the current version
+update-badge:
+	python3 scripts/update_badge.py
+
 # Use the virtual environment python if it exists, otherwise try system python
 build:
 	(test -f .venv/bin/python && .venv/bin/python -m build) || \
@@ -76,8 +80,8 @@ tag:
 	git tag -a "v$$VERSION" -m "Release v$$VERSION"; \
 	git push --tags
 
-# Full release process: build, publish and tag
-release: clean build publish tag
+# Full release process: update badge, build, publish and tag
+release: update-badge clean build publish tag
 	@echo "Release process completed!"
 
 version-patch:

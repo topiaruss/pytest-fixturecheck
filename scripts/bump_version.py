@@ -1,139 +1,129 @@
 #!/usr/bin/env python
 """
-Utility script to bump the version in pyproject.toml and update the CHANGELOG.md.
-Since __init__.py now uses importlib.metadata, it will automatically use the updated version.
+Bump the version in pyproject.toml and src/pytest_fixturecheck/__init__.py
 """
 
-import argparse
 import re
 import sys
-from datetime import date
+import subprocess
 from pathlib import Path
 
-import tomli
-import tomli_w
-
-
-def get_pyproject_path():
-    """Get the path to pyproject.toml."""
-    return Path(__file__).parent.parent / "pyproject.toml"
-
-
-def get_changelog_path():
-    """Get the path to CHANGELOG.md."""
-    return Path(__file__).parent.parent / "CHANGELOG.md"
+INIT_FILE = "src/pytest_fixturecheck/__init__.py"
+PYPROJECT_FILE = "pyproject.toml"
 
 
 def get_current_version():
-    """Get the current version from pyproject.toml."""
-    with open(get_pyproject_path(), "rb") as f:
-        data = tomli.load(f)
-    return data["project"]["version"]
-
-
-def update_changelog(new_version, version_type):
-    """Update the CHANGELOG.md with the new version and today's date."""
-    changelog_path = get_changelog_path()
-    today = date.today().strftime("%Y-%m-%d")
-
-    # Read the current changelog
-    with open(changelog_path) as f:
+    """Extract the current version from pyproject.toml."""
+    pyproject_path = Path(PYPROJECT_FILE)
+    
+    if not pyproject_path.exists():
+        print(f"Error: {PYPROJECT_FILE} not found")
+        sys.exit(1)
+    
+    with open(pyproject_path, "r") as f:
         content = f.read()
+    
+    # Find the version line
+    version_match = re.search(r'version\s*=\s*"([^"]+)"', content)
+    if not version_match:
+        print(f"Error: Could not find version in {PYPROJECT_FILE}")
+        sys.exit(1)
+    
+    return version_match.group(1)
 
-    # Check if there's already an entry for this version
-    version_pattern = rf"## {re.escape(new_version)} \((.*?)\)"
-    existing_version_match = re.search(version_pattern, content)
 
-    if existing_version_match:
-        # Update the date for the existing version entry
-        updated_content = re.sub(
-            rf"## {re.escape(new_version)} \((.*?)\)",
-            f"## {new_version} ({today})",
-            content,
-        )
-        with open(changelog_path, "w") as f:
-            f.write(updated_content)
-        print(f"Updated date for existing version {new_version} to {today}")
-        return True
-
-    # Create a new entry template based on version type
-    if version_type == "major":
-        new_entry = f"\n## {new_version} ({today})\n\n### New Features\n- \n\n### Breaking Changes\n- \n"
-    elif version_type == "minor":
-        new_entry = f"\n## {new_version} ({today})\n\n### New Features\n- \n\n### Bug Fixes\n- \n"
-    else:  # patch
-        new_entry = f"\n## {new_version} ({today})\n\n### Bug Fixes\n- \n"
-
-    # Insert the new entry after the "# Changelog" line
-    changelog_pattern = r"# Changelog\n"
-    if re.search(changelog_pattern, content):
-        updated_content = re.sub(
-            changelog_pattern, f"# Changelog{new_entry}", content, count=1
-        )
-
-        with open(changelog_path, "w") as f:
-            f.write(updated_content)
-
-        print(f"Updated CHANGELOG.md with new version {new_version} and date {today}")
-        return True
+def bump_version(current_version, bump_type):
+    """Bump the version according to the bump_type (patch, minor, major)."""
+    major, minor, patch = map(int, current_version.split('.'))
+    
+    if bump_type == "patch":
+        patch += 1
+    elif bump_type == "minor":
+        minor += 1
+        patch = 0
+    elif bump_type == "major":
+        major += 1
+        minor = 0
+        patch = 0
     else:
-        print("Could not find '# Changelog' heading in CHANGELOG.md")
-        return False
+        print(f"Error: Invalid bump type '{bump_type}'. Must be 'patch', 'minor', or 'major'.")
+        sys.exit(1)
+    
+    return f"{major}.{minor}.{patch}"
 
 
-def bump_version(version_type):
-    """Bump the version in pyproject.toml and update the changelog."""
-    # Read the current version
-    pyproject_path = get_pyproject_path()
-    with open(pyproject_path, "rb") as f:
-        data = tomli.load(f)
+def update_pyproject(new_version):
+    """Update the version in pyproject.toml."""
+    with open(PYPROJECT_FILE, "r") as f:
+        content = f.read()
+    
+    # Replace the version
+    updated_content = re.sub(
+        r'(version\s*=\s*)"[^"]+"',
+        r'\1"' + new_version + '"',
+        content
+    )
+    
+    with open(PYPROJECT_FILE, "w") as f:
+        f.write(updated_content)
+    
+    print(f"Updated {PYPROJECT_FILE} to version {new_version}")
 
-    current_version = data["project"]["version"]
-    major, minor, patch = current_version.split(".")
 
-    # Bump the version based on type
-    if version_type == "major":
-        major = str(int(major) + 1)
-        minor = "0"
-        patch = "0"
-    elif version_type == "minor":
-        minor = str(int(minor) + 1)
-        patch = "0"
-    elif version_type == "patch":
-        patch = str(int(patch) + 1)
-    else:
-        print(f"Unknown version type: {version_type}")
-        return False
+def update_init(new_version):
+    """Update the version in __init__.py."""
+    init_path = Path(INIT_FILE)
+    
+    if not init_path.exists():
+        print(f"Warning: {INIT_FILE} not found, skipping")
+        return
+    
+    with open(init_path, "r") as f:
+        content = f.read()
+    
+    # Replace the version
+    updated_content = re.sub(
+        r'(__version__\s*=\s*)"[^"]+"',
+        r'\1"' + new_version + '"',
+        content
+    )
+    
+    with open(init_path, "w") as f:
+        f.write(updated_content)
+    
+    print(f"Updated {INIT_FILE} to version {new_version}")
 
-    new_version = f"{major}.{minor}.{patch}"
-    data["project"]["version"] = new_version
 
-    # Write the new version to pyproject.toml
-    with open(pyproject_path, "wb") as f:
-        tomli_w.dump(data, f)
-
-    print(f"Bumped version from {current_version} to {new_version}")
-
-    # Update the changelog
-    update_changelog(new_version, version_type)
-
-    return True
+def update_badge():
+    """Update the PyPI badge in README.md."""
+    try:
+        subprocess.run(["python3", "scripts/update_badge.py"], check=True)
+    except subprocess.CalledProcessError:
+        print("Warning: Failed to update the PyPI badge")
 
 
 def main():
-    parser = argparse.ArgumentParser(
-        description="Bump version in pyproject.toml and update CHANGELOG.md"
-    )
-    parser.add_argument(
-        "version_type",
-        choices=["major", "minor", "patch"],
-        help="Type of version bump to perform",
-    )
-    args = parser.parse_args()
-
-    success = bump_version(args.version_type)
-    return 0 if success else 1
+    """Bump the version and update all version references."""
+    if len(sys.argv) != 2 or sys.argv[1] not in ["major", "minor", "patch"]:
+        print("Usage: python bump_version.py [major|minor|patch]")
+        sys.exit(1)
+    
+    bump_type = sys.argv[1]
+    current_version = get_current_version()
+    new_version = bump_version(current_version, bump_type)
+    
+    print(f"Bumping version from {current_version} to {new_version}")
+    
+    update_pyproject(new_version)
+    update_init(new_version)
+    update_badge()
+    
+    print(f"Version bumped to {new_version}")
+    print("\nTo commit and push these changes:")
+    print(f"  git add {PYPROJECT_FILE} {INIT_FILE} README.md")
+    print(f'  git commit -m "Bump version to {new_version}"')
+    print("  git push")
 
 
 if __name__ == "__main__":
-    sys.exit(main())
+    main()
