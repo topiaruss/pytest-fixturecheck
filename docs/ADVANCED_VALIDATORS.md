@@ -158,7 +158,7 @@ The advanced validators are primarily designed to be used as fixture decorators.
    # DON'T DO THIS:
    validator = nested_property_validator(name="Test")
    validator(camera_obj, False)  # May cause issues
-   
+
    # DO THIS INSTEAD:
    assert camera_obj.name == "Test"
    assert camera_obj.config.resolution == "1280x720"
@@ -172,7 +172,7 @@ The advanced validators are primarily designed to be used as fixture decorators.
    @with_nested_properties(name="Test Camera", config__resolution="1280x720")
    def camera_fixture():
        return Camera(...)
-       
+
    # Instead of creating and applying validators manually
    ```
 
@@ -199,7 +199,7 @@ assert __version__ in ["0.3.0", "0.3.3", "0.3.4"]  # Support multiple versions
 ## Best Practices
 
 1. **For Simple Value Validation**: Use the standard `with_property_values` or `check_property_values`
-2. **For Nested Objects**: Use `with_nested_properties` or `nested_property_validator`  
+2. **For Nested Objects**: Use `with_nested_properties` or `nested_property_validator`
 3. **For Type Safety**: Use `with_type_checks` or `type_check_properties`
 4. **For Custom Validation Logic**: Use `simple_validator` to create your own validators
 
@@ -211,4 +211,4 @@ These advanced validators were added to address the limitations identified in ve
 2. No type checking capabilities
 3. Complexity in handling the collection phase in custom validators
 
-The implementation is backward compatible with all existing validators. 
+The implementation is backward compatible with all existing validators.

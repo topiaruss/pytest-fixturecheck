@@ -4,16 +4,16 @@ import sys
 from unittest.mock import MagicMock, patch
 
 import pytest
-from django.db import models
-from django.core.exceptions import ValidationError
 from django.conf import settings
+from django.core.exceptions import ValidationError
+from django.db import models
 
 from pytest_fixturecheck import fixturecheck
 from pytest_fixturecheck.django_validators import (
-    is_django_model,
-    validate_model_fields,
     django_model_has_fields,
     django_model_validates,
+    is_django_model,
+    validate_model_fields,
 )
 
 
@@ -200,9 +200,9 @@ class TestIsDjangoModel:
     """Tests for is_django_model validator."""
 
     def test_valid_model(self, test_model):
-        from pytest_fixturecheck.django_validators import (
+        from pytest_fixturecheck.django_validators import (  # Renamed; Import locally for this test
             is_django_model,
-        )  # Renamed; Import locally for this test
+        )
 
         assert is_django_model(test_model)
 
@@ -213,9 +213,9 @@ class TestIsDjangoModel:
         assert not is_django_model(NotAModel())
 
     def test_invalid_model(self):
-        from pytest_fixturecheck.django_validators import (
+        from pytest_fixturecheck.django_validators import (  # Renamed; Import locally
             is_django_model,
-        )  # Renamed; Import locally
+        )
 
         assert not is_django_model(object())
 

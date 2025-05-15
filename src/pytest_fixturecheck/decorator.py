@@ -14,10 +14,8 @@ from .validators_fix import check_property_values
 # Try to import from .django_validators. These names should always be available from there.
 # DJANGO_AVAILABLE will be the one defined in django_validators.py
 try:
-    from .django_validators import (
-        DJANGO_AVAILABLE,
-        validate_model_fields as django_validate_model_fields,
-    )
+    from .django_validators import DJANGO_AVAILABLE
+    from .django_validators import validate_model_fields as django_validate_model_fields
 except ImportError:
     # This is a fallback if .django_validators itself is missing or unimportable
     DJANGO_AVAILABLE = False
@@ -239,9 +237,9 @@ def with_model_validation(*field_names: str) -> Callable[[F], F]:
             return
 
         from .django_validators import (
-            is_django_model,
             django_model_has_fields,
             django_model_validates,
+            is_django_model,
         )
 
         if not is_django_model(obj):

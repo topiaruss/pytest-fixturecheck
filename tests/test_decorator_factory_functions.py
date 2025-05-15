@@ -1,11 +1,11 @@
 """Tests for factory functions in decorator.py."""
 
+import inspect
 from unittest.mock import MagicMock, patch
 
 import pytest
-import inspect
 
-from pytest_fixturecheck import fixturecheck, with_required_fields, with_property_values
+from pytest_fixturecheck import fixturecheck, with_property_values, with_required_fields
 from pytest_fixturecheck.decorator import (
     _default_validator as decorator_default_validator,
 )
@@ -17,7 +17,6 @@ try:
     from django.db import models
 
     # from django.conf import settings # Not needed here anymore
-
     # if not settings.configured: # Remove this block
     # ...
     # django.setup() # Remove this
@@ -179,7 +178,7 @@ def test_fixturecheck_none():
 def setup_my_django_model_db():  # New fixture to create the table
     if not DJANGO_AVAILABLE:
         pytest.skip("Django not available")
-    from django.db import connection, DatabaseError  # Import DatabaseError
+    from django.db import DatabaseError, connection  # Import DatabaseError
 
     table_name = MyDjangoModel._meta.db_table
     with connection.cursor() as cursor:
@@ -210,9 +209,9 @@ def django_model_instance(setup_my_django_model_db):  # Depend on table creation
 # @pytest.mark.django_db # This is the duplicate to remove
 def test_is_django_model_positive_case(django_model_instance):
     # Test that is_django_model correctly identifies a Django model instance.
-    from pytest_fixturecheck.django import (
+    from pytest_fixturecheck.django import (  # Import here to use updated DJANGO_AVAILABLE
         is_django_model,
-    )  # Import here to use updated DJANGO_AVAILABLE
+    )
     from pytest_fixturecheck.django_validators import DJANGO_AVAILABLE, django_models
 
     # Debug information

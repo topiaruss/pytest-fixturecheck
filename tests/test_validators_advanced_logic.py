@@ -1,4 +1,5 @@
 import pytest
+
 from pytest_fixturecheck.validators_advanced import (
     nested_property_validator,
     type_check_properties,

@@ -32,8 +32,8 @@ from pytest_fixturecheck.django_validators import django_model_has_fields
 @fixturecheck(django_model_has_fields("name", "email", "is_active"))
 def user_model_fixture(db):
     return User.objects.create(
-        name="Test User", 
-        email="test@example.com", 
+        name="Test User",
+        email="test@example.com",
         is_active=True
     )
 ```
@@ -103,4 +103,4 @@ def my_function(obj):
 
 ## Compatibility Layer
 
-For backward compatibility, pytest-fixturecheck also includes a `django.py` module that re-exports the Django validators from `django_validators.py`. This ensures that existing code continues to work. 
+For backward compatibility, pytest-fixturecheck also includes a `django.py` module that re-exports the Django validators from `django_validators.py`. This ensures that existing code continues to work.

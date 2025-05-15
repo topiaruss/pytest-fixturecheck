@@ -1,13 +1,15 @@
 """Tests for internal logic of pytest_fixturecheck/decorator.py."""
 
-import pytest
-from unittest.mock import MagicMock, patch
-import sys
-import pytest_fixturecheck.django_validators  # Ensure the module is imported
 import importlib  # Added importlib
 import inspect
-from pytest_fixturecheck import decorator as fc_decorator
+import sys
 import types
+from unittest.mock import MagicMock, patch
+
+import pytest
+
+import pytest_fixturecheck.django_validators  # Ensure the module is imported
+from pytest_fixturecheck import decorator as fc_decorator
 
 # Assuming _default_validator is accessible for testing.
 # If not, we might need to import it carefully or test via the main fixturecheck decorator.
@@ -581,7 +583,7 @@ def inspecting_default_validator_global(obj, is_collection_phase=False):
 def patch_default_validator_for_pytester_run(monkeypatch):
     global global_mock_validator_calls
     global_mock_validator_calls = [] # Reset for each pytester run
-    
+
     # Path to _default_validator within the decorator module
     monkeypatch.setattr(
         "pytest_fixturecheck.decorator._default_validator",
@@ -607,9 +609,9 @@ def test_yielded_value_correct(my_yielding_fixture_tc):
 def test_check_validator_calls(my_yielding_fixture_tc): # Include fixture to ensure it runs
     global global_mock_validator_calls
     # print(f"TEST: test_check_validator_calls - calls: {global_mock_validator_calls}")
-    
+
     assert len(global_mock_validator_calls) >= 1, "Validator was not called at least once"
-    
+
     execution_phase_calls = [
         call for call in global_mock_validator_calls if not call['is_collection_phase']
     ]

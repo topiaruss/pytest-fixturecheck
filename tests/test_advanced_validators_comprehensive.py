@@ -1,21 +1,22 @@
+from typing import Any, Optional, Union
+from unittest.mock import MagicMock
+
 import pytest
-from typing import Optional, Union, Any
 
 from pytest_fixturecheck import fixturecheck
+from pytest_fixturecheck.utils import creates_validator
 from pytest_fixturecheck.validators import (
-    is_instance_of,
-    has_required_fields,
     combines_validators,
+    has_required_fields,
+    is_instance_of,
 )
 from pytest_fixturecheck.validators_advanced import (
     nested_property_validator,
-    type_check_properties,
     simple_validator,
+    type_check_properties,
     with_nested_properties,
     with_type_checks,
 )
-from pytest_fixturecheck.utils import creates_validator
-from unittest.mock import MagicMock
 
 
 # Class definitions first

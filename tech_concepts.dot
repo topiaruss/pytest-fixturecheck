@@ -17,7 +17,7 @@ digraph TechConcepts {
   // Version Control tools
   Git [label="Git"];
   GitHub [label="GitHub"];
-  
+
   // Package Management tools
   PyPI [label="PyPI"];
   Twine [label="Twine"];
@@ -26,7 +26,7 @@ digraph TechConcepts {
   PyProject [label="pyproject.toml"];
   UV [label="uv"];
   VirtualEnv [label="virtualenv"];
-  
+
   // Testing tools and concepts
   Pytest [label="Pytest"];
   FixtureCheck [label="pytest-fixturecheck"];
@@ -34,22 +34,22 @@ digraph TechConcepts {
   TestCollection [label="Test Collection"];
   UnitTests [label="Unit Tests"];
   Validators [label="Validators"];
-  
+
   // Code Quality tools
   Black [label="Black"];
   Linting [label="Linting"];
   PreCommit [label="pre-commit hooks"];
-  
-  // Documentation 
+
+  // Documentation
   Markdown [label="Markdown"];
   Changelog [label="CHANGELOG.md"];
   DocString [label="Docstrings"];
   ReadMe [label="README.md"];
-  
+
   // Development Tools
   Terminal [label="Terminal"];
   Make [label="Makefile"];
-  
+
   // Python Concepts
   SemVer [label="Semantic Versioning"];
   Decorators [label="Decorators"];
@@ -58,7 +58,7 @@ digraph TechConcepts {
   Assertions [label="Assertions"];
   DynamicImport [label="Dynamic Imports"];
   ModuleStructure [label="Module Structure"];
-  
+
   // Automation
   CI [label="CI Workflows"];
   GitHooks [label="Git Hooks"];
@@ -72,7 +72,7 @@ digraph TechConcepts {
   DevTools -> {Terminal, Make};
   Concepts -> {SemVer, Decorators, AdvancedValidators, TypeChecking, Assertions, DynamicImport, ModuleStructure};
   Automation -> {CI, GitHooks};
-  
+
   // Cross-category relationships
   Git -> GitHub [label="pushes to"];
   Build -> PyPI [label="packages for"];
@@ -89,10 +89,10 @@ digraph TechConcepts {
   Make -> Testing [label="automates"];
   PyProject -> PackageManagement [label="configures"];
   SetupTools -> Build [label="powers"];
-  
+
   // Additional interesting relationships
   AdvancedValidators -> TypeChecking [label="uses"];
   ModuleStructure -> DynamicImport [label="employs"];
   Decorators -> Validators [label="creates"];
   FixtureCheck -> Decorators [label="uses"];
-} 
+}

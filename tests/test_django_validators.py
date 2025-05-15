@@ -20,8 +20,8 @@ from pytest_fixturecheck import (
 # The actual settings.configure and django.setup() should be in conftest.py
 try:
     import django  # Just check if Django itself is importable
-    from django.db import models  # and models can be imported
     from django.contrib.auth.models import User  # and auth models
+    from django.db import models  # and models can be imported
 
     # If conftest.py failed to set up Django, these imports might still work
     # but DJANGO_SETUP_SUCCESS from conftest would be False.

@@ -1,18 +1,19 @@
 """Tests for the pytest-fixturecheck plugin."""
 
-import pytest
 import builtins as real_builtins  # Import with an alias to ensure access to original
-import unittest.mock as mock  # Import with an alias for unittest.mock
 import inspect
+import unittest.mock as mock  # Import with an alias for unittest.mock
+from unittest.mock import MagicMock, patch
+
+import pytest
 
 from pytest_fixturecheck import fixturecheck
 from pytest_fixturecheck.plugin import (
-    is_async_fixture,
     PYTEST_ASYNCIO_INSTALLED,
-    pytest_fixture_setup,
+    is_async_fixture,
     pytest_collection_finish,
+    pytest_fixture_setup,
 )
-from unittest.mock import MagicMock, patch
 
 
 def test_fixturecheck_decorator_exists():

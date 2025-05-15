@@ -3,6 +3,8 @@
 import warnings
 
 import pytest
+
+from pytest_fixturecheck import fixturecheck
 from pytest_fixturecheck.validators_advanced import (
     nested_property_validator,
     simple_validator,
@@ -10,7 +12,6 @@ from pytest_fixturecheck.validators_advanced import (
     with_nested_properties,
     with_type_checks,
 )
-from pytest_fixturecheck import fixturecheck
 
 
 # Test classes

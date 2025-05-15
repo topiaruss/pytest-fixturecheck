@@ -76,7 +76,6 @@ try:
     # if not settings.configured:
     #     # This makes the module gracefully handle non-configured Django settings
     #     raise ImportError("Django settings not configured during pytest_fixturecheck.django_validators import.")
-
     # If settings are configured, proceed with real Django imports
     from django.core.exceptions import FieldDoesNotExist as DjangoFieldDoesNotExist_real
     from django.core.exceptions import ValidationError as DjangoValidationError_real

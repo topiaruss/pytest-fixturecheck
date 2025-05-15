@@ -7,7 +7,9 @@ These tests verify that the strict parameter works as expected in the validators
 """
 
 import warnings
+
 import pytest
+
 from pytest_fixturecheck import fixturecheck
 from pytest_fixturecheck.validators_fix import (
     check_property_values,

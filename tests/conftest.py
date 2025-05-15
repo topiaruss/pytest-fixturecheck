@@ -1,6 +1,7 @@
 """Test configuration for pytest-fixturecheck."""
 
 import inspect
+
 import pytest
 
 # Configure Django settings centrally for all tests that might need it
@@ -31,8 +32,8 @@ except ImportError:
 
 from pytest_fixturecheck import fixturecheck, has_required_fields
 from pytest_fixturecheck.utils import creates_validator
-from pytest_fixturecheck.validators_advanced import nested_property_validator
 from pytest_fixturecheck.validators import is_instance_of
+from pytest_fixturecheck.validators_advanced import nested_property_validator
 
 
 class User:
