@@ -22,7 +22,12 @@ except ImportError:
     # This is a fallback if .django_validators itself is missing or unimportable
     DJANGO_AVAILABLE = False
 
-    def django_validate_model_fields(obj: Any, fields_to_check: Any = None, expect_error: bool = False) -> None:
+    def django_validate_model_fields(
+        obj: Any,
+        fields_to_check: Any = None,
+        expect_error: bool = False,
+        is_collection_phase: bool = False,
+    ) -> None:
         return None
 
 
@@ -103,7 +108,7 @@ def fixturecheck(
 
         if validator is not None:  # validator= kwarg was used
             if getattr(validator, "_is_pytest_fixturecheck_creator", False):
-                actual_validator_to_use = validator()  # Call factory
+                actual_validator_to_use = validator()  # type: ignore # Call factory
             else:
                 actual_validator_to_use = (
                     validator  # Use directly (could be validator instance or func)
@@ -111,7 +116,7 @@ def fixturecheck(
         elif fixture_or_validator is not None and callable(fixture_or_validator):
             # fixture_or_validator is the first positional arg
             if getattr(fixture_or_validator, "_is_pytest_fixturecheck_creator", False):
-                actual_validator_to_use = fixture_or_validator()  # Call factory
+                actual_validator_to_use = fixture_or_validator()  # type: ignore # Call factory
             elif getattr(
                 fixture_or_validator, "_is_pytest_fixturecheck_validator", False
             ):
@@ -142,7 +147,7 @@ def fixturecheck(
 
 # This is the default validator used if no validator is explicitly provided.
 # It tries to be helpful for common cases, e.g., Django models.
-def _default_validator(obj: Any, is_collection_phase: bool = False, expect_error_in_validator: bool = False) -> None:
+def _default_validator(obj: Any, is_collection_phase: bool = False) -> None:
     if is_collection_phase:
         return  # Default validator does nothing during collection
 
@@ -154,7 +159,10 @@ def _default_validator(obj: Any, is_collection_phase: bool = False, expect_error
             if isinstance(obj, Model):
                 # Use the imported (and possibly renamed) validate_model_fields
                 django_validate_model_fields(
-                    obj, expect_error=expect_error_in_validator
+                    obj=obj,
+                    fields_to_check=None,
+                    expect_error=False,
+                    is_collection_phase=is_collection_phase,
                 )
                 return
         except ImportError:

@@ -89,9 +89,16 @@ try:
     django_models = django_models_real
     DjangoField = DjangoField_real  # type: ignore
 
-    # Update test aliases as well
-    ValidationError = DjangoValidationError
-    FieldDoesNotExist = DjangoFieldDoesNotExist
+    # Export the exceptions for use by other modules
+    # Use different names to avoid name conflicts with type annotations
+    from typing import cast
+
+    ValidationError_Export: Type[Exception] = cast(
+        Type[Exception], DjangoValidationError
+    )
+    FieldDoesNotExist_Export: Type[Exception] = cast(
+        Type[Exception], DjangoFieldDoesNotExist
+    )
 
     DJANGO_AVAILABLE = True
 
@@ -235,6 +242,7 @@ def validate_model_fields(
 def django_model_has_fields(*required_fields: str, allow_empty: bool = False):
     """
     Validator factory: Checks if a Django model instance has specific fields populated.
+
     If allow_empty is False (default), fields must not be None.
 
     Args:

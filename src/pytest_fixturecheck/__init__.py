@@ -1,10 +1,21 @@
 """pytest-fixturecheck - A pytest plugin to validate fixtures before tests."""
 
 import importlib.metadata
+from . import validators
 
 from .decorator import fixturecheck
-from .decorator import with_required_fields, with_required_methods, with_model_validation
-from .django import django_model_has_fields, django_model_validates, is_django_model
+from .decorator import (
+    with_required_fields,
+    with_required_methods,
+    with_model_validation,
+)
+from .django_validators import (
+    django_model_has_fields,
+    django_model_validates,
+    is_django_model,
+    ValidationError_Export as ValidationError,
+    FieldDoesNotExist_Export as FieldDoesNotExist,
+)
 from .utils import creates_validator
 from .validators import (
     combines_validators,
@@ -37,7 +48,7 @@ try:
     __version__ = importlib.metadata.version("pytest-fixturecheck")
 except importlib.metadata.PackageNotFoundError:
     # Package is not installed, use a default version
-    __version__ = "0.3.4"
+    __version__ = "0.4.0"
 
 __all__ = [
     "fixturecheck",
@@ -67,5 +78,16 @@ __all__ = [
     "with_model_validation",
 ]
 
-# Add our fixed with_property_values to fixturecheck
+# Add factory functions to fixturecheck
 fixturecheck.with_property_values = with_property_values
+fixturecheck.with_required_fields = with_required_fields
+fixturecheck.with_required_methods = with_required_methods
+fixturecheck.with_model_validation = with_model_validation
+fixturecheck.with_nested_properties = with_nested_properties
+fixturecheck.with_type_checks = with_type_checks
+
+# Add creates_validator to fixturecheck
+fixturecheck.creates_validator = creates_validator
+
+# Add validators module directly to fixturecheck
+fixturecheck.validators = validators
