@@ -22,7 +22,7 @@ try:
                 # "pytest_fixturecheck.tests", # Removed this, as it's not an importable module
             ],
             # Minimal other settings if required by auth or other apps
-            SECRET_KEY='dummysecret',
+            SECRET_KEY="dummysecret",
         )
     DJANGO_SETUP_SUCCESS = True
 except ImportError:
@@ -66,18 +66,24 @@ def conftest_property_values_validator(expected_values):
     """
 
     @creates_validator
-    def validator(obj):
-        for prop_name, expected_value in expected_values.items():
-            if not hasattr(obj, prop_name):
-                raise AttributeError(
-                    f"Property '{prop_name}' missing from {obj.__class__.__name__}"
-                )
+    def validator():
+        def inner_validator(obj, is_collection_phase=False):
+            if is_collection_phase:
+                return
 
-            actual_value = getattr(obj, prop_name)
-            if actual_value != expected_value:
-                raise ValueError(
-                    f"Expected {prop_name}={expected_value}, got {actual_value}"
-                )
+            for prop_name, expected_value in expected_values.items():
+                if not hasattr(obj, prop_name):
+                    raise AttributeError(
+                        f"Property '{prop_name}' missing from {obj.__class__.__name__}"
+                    )
+
+                actual_value = getattr(obj, prop_name)
+                if actual_value != expected_value:
+                    raise ValueError(
+                        f"Expected {prop_name}={expected_value}, got {actual_value}"
+                    )
+
+        return inner_validator
 
     return validator
 
@@ -124,15 +130,18 @@ class Config:
         self.resolution = resolution
         self.frame_rate = frame_rate
 
+
 class Camera:
     def __init__(self, name: str, config: Config):
         self.name = name
         self.config = config
 
+
 # Define the validator instance separately
 _working_camera_validator_instance = nested_property_validator(
     name="Test", config__resolution="1280x720", config__frame_rate=30
 )
+
 
 @pytest.fixture
 @fixturecheck(validator=_working_camera_validator_instance)

@@ -28,14 +28,7 @@ class TestDefaultValidator:
 
     def test_default_validator_django_not_available(self):
         """Test default validator when Django is not available."""
-        # Force import to fail to simulate Django not being available
-        with patch(
-            "builtins.__import__",
-            side_effect=lambda name, *args, **kwargs: (
-                ImportError("No module named django")
-                if name == "django"
-                else __import__(name, *args, **kwargs)
-            ),
-        ):
+        # Instead of patching __import__, directly patch DJANGO_AVAILABLE
+        with patch("pytest_fixturecheck.decorator.DJANGO_AVAILABLE", False):
             # Should not raise any exception
             _default_validator(MagicMock())

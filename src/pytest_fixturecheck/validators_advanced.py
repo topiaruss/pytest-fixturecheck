@@ -191,7 +191,9 @@ def simple_validator(func: Callable[[Any], None]) -> _SimpleValidatorCallable:
     return _SimpleValidatorCallable(func)
 
 
-def with_nested_properties(**expected_values: Any) -> Callable[[Callable[..., Any]], Callable[..., Any]]:
+def with_nested_properties(
+    **expected_values: Any,
+) -> Callable[[Callable[..., Any]], Callable[..., Any]]:
     """
     Factory function to create a fixture decorator that validates nested properties.
     # ... (docstring as before) ...
@@ -204,7 +206,9 @@ def with_nested_properties(**expected_values: Any) -> Callable[[Callable[..., An
     return decorator
 
 
-def with_type_checks(**expected_values: Any) -> Callable[[Callable[..., Any]], Callable[..., Any]]:
+def with_type_checks(
+    **expected_values: Any,
+) -> Callable[[Callable[..., Any]], Callable[..., Any]]:
     """
     Factory function to create a fixture decorator that validates property types.
     # ... (docstring as before) ...

@@ -34,7 +34,7 @@ with patch.dict(
         "django.core.exceptions": MagicMock(FieldDoesNotExist=MockFieldDoesNotExist),
     },
 ):
-    from pytest_fixturecheck.django import (
+    from pytest_fixturecheck.django_validators import (
         DJANGO_AVAILABLE,
         django_model_has_fields,
         django_model_validates,

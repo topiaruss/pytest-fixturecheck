@@ -119,7 +119,9 @@ class TestIsInstanceOf:
         # This should raise TypeError with the expected message
         with pytest.raises(TypeError) as excinfo:
             is_instance_of((CompTestObject, dict))(obj)
-        assert "Expected instance of one of (CompTestObject, dict), got int" in str(excinfo.value)
+        assert "Expected instance of one of (CompTestObject, dict), got int" in str(
+            excinfo.value
+        )
 
 
 # Test for has_required_fields validator
@@ -200,7 +202,9 @@ class TestHasRequiredMethods:
 
     def test_non_callable_attribute(self):
         """Test validation when an attribute exists but is not callable."""
-        validator_instance = has_required_methods("method1", "name") # 'name' is an attribute, not a method
+        validator_instance = has_required_methods(
+            "method1", "name"
+        )  # 'name' is an attribute, not a method
         obj = CompTestObject()
 
         with pytest.raises(TypeError) as excinfo:
@@ -231,7 +235,7 @@ class TestHasPropertyValues:
     def test_wrong_value(self):
         """Test validation when a property has the wrong value."""
         validator_instance = has_property_values(name="test", value=99)
-        obj = CompTestObject(name="test", value=42) # Actual value is 42
+        obj = CompTestObject(name="test", value=42)  # Actual value is 42
 
         with pytest.raises(ValueError) as excinfo:
             validator_instance(obj)
@@ -251,7 +255,7 @@ class TestCombinesValidators:
             is_instance_of(CompTestObject),
             has_required_fields("name", "value"),
             has_required_methods("method1"),
-            has_property_values(name="test", value=123)
+            has_property_values(name="test", value=123),
         )
         # Should not raise exception
         validator(obj, is_collection_phase=False)
@@ -264,7 +268,7 @@ class TestCombinesValidators:
         validator = combines_validators(
             is_instance_of(CompTestObject),
             has_required_fields("name", "value"),
-            has_property_values(name="test", value="wrong_type") # This should fail
+            has_property_values(name="test", value="wrong_type"),  # This should fail
         )
 
         with pytest.raises(ValueError) as excinfo:
@@ -273,12 +277,13 @@ class TestCombinesValidators:
 
     def test_collection_phase_handling(self):
         """Test that combines_validators respects is_collection_phase."""
+
         # Create a mock validator that would fail if not in collection phase
         def mock_failing_validator(obj, is_collection_phase):
             if not is_collection_phase:
                 raise AssertionError("Should fail only in non-collection phase")
             # else: implicitly return None to signify success/skip
-        
+
         # Set the necessary attribute for it to be treated as a validator
         mock_failing_validator._is_pytest_fixturecheck_validator = True
 
@@ -286,8 +291,7 @@ class TestCombinesValidators:
 
         # Combine with a validator that would fail
         combined = combines_validators(
-            is_instance_of(CompTestObject),
-            mock_failing_validator
+            is_instance_of(CompTestObject), mock_failing_validator
         )
 
         # Should not raise exception when is_collection_phase is True
@@ -297,7 +301,9 @@ class TestCombinesValidators:
             pytest.fail("Validator was not skipped during collection phase")
 
         # Should raise exception when is_collection_phase is False
-        with pytest.raises(AssertionError, match="Should fail only in non-collection phase"):
+        with pytest.raises(
+            AssertionError, match="Should fail only in non-collection phase"
+        ):
             combined(obj, is_collection_phase=False)
 
     def test_empty_combines_validators(self):

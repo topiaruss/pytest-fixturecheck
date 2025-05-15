@@ -19,16 +19,19 @@ from pytest_fixturecheck import (
 # Skip all tests if Django is not installed
 # The actual settings.configure and django.setup() should be in conftest.py
 try:
-    import django # Just check if Django itself is importable
-    from django.db import models # and models can be imported
-    from django.contrib.auth.models import User # and auth models
+    import django  # Just check if Django itself is importable
+    from django.db import models  # and models can be imported
+    from django.contrib.auth.models import User  # and auth models
+
     # If conftest.py failed to set up Django, these imports might still work
     # but DJANGO_SETUP_SUCCESS from conftest would be False.
     # For this file, we primarily care if Django modules are present.
     DJANGO_AVAILABLE = True
 except ImportError:
     DJANGO_AVAILABLE = False
-    pytestmark = pytest.mark.skip(reason="Django not installed or setup failed in conftest")
+    pytestmark = pytest.mark.skip(
+        reason="Django not installed or setup failed in conftest"
+    )
 
 
 # Define a test model if Django is available
@@ -116,13 +119,21 @@ def valid_book(setup_django_db):
 
 # Create a custom Django validator using creates_validator
 @creates_validator
-def validate_book_title(book):
-    """Validate that a book has a title starting with 'Test'."""
-    if not is_django_model(book):
-        return  # Skip validation if not a Django model (during collection)
+def validate_book_title():
+    """Validator factory that validates a book has a title starting with 'Test'."""
 
-    if not book.title.startswith("Test"):
-        raise ValueError("Book title must start with 'Test'")
+    def inner_validator(book, is_collection_phase=False):
+        """Validate that a book has a title starting with 'Test'."""
+        if is_collection_phase or not DJANGO_AVAILABLE:
+            return  # Skip validation during collection
+
+        if not is_django_model(book):
+            return  # Skip validation if not a Django model
+
+        if not book.title.startswith("Test"):
+            raise ValueError("Book title must start with 'Test'")
+
+    return inner_validator
 
 
 @pytest.fixture

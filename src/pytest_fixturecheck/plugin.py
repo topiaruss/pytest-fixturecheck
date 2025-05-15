@@ -110,37 +110,56 @@ def pytest_collection_finish(session: Any) -> None:
     for fixturedef in fixtures_to_validate:
         try:
             # Get the fixture function and validator
-            fixture_func = fixturedef.func
-            # Support different decorator orders - check original fixture if wrapped
-            if hasattr(fixture_func, "__wrapped__"):
-                # Check if any wrapper in the chain has _fixturecheck
-                current_func = fixture_func
-                while hasattr(current_func, "__wrapped__"):
-                    if getattr(current_func, "_fixturecheck", False):
-                        # Found the wrapper with fixturecheck
-                        validator = getattr(current_func, "_validator", None)
+            fixture_original_func = (
+                fixturedef.func
+            )  # The func pytest associates with fixturedef
+
+            # Default to attributes from this original_func.
+            # These will be used if the original_func is not wrapped, or if it is wrapped
+            # but the _fixturecheck marker (and thus validator) is on original_func itself,
+            # or if the marker is on an inner function that the loop below finds.
+            validator = getattr(fixture_original_func, "_validator", None)
+            expect_validation_error = getattr(
+                fixture_original_func, "_expect_validation_error", False
+            )
+
+            # If fixture_original_func is wrapped, we need to search for the actual function
+            # in the wrapper chain that has _fixturecheck=True, as that's where
+            # _validator and _expect_validation_error will be.
+            if hasattr(fixture_original_func, "__wrapped__"):
+                current_search_func = fixture_original_func
+                while True:  # Loop from outermost to innermost
+                    # Check if the current function in the chain has the marker
+                    if getattr(current_search_func, "_fixturecheck", False):
+                        # Marker found on this current_search_func. Use its attributes.
+                        validator = getattr(current_search_func, "_validator", None)
                         expect_validation_error = getattr(
-                            current_func, "_expect_validation_error", False
+                            current_search_func, "_expect_validation_error", False
                         )
-                        break
-                    current_func = current_func.__wrapped__
-                else:
-                    # No wrapper had _fixturecheck
-                    validator = getattr(fixture_func, "_validator", None)
-                    expect_validation_error = getattr(
-                        fixture_func, "_expect_validation_error", False
-                    )
-            else:
-                validator = getattr(fixture_func, "_validator", None)
-                expect_validation_error = getattr(
-                    fixture_func, "_expect_validation_error", False
-                )
+                        break  # Found the true source of attributes, stop searching
+
+                    # If no more wrappers, and we haven't found the marker by break-ing,
+                    # the attributes from fixture_original_func (if it had the marker)
+                    # or the defaults (None/False) will be used.
+                    # The 'validator' and 'expect_validation_error' are already pre-set
+                    # using fixture_original_func. If the marker was on fixture_original_func itself,
+                    # those are correct. If the marker was on an inner function, this loop
+                    # would have updated them and broken. If the marker was *not* on an inner
+                    # function reached so far, and this is the innermost, then the pre-set
+                    # values (from original_func) remain correct if original_func was marked.
+                    if not hasattr(current_search_func, "__wrapped__"):
+                        break  # Reached the innermost function
+
+                    current_search_func = current_search_func.__wrapped__
+
+            # At this point, 'validator' and 'expect_validation_error' should be correctly set
+            # from the function in the (potential) wrapper chain that has _fixturecheck = True.
 
             # First, run validator on the fixture function itself if there's a validator
             if validator is not None:
                 try:
                     # Pass the function object and True to indicate collection phase
-                    validator(fixture_func, True)
+                    validator(fixture_original_func, True)
 
                     # If we expected validation error but didn't get one
                     if expect_validation_error:

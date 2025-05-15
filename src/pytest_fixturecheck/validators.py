@@ -40,6 +40,7 @@ def is_instance_of(
                     f"Expected instance of {type_or_types.__name__}, got {type(obj).__name__}"
                 )
         validator._is_pytest_fixturecheck_validator = True
+
     return validator
 
 
@@ -108,6 +109,7 @@ def has_required_methods(*method_names: str) -> Callable[[Any, bool], None]:
                     f"'{method}' is not callable in {obj.__class__.__name__}"
                 )
         validator._is_pytest_fixturecheck_validator = True
+
     return validator
 
 
@@ -141,6 +143,7 @@ def has_property_values(**expected_values: Any) -> Callable[[Any, bool], None]:
                     f"Expected {prop_name}={expected_value}, got {actual_value}"
                 )
         validator._is_pytest_fixturecheck_validator = True
+
     return validator
 
 
@@ -169,4 +172,5 @@ def combines_validators(*validators: Callable) -> Callable[[Any, bool], None]:
             validator(obj, is_collection_phase)
 
         combined_validator._is_pytest_fixturecheck_validator = True
+
     return combined_validator
