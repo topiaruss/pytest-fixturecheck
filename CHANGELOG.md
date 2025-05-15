@@ -1,6 +1,6 @@
 # Changelog
 
-## 0.4.2 (2025-06-04)
+## 0.4.2 (2025-05-15)
 
 ### Bug Fixes
 - Fixed ImportError when importing `FieldDoesNotExist_Export` or `ValidationError_Export` from `pytest_fixturecheck.django_validators` when Django is not installed
@@ -22,7 +22,7 @@
 - Fixed code formatting issues
 - Fixed f-string issues 
 
-## 0.4.0 (2024-05-15)
+## 0.4.0 (2025-05-15)
 
 ### Bug Fixes and Improvements
 - Fixed `creates_validator` decorator to properly handle different function signatures:
