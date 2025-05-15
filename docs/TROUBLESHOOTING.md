@@ -65,6 +65,20 @@ def validate_user_data(obj, is_collection_phase=False):
 4. **Use clear, specific error messages** to make debugging easier
 5. **Test your validators independently** before using them with `@fixturecheck`
 
+### Recommended Validator Pattern
+
+Use this pattern for your custom validators to avoid common issues:
+
+```python
+def my_validator(obj, is_collection_phase=False):
+    # Skip validation during collection or if obj is a function
+    import inspect  # Import locally
+    if is_collection_phase or inspect.isfunction(obj):
+        return
+    
+    # Rest of validation logic
+```
+
 ## Django Validator Issues
 
 When using the Django-specific validators, you might encounter:
@@ -89,6 +103,23 @@ When using the Django-specific validators, you might encounter:
 2. **Verify validator syntax** - ensure your validator follows the correct signature
 3. **Run with `--verbose`** for more detailed error information
 4. **Use the `expect_validation_error=True`** parameter if you're expecting validation to fail
+
+   **Example:**
+   ```python
+   import pytest
+   from pytest_fixturecheck import fixturecheck, has_required_fields
+  
+   # This fixture is expected to fail validation but the test will still run
+   @pytest.fixture
+   @fixturecheck(has_required_fields("nonexistent_field"), expect_validation_error=True)
+   def fixture_missing_field():
+       # This fixture intentionally violates the validator requirements
+       return {"name": "test"}  # Missing the 'nonexistent_field'
+   
+   # Tests using this fixture will run normally, despite the validation error
+   def test_with_missing_field(fixture_missing_field):
+       assert fixture_missing_field["name"] == "test"
+   ```
 
 If you're still having issues, please open an issue on our [GitHub repository](https://github.com/topiaruss/pytest-fixturecheck/issues) with:
 1. Your Python and pytest versions
