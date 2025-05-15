@@ -20,6 +20,7 @@ A pytest plugin to validate fixtures before they're used in tests.
   - Validators that expect errors (for testing)
 - Supports both synchronous and asynchronous (coroutine) fixtures
 - Compatible with pytest-django, pytest-asyncio, and other pytest plugins
+- Full test coverage tracking with Codecov integration
 
 ## Installation
 
