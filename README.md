@@ -105,6 +105,8 @@ def validated_model(db):
     return MyModel.objects.create(name="Test", valid_field=True)
 ```
 
+For more details on Django validators, see [docs/DJANGO_VALIDATORS.md](docs/DJANGO_VALIDATORS.md).
+
 ## Creating Custom Validators
 
 ```python
@@ -160,7 +162,7 @@ def object_fixture3():
     return TestObject(name="test", value=42)
 ```
 
-For more details on property validation, see [PROPERTY_VALIDATORS.md](PROPERTY_VALIDATORS.md).
+For more details on property validation, see [docs/PROPERTY_VALIDATORS.md](docs/PROPERTY_VALIDATORS.md).
 
 ## Testing Validators
 
@@ -198,7 +200,7 @@ For more complex validation scenarios, pytest-fixturecheck offers advanced valid
 - `with_nested_properties(**expected_values)` - Factory function for nested property validation
 - `with_type_checks(**expected_values)` - Factory function for type checking validation
 
-For more details on advanced validators, see [ADVANCED_VALIDATORS.md](ADVANCED_VALIDATORS.md).
+For more details on advanced validators, see [docs/ADVANCED_VALIDATORS.md](docs/ADVANCED_VALIDATORS.md).
 
 ## Configuration Options
 
@@ -213,7 +215,7 @@ fixturecheck-auto-skip = true  # Automatically skip tests with invalid fixtures 
 
 For developers contributing to pytest-fixturecheck, we use pre-commit hooks to ensure code quality and consistency.
 
-See [PRE_COMMIT_HOOKS.md](PRE_COMMIT_HOOKS.md) for details on the available hooks and how to use them.
+See [docs/CONTRIBUTING.md](docs/CONTRIBUTING.md) for details on how to contribute and [docs/PRE_COMMIT_HOOKS.md](docs/PRE_COMMIT_HOOKS.md) for information about the pre-commit hooks.
 
 ## Project Tags
 
