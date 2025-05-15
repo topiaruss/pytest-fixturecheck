@@ -47,7 +47,6 @@ if DJANGO_AVAILABLE:
             app_label = "tests"
 
 
-@pytest.mark.django_db
 @pytest.fixture
 def setup_django_db():
     """Setup Django database if available."""
@@ -95,7 +94,6 @@ def has_model_fields(*fields):
     return validator
 
 
-@pytest.mark.skipif(not DJANGO_AVAILABLE, reason="Django not installed")
 @pytest.fixture
 @fixturecheck(has_model_fields("title", "author"))
 def sample_book(setup_django_db):
@@ -106,7 +104,6 @@ def sample_book(setup_django_db):
     return Book.objects.create(title="Test Book", author="Test Author")
 
 
-@pytest.mark.skipif(not DJANGO_AVAILABLE, reason="Django not installed")
 @pytest.fixture
 @fixturecheck(django_model_validates())
 def valid_book(setup_django_db):
@@ -128,7 +125,6 @@ def validate_book_title(book):
         raise ValueError("Book title must start with 'Test'")
 
 
-@pytest.mark.skipif(not DJANGO_AVAILABLE, reason="Django not installed")
 @pytest.fixture
 @fixturecheck(validate_book_title)
 def custom_validated_book(setup_django_db):
@@ -140,7 +136,6 @@ def custom_validated_book(setup_django_db):
 
 
 # A fixture we expect to fail validation
-@pytest.mark.skipif(not DJANGO_AVAILABLE, reason="Django not installed")
 @pytest.fixture
 @fixturecheck(has_model_fields("nonexistent_field"), expect_validation_error=True)
 def book_with_missing_field(setup_django_db):
@@ -152,7 +147,6 @@ def book_with_missing_field(setup_django_db):
 
 
 # Tests
-@pytest.mark.skipif(not DJANGO_AVAILABLE, reason="Django not installed")
 @pytest.mark.django_db
 def test_django_model_has_fields(sample_book):
     """Test that django_model_has_fields validator works."""
@@ -161,7 +155,6 @@ def test_django_model_has_fields(sample_book):
 
 
 # Modified to use sample_book instead of valid_book because the valid_book fixture may not be properly registered
-@pytest.mark.skipif(not DJANGO_AVAILABLE, reason="Django not installed")
 @pytest.mark.django_db
 def test_django_model_validates(sample_book):
     """Test that django_model_validates validator works."""
@@ -173,7 +166,6 @@ def test_django_model_validates(sample_book):
 
 
 # Also use sample_book instead of custom_validated_book for the same reason
-@pytest.mark.skipif(not DJANGO_AVAILABLE, reason="Django not installed")
 @pytest.mark.django_db
 def test_custom_validator(sample_book):
     """Test that a custom validator created with creates_validator works."""
@@ -190,7 +182,6 @@ def test_custom_validator(sample_book):
     test_validator(sample_book)
 
 
-@pytest.mark.skipif(not DJANGO_AVAILABLE, reason="Django not installed")
 @pytest.mark.django_db
 def test_expect_validation_error(book_with_missing_field):
     """Test that expect_validation_error works with Django validators."""

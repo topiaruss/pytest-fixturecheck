@@ -166,10 +166,12 @@ def test_fixturecheck_none():
 #     """Test fixturecheck called with various non-validator arguments."""
 # ... (rest of parameterized test commented out or removed for simplicity for now)
 
-@pytest.mark.skipif(not DJANGO_AVAILABLE, reason="Django not available")
-@pytest.mark.django_db
+# @pytest.mark.skipif(not DJANGO_AVAILABLE, reason="Django not available") # Moved inside
+# @pytest.mark.django_db # Removed, consuming test is marked
 @pytest.fixture
 def setup_my_django_model_db(): # New fixture to create the table
+    if not DJANGO_AVAILABLE:
+        pytest.skip("Django not available")
     from django.db import connection, DatabaseError # Import DatabaseError
     table_name = MyDjangoModel._meta.db_table
     with connection.cursor() as cursor:
@@ -184,10 +186,12 @@ def setup_my_django_model_db(): # New fixture to create the table
                 )
             """)
 
-@pytest.mark.skipif(not DJANGO_AVAILABLE, reason="Django not available")
-@pytest.mark.django_db # Added to allow database access
+# @pytest.mark.skipif(not DJANGO_AVAILABLE, reason="Django not available") # Moved inside
+# @pytest.mark.django_db # Removed, consuming test is marked
 @pytest.fixture
 def django_model_instance(setup_my_django_model_db): # Depend on table creation
+    if not DJANGO_AVAILABLE:
+        pytest.skip("Django not available")
     return MyDjangoModel.objects.create(name="Test Model")
 
 
