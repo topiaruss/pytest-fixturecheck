@@ -312,17 +312,26 @@ def report_fixture_errors(failed_fixtures: List[Tuple]) -> None:
             if "pytest_fixturecheck" not in str(error) and tb:
                 # Check the traceback to see if the ImportError is coming from user code
                 user_paths = [
-                    line for line in tb.splitlines() 
-                    if "site-packages/pytest_fixturecheck" not in line 
+                    line
+                    for line in tb.splitlines()
+                    if "site-packages/pytest_fixturecheck" not in line
                     and "File" in line
                 ]
                 if user_paths:
                     error_in_user_code = True
                     # Extract the path of the file with the import error
-                    import_error_file = user_paths[0].split('"')[1] if '"' in user_paths[0] else "<unknown file>"
-                    print(f"\n  POSSIBLE USER CODE ERROR: The import error appears to be in your code.")
+                    import_error_file = (
+                        user_paths[0].split('"')[1]
+                        if '"' in user_paths[0]
+                        else "<unknown file>"
+                    )
+                    print(
+                        "\n  POSSIBLE USER CODE ERROR: The import error appears to be in your code."
+                    )
                     print(f"  The error occurred in file: {import_error_file}")
-                    print(f"  Check that all imports in your validator function are correct and the packages are installed.")
+                    print(
+                        "  Check that all imports in your validator function are correct and the packages are installed."
+                    )
 
         # Print a simplified traceback
         if isinstance(tb, str) and tb.strip():
@@ -342,7 +351,13 @@ def report_fixture_errors(failed_fixtures: List[Tuple]) -> None:
     print("Fix these fixture issues before running your tests.")
     if any(isinstance(error, ImportError) for _, error, _ in failed_fixtures):
         print("\nIMPORT ERRORS DETECTED:")
-        print("  • If the import error is in your custom validator, ensure all required packages are installed.")
-        print("  • Custom validators should be defined in your own files, not in the pytest_fixturecheck package.")
-        print("  • For validator examples, see https://github.com/topiaruss/pytest-fixturecheck#property-validators")
+        print(
+            "  • If the import error is in your custom validator, ensure all required packages are installed."
+        )
+        print(
+            "  • Custom validators should be defined in your own files, not in the pytest_fixturecheck package."
+        )
+        print(
+            "  • For validator examples, see https://github.com/topiaruss/pytest-fixturecheck#property-validators"
+        )
     print("=" * 80)
