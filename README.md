@@ -5,6 +5,7 @@
 [![PyPI version](https://img.shields.io/pypi/v/pytest-fixturecheck.svg)](https://pypi.org/project/pytest-fixturecheck/0.4.3/)
 [![Python Versions](https://img.shields.io/pypi/pyversions/pytest-fixturecheck.svg)](https://pypi.org/project/pytest-fixturecheck/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![AI-assisted](https://img.shields.io/badge/code%20origin-AI--assisted-blueviolet)](#-ai-generated-code-disclosure)
 
 A pytest plugin to validate fixtures before they're used in tests.
 
@@ -225,6 +226,17 @@ For developers contributing to pytest-fixturecheck, we use pre-commit hooks to e
 
 See [docs/CONTRIBUTING.md](docs/CONTRIBUTING.md) for details on how to contribute and [docs/PRE_COMMIT_HOOKS.md](docs/PRE_COMMIT_HOOKS.md) for information about the pre-commit hooks.
 
+
+## ⚠️ AI-Generated Code Disclosure
+
+This project includes significant portions of code that were generated with the assistance of large language models—specifically **Claude 3.7 Sonnet** and **Gemini 2.5 Pro Preview (2024-05-06)**—over an intensive 48-hour development sprint. These tools were used to accelerate scaffolding, explore idiomatic patterns, and propose implementations for specific challenges.
+
+All AI-generated code has been reviewed, integrated, and tested by the author. Transparency is important: this project makes no attempt to conceal the involvement of generative AI, and welcomes scrutiny and feedback. 
+
+If you're curious about the design, want to critique the use of AI in open-source development, or have experience with similar approaches, the author invites comments and contributions from both the AI and broader developer communities.
+
+Your insights—technical, ethical, or otherwise—are welcome.
+
 ## Project Tags
 
 This project is tagged with the following keywords to improve discoverability:
@@ -233,7 +245,10 @@ This project is tagged with the following keywords to improve discoverability:
 - #fixtures - Specifically focuses on validating pytest fixtures
 - #python - Written in and for Python
 - #validation - Provides validation tools for fixture objects
+- #ai-assisted — This project was created with the assistance of large language models (LLMs). The author supports the establishment of best practice norms for AI-assisted development and is committed to full and ongoing disclosure.
+
 
 ## License
 
 MIT
+
