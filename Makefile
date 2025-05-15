@@ -1,4 +1,4 @@
-.PHONY: clean install test test-all test-specific lint mypy format build publish tox pre-commit version-patch version-minor version-major
+.PHONY: clean install test test-all test-specific lint mypy format build publish tox pre-commit version-patch version-minor version-major release tag
 
 clean:
 	rm -rf build/ dist/ *.egg-info/ .pytest_cache/ .coverage htmlcov/ .tox/ __pycache__/ */__pycache__/ */*/__pycache__/
@@ -58,11 +58,27 @@ tox-mypy:
 tox-django:
 	tox -e django
 
+# Use the virtual environment python if it exists, otherwise try system python
 build:
-	python -m build
+	(test -f .venv/bin/python && .venv/bin/python -m build) || \
+	(test -f env/bin/python && env/bin/python -m build) || \
+	(python3 -m build)
 
+# Upload to PyPI using the same Python as build
 publish:
-	twine upload dist/*
+	(test -f .venv/bin/python && .venv/bin/python -m twine upload dist/*) || \
+	(test -f env/bin/python && env/bin/python -m twine upload dist/*) || \
+	(python3 -m twine upload dist/*)
+
+# Tag the current version and push the tag
+tag:
+	VERSION=$$(grep -m 1 "version" pyproject.toml | sed 's/.*"\(.*\)".*/\1/'); \
+	git tag -a "v$$VERSION" -m "Release v$$VERSION"; \
+	git push --tags
+
+# Full release process: build, publish and tag
+release: clean build publish tag
+	@echo "Release process completed!"
 
 version-patch:
 	python scripts/bump_version.py patch
