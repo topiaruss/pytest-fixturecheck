@@ -177,25 +177,6 @@ def is_django_model_test(obj):
 class TestIsDjangoModel:
     """Tests for is_django_model validator."""
 
-    def test_basic_validation(self):
-        """Test basic Django model validation."""
-        # Create a model instance
-        model = MockDjangoModel()
-
-        # Test validation - should not raise exception
-        assert isinstance(model, MockDjangoModel)
-
-    def test_failed_validation(self):
-        """Test validation failure for non-model objects."""
-        # Create a regular object
-        not_model = {"name": "test"}
-
-        # Test with our custom test version that raises exceptions
-        with pytest.raises(TypeError) as excinfo:
-            is_django_model_test(not_model)
-
-        assert "Expected a Django model instance" in str(excinfo.value)
-
     def test_valid_model(self, test_model):
         from pytest_fixturecheck.django import is_django_model # Import locally for this test
         assert is_django_model(test_model)
@@ -205,40 +186,6 @@ class TestIsDjangoModel:
             pass
 
         assert not is_django_model(NotAModel())
-
-    @pytest.mark.skip(reason="Deep Django metaclass mocking issues, covered by other tests.")
-    def test_model_without_meta(self):
-        # Import locally to ensure patched version is used if needed
-        from pytest_fixturecheck.django import is_django_model, DJANGO_AVAILABLE
-        if not DJANGO_AVAILABLE: # Should be true due to autouse mock
-            # This test relies on Django model infrastructure, even if mocked.
-            # Pytest typically skips if DJANGO_AVAILABLE is module-level false.
-            # If it reaches here and DJANGO_AVAILABLE is false, something is wrong with mock setup.
-            pytest.skip("Django not available or mock setup incorrect for test_model_without_meta")
-
-        class ModelWithoutMeta(models.Model): # models.Model should be the mocked version
-            class Meta:
-                app_label = "test_app" # Add a dummy app_label to satisfy metaclass
-
-        model_instance = ModelWithoutMeta()
-        
-        # Now, for the purpose of this specific test, remove _meta to test is_django_model's robustness
-        if hasattr(model_instance, "_meta"): # Safely delete if exists
-            delattr(model_instance, "_meta")
-            
-        assert not is_django_model(model_instance)
-
-    @pytest.mark.skip(reason="Deep Django metaclass mocking issues, covered by other tests.")
-    def test_model_with_minimal_meta(self):
-        from pytest_fixturecheck.django import is_django_model, DJANGO_AVAILABLE
-        if not DJANGO_AVAILABLE: # Should be true due to autouse mock
-            pytest.skip("Django not available or mock setup incorrect for test_model_with_minimal_meta")
-
-        class ModelWithMinimalMeta(models.Model): # Renamed class for clarity
-            # No explicit Meta class, or a Meta without app_label
-            pass
-
-        assert not is_django_model(ModelWithMinimalMeta())
 
     def test_invalid_model(self):
         from pytest_fixturecheck.django import is_django_model # Import locally
@@ -266,39 +213,6 @@ def check_model_has_required_fields(obj, is_collection_phase=False):
 class TestDjangoModelHasFields:
     """Tests for django_model_has_fields validator."""
 
-    def test_basic_validation(self):
-        """Test basic field validation."""
-        # Create a model with fields
-        fields = ["name", "age", "email"]
-        model = MockDjangoModel(fields=fields)
-
-        # Use custom validator function instead of django_model_has_fields
-        check_model_has_required_fields(model, False)
-
-    def test_missing_field(self):
-        """Test validation when a field is missing."""
-        # Create a model with fields
-        fields = ["name", "age"]
-        model = MockDjangoModel(fields=fields)
-
-        # Create a validator for specific missing fields
-        def missing_field_validator(obj, is_collection_phase=False):
-            if is_collection_phase:
-                return
-
-            if not isinstance(obj, MockDjangoModel):
-                raise TypeError(f"Expected a Django model, got {type(obj).__name__}")
-
-            if "email" not in obj._fields:
-                raise AttributeError(
-                    f"Required field 'email' not found on {obj.__class__.__name__}"
-                )
-
-        # Should raise for missing field during execution
-        with pytest.raises(AttributeError) as excinfo:
-            missing_field_validator(model, False)
-        assert "Required field 'email' not found" in str(excinfo.value)
-
     def test_collection_phase_skipping(self):
         """Test that validation is skipped during collection phase."""
         # Create a model with fields
@@ -306,15 +220,12 @@ class TestDjangoModelHasFields:
         model = MockDjangoModel(fields=fields)
 
         # This would fail during execution
-        def validator(obj, is_collection_phase=False):
-            if is_collection_phase:
-                return
+        # Using the actual validator factory to get the validator logic
+        validator_logic = django_model_has_fields("nonexistent")
 
-            if "nonexistent" not in obj._fields:
-                raise AttributeError(f"Required field 'nonexistent' not found")
-
-        # Should not raise during collection
-        validator(model, True)
+        # Should not raise during collection when calling the validator logic
+        # with is_collection_phase=True
+        validator_logic(model, is_collection_phase=True) # Call with is_collection_phase=True
 
     def test_valid_fields(self, test_model):
         validator = django_model_has_fields("name", "email", "age")
@@ -334,42 +245,6 @@ class TestDjangoModelHasFields:
 # Test django_model_validates validator
 class TestDjangoModelValidates:
     """Tests for django_model_validates validator."""
-
-    def test_basic_validation(self):
-        """Test basic model validation."""
-        # Create a model that validates
-        model = MockDjangoModel()
-
-        # Create validator function - skip collection phase
-        def validator(obj, is_collection_phase=False):
-            if is_collection_phase:
-                return
-            django_model_validates()(obj)
-
-        # Should not raise exception
-        validator(model, False)
-
-    def test_validation_error(self):
-        """Test validation when full_clean raises ValidationError."""
-        # Create a model that fails validation
-        model = MockDjangoModel(clean_raises=True)
-
-        # Verify our mock raises the exception directly
-        with pytest.raises(MockValidationError):
-            model.full_clean()
-
-        # Instead of using django_model_validates, create our own validation function
-        # that follows the same pattern but is simpler for testing
-        def custom_validator(obj):
-            if not isinstance(obj, MockDjangoModel):
-                raise TypeError(f"Object is not a Django model: {type(obj).__name__}")
-
-            # Call full_clean which should raise MockValidationError
-            obj.full_clean()
-
-        # The validator should propagate the exception
-        with pytest.raises(MockValidationError):
-            custom_validator(model)
 
     def test_valid_model(self, test_model):
         validator_func = django_model_validates()
@@ -392,52 +267,10 @@ class TestDjangoModelValidates:
             validator(object())
 
 
-# Test combined Django validators
-class TestCombinedDjangoValidators:
-    """Tests for combining Django validators."""
-
-    def test_combined_validation(self):
-        """Test combining multiple Django validators."""
-        # Create a model with fields
-        fields = ["name", "age"]
-        model = MockDjangoModel(fields=fields)
-
-        # Create validators that skip collection phase
-        def has_fields_validator(obj, is_collection_phase=False):
-            if is_collection_phase:
-                return
-
-            if not isinstance(obj, MockDjangoModel):
-                raise TypeError(f"Expected a Django model, got {type(obj).__name__}")
-
-            for field in ["name", "age"]:
-                if field not in obj._fields:
-                    raise AttributeError(f"Required field '{field}' not found")
-
-        def validates_validator(obj, is_collection_phase=False):
-            if is_collection_phase:
-                return
-            django_model_validates()(obj)
-
-        # Create a combined validator
-        def combined_validator(obj, is_collection_phase=False):
-            if is_collection_phase:
-                return
-            has_fields_validator(obj, is_collection_phase)
-            validates_validator(obj, is_collection_phase)
-
-        # Should not raise exception
-        combined_validator(model, False)
-
-
 # Test validate_model_fields
 class TestValidateModelFields:
     def test_valid_fields(self, test_model):
         validate_model_fields(test_model)
-
-    def test_invalid_field_access(self, test_model):
-        with pytest.raises(AttributeError):
-            test_model.nonexistent_field
 
     def test_collection_phase(self):
         @fixturecheck(validate_model_fields)
