@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "pytest-fixturecheck"
-version = "0.3.4"
+version = "0.4.0"
 description = "A pytest plugin to check fixture validity before test execution"
 readme = "README.md"
 authors = [
@@ -54,6 +54,7 @@ dev = [
     "pylint-pytest",
     "tomli",
     "tomli_w",
+    "pytest-mock",
 ]
 
 [project.urls]

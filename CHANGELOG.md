@@ -1,5 +1,22 @@
 # Changelog
 
+## 0.4.0 (2025-05-15)
+
+### Bug Fixes and Improvements
+- Fixed `creates_validator` decorator to properly handle different function signatures:
+  - Correctly handles functions with a single parameter when called with no arguments
+  - Better support for direct validator functions vs factory functions
+  - Improved handling of phase-aware validation
+- Enhanced Django validators for more robust validation:
+  - Improved Django model detection for better test environments compatibility
+  - Fixed validation error handling with better error messages
+  - Made validators properly respect the `is_collection_phase` parameter
+  - Added safety checks for accessing model attributes
+- Added exports for `ValidationError` and `FieldDoesNotExist` to simplify testing
+- Fixed compatibility issue in Django compatibility layer
+- Improved error handling and test stability
+- Deeper testing for yield fixture
+
 ## 0.3.4 (2024-05-14)
 
 ### New Features
