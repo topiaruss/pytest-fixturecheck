@@ -32,7 +32,9 @@ FieldDoesNotExist = DjangoFieldDoesNotExist
 
 # Define these unconditionally so they can be imported regardless of Django availability
 ValidationError_Export: Type[Exception] = cast(Type[Exception], DjangoValidationError)
-FieldDoesNotExist_Export: Type[Exception] = cast(Type[Exception], DjangoFieldDoesNotExist)
+FieldDoesNotExist_Export: Type[Exception] = cast(
+    Type[Exception], DjangoFieldDoesNotExist
+)
 
 
 # Define dummy structures for type hints and basic attribute access if Django is not available
