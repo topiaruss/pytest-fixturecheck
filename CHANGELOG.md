@@ -1,6 +1,6 @@
 # Changelog
 
-## 0.4.2 (2025-05-22)
+## 0.4.2 (2024-06-04)
 
 ### Bug Fixes
 - Fixed ImportError when importing `FieldDoesNotExist_Export` or `ValidationError_Export` from `pytest_fixturecheck.django_validators` when Django is not installed
