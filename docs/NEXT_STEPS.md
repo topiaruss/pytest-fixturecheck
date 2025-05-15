@@ -1,115 +1,141 @@
-# Next Steps for pytest-fixturecheck v0.4.0
+# Next Steps for pytest-fixturecheck v0.4.1+
 
-This file outlines the next steps for the pytest-fixturecheck project after releasing version 0.3.2.
+This file outlines the next steps for the pytest-fixturecheck project after releasing version 0.4.1.
 
-## Progress in v0.3.2
+## Progress in v0.4.1
 
-1. **Test Suite Improvements**
-   - Fixed mock Django validation in test_django_validators_comprehensive.py
-   - Improved test coverage for utility functions in test_utils_comprehensive.py
-   - Created workarounds for property validators tests with direct validator functions
+1. **Improved Error Reporting**
+   - Enhanced error detection in plugin.py to better identify when errors come from user code vs. the package
+   - Added more helpful error messages for import errors 
+   - Improved traceback formatting for better readability
 
-2. **Configuration and Code Quality**
-   - Enhanced flake8 configuration with more comprehensive ignore rules
-   - Fixed formatting issues in utils.py and other files
-   - Improved CI pipeline stability
+2. **Documentation Enhancements**
+   - Created comprehensive TROUBLESHOOTING.md guide with:
+     - Sections on import errors and how to resolve them
+     - Examples of correctly structured validators
+     - Best practices for validator patterns
+     - Recommended validator pattern with local imports
+     - Django validator troubleshooting
+     - General troubleshooting steps
+   - Added examples of using `expect_validation_error=True` for testing validation failures
+   - Updated README.md to reference the troubleshooting guide
 
-## Completed in Version 0.3.0
+3. **Code Quality Improvements**
+   - Fixed f-string issues where f-strings were used without variable substitutions
+   - Applied Black formatting to plugin.py
+   - Ensured code passes tox -e lint and tox -e py313 tests
+
+## Completed in Version 0.4.0
+
+1. **Bug Fixes and Improvements**
+   - Fixed `creates_validator` decorator to properly handle different function signatures
+   - Enhanced Django validators for more robust validation
+   - Added exports for `ValidationError` and `FieldDoesNotExist` to simplify testing
+   - Fixed compatibility issue in Django compatibility layer
+   - Improved error handling and test stability
+   - Added deeper testing for yield fixtures
+
+## Completed in Previous Versions (0.3.x)
 
 1. **Enhanced Validator Framework**
    - Added `creates_validator` decorator for easy validator creation
    - Added factory functions for common validation patterns
    - Implemented a rich set of built-in validators
 
-2. **Improved Django Integration**
+2. **Advanced Validators**
+   - Added `nested_property_validator` for validating nested object properties
+   - Added `type_check_properties` for validating both property values and their types
+   - Added `simple_validator` for a simplified API to create custom validators
+   - Added factory functions for advanced validators:
+     - `with_nested_properties` for validating nested properties
+     - `with_type_checks` for validating property types
+
+3. **Improved Django Integration**
    - Enhanced Django model detection with the `is_django_model` function
    - Added specialized Django validators:
      - `django_model_has_fields`
      - `django_model_validates`
 
-3. **Testing Validators**
+4. **Testing Validators**
    - Added `expect_validation_error` parameter for testing validators
    - This allows for creating fixtures that are expected to fail validation
 
-4. **Better AsyncIO Support**
+5. **Better AsyncIO Support**
    - Improved detection and handling of async fixtures
    - Better compatibility with pytest-asyncio
 
-5. **Improved API**
-   - Simplified API for common validation tasks
-   - Maintained backward compatibility with existing validators
-
 6. **Fixed Property Value Validators**
-   - Fixed issues with `has_property_values` not accepting keyword arguments
    - Added three new validators for property validation:
      - `property_values_validator` - Takes a dictionary of property names and values
      - `check_property_values` - Takes keyword arguments for property names and values
-     - `with_property_values` - A factory function to replace `fixturecheck.with_property_values`
-   - Comprehensive test coverage for property validators (72%)
+     - `with_property_values` - A factory function for property validation
 
-## Future Enhancements for v0.4.0
+## Future Enhancements for v0.4.2 and Beyond
 
 1. **Enhanced Fixture Discovery**
    - Automatic discovery of fixtures without requiring the decorator
    - Optional auto-validation of all fixtures
-   - Investigate and fix the fixture discovery issue in tests/test_property_values_fix.py where fixtures
-     decorated with @fixturecheck are not being properly discovered by pytest
+   - Investigate and fix fixture discovery issues where fixtures decorated with @fixturecheck are not properly discovered
 
-2. **Type Checking**
-   - Add validators for type annotations
-   - Integration with mypy or other type checkers
-
-3. **More Validation Patterns**
+2. **More Validation Patterns**
    - Add validators for common patterns like JSONSchema validation
-   - Add more ORM-specific validators (SQLAlchemy, etc.)
+   - Add more ORM-specific validators beyond Django (SQLAlchemy, etc.)
+   - Support for data class validation
 
-4. **Performance Improvements**
+3. **Performance Improvements**
    - Optimize fixture validation during collection phase
    - Add caching for previously validated fixtures
+   - Profile and optimize validation functions
 
-5. **Configuration Options**
+4. **Configuration Options**
    - More granular configuration options
    - Project-wide validation rules
+   - Support for validation groups
 
-6. **Property Validators Enhancements**
-   - Add support for nested property validation
-   - Support for complex property validation logic (e.g., range validation, custom patterns)
-   - Add validators for property types
+5. **Advanced Error Handling**
+   - Provide more context in error messages
+   - Add option to generate fix suggestions for common errors
+   - Improve how dependent tests are marked for skipping
 
-7. **Fix Python 3.12 AsyncIO Compatibility**
-   - Investigate and fix issues with pytest-asyncio tests on Python 3.12
-   - Currently, asyncio tests are skipped in CI for Python 3.12 due to import errors
-   - This may require updates to how pytest-asyncio is integrated or conditional test skipping
-   - Initial workarounds implemented in v0.3.1-0.3.2, but a more comprehensive solution is needed
+6. **Deeper AsyncIO Integration**
+   - Better support for complex async fixture scenarios
+   - Improved validation for coroutine objects
+   - Address any remaining compatibility issues with pytest-asyncio
+
+7. **Add Integration Tests**
+   - Test the plugin with real-world fixture scenarios
+   - Test performance with many fixtures
+   - Create complex fixture dependency trees for testing
 
 ## Contribution Opportunities
 
 Below are specific areas where contributions would be valuable:
 
-1. **Improve Coverage for django.py (currently at 12%)**
+1. **Improve Coverage for django.py (needs better coverage)**
    - Add tests for Django model validation functions
    - Create proper test fixtures with Django model mocks
 
-2. **Increase Coverage for plugin.py (currently at 35%)**
+2. **Increase Coverage for plugin.py**
    - Test pytest plugin hooks
    - Cover the fixture collection and execution phases
 
-3. **Add Tests for Edge Cases in decorator.py**
+3. **Add Tests for Edge Cases**
    - Test validation with more complex nested fixtures
    - Test error handling and reporting
+   - Test with large fixture dependency chains
 
 4. **Improve AsyncIO Support Testing**
    - Add more comprehensive tests for async fixtures
    - Test concurrent validation scenarios
 
-5. **Add Integration Tests**
-   - Test the plugin with real-world fixture scenarios
-   - Test performance with many fixtures
-
-6. **Enhance Documentation**
+5. **Enhance Documentation**
    - Add more examples in docstrings
    - Create usage examples for common scenarios
-   - Document best practices for using the property validators
+   - Create video tutorials or interactive examples
+
+6. **Create Integration Examples**
+   - Show integration with popular testing frameworks
+   - Demonstrate usage in real-world projects
 
 ## Development Workflow
 
@@ -127,10 +153,9 @@ The recommended workflow for contributing to the project:
 To release a new version:
 
 1. Update version number in:
-   - `src/pytest_fixturecheck/__init__.py`
    - `pyproject.toml`
 2. Update `CHANGELOG.md`
 3. Build the package: `python -m build`
 4. Test the built package in a fresh environment
 5. Upload to PyPI: `twine upload dist/*`
-6. Tag the release in git: `git tag v0.4.0 && git push --tags`
+6. Tag the release in git: `git tag v0.4.2 && git push --tags`
