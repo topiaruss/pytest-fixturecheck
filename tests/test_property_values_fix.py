@@ -5,7 +5,7 @@ import pytest
 from pytest_fixturecheck import fixturecheck
 
 
-class TestObject:
+class PropFixTestObject:
     """Test object with properties."""
 
     def __init__(self, name="test", value=42):
@@ -19,7 +19,7 @@ def direct_check_properties(obj, is_collection_phase=False):
     if is_collection_phase:
         return
 
-    if not isinstance(obj, TestObject):
+    if not isinstance(obj, PropFixTestObject):
         return
 
     if obj.name != "test":
@@ -37,13 +37,13 @@ def check_properties():
 def test_custom_validator():
     """Test our custom property validator."""
     # Create a test object
-    obj = TestObject()
+    obj = PropFixTestObject()
 
     # Test the validator directly
     direct_check_properties(obj, False)  # Should not raise
 
     # Test with a wrong value - this should raise a ValueError
-    wrong_obj = TestObject(name="wrong")
+    wrong_obj = PropFixTestObject(name="wrong")
     with pytest.raises(ValueError):
         direct_check_properties(wrong_obj, False)
 
@@ -53,7 +53,7 @@ def test_custom_validator():
 @fixturecheck(check_properties())
 def my_valid_object():
     """Fixture with valid object."""
-    return TestObject()
+    return PropFixTestObject()
 
 
 @pytest.mark.skip(reason="Fixture discovery issue")

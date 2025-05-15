@@ -15,7 +15,7 @@ from pytest_fixturecheck.validators_fix import (
 )
 
 
-class TestObject:
+class StrictParamTestObject:
     def __init__(self, name, value):
         self.name = name
         self.value = value
@@ -28,7 +28,7 @@ def test_strict_parameter_default_in_check_property_values():
     validator = check_property_values(name="test", value=42)
 
     # Create a test object with mismatched values
-    obj = TestObject("wrong", 99)
+    obj = StrictParamTestObject("wrong", 99)
 
     # The validator should raise an exception by default
     with pytest.raises(ValueError):
@@ -42,7 +42,7 @@ def test_strict_parameter_true_in_check_property_values():
     validator = check_property_values(strict=True, name="test", value=42)
 
     # Create a test object with mismatched values
-    obj = TestObject("wrong", 99)
+    obj = StrictParamTestObject("wrong", 99)
 
     # The validator should raise an exception with strict=True
     with pytest.raises(ValueError):
@@ -56,7 +56,7 @@ def test_strict_parameter_false_in_check_property_values():
     validator = check_property_values(strict=False, name="test", value=42)
 
     # Create a test object with mismatched values
-    obj = TestObject("wrong", 99)
+    obj = StrictParamTestObject("wrong", 99)
 
     # The validator should issue warnings, not exceptions with strict=False
     with warnings.catch_warnings(record=True) as recorded_warnings:
@@ -79,7 +79,7 @@ def test_strict_parameter_default_in_with_property_values():
 
     # Define a fixture function that returns a mismatched object
     def fixture_func():
-        return TestObject("wrong", 99)
+        return StrictParamTestObject("wrong", 99)
 
     # Apply the validator to the fixture function
     decorated_func = validator(fixture_func)
@@ -97,7 +97,7 @@ def test_strict_parameter_true_in_with_property_values():
 
     # Define a fixture function that returns a mismatched object
     def fixture_func():
-        return TestObject("wrong", 99)
+        return StrictParamTestObject("wrong", 99)
 
     # Apply the validator to the fixture function
     decorated_func = validator(fixture_func)
@@ -115,7 +115,7 @@ def test_strict_parameter_false_in_with_property_values():
 
     # Define a fixture function that returns a mismatched object
     def fixture_func():
-        return TestObject("wrong", 99)
+        return StrictParamTestObject("wrong", 99)
 
     # Apply the validator to the fixture function
     decorated_func = validator(fixture_func)

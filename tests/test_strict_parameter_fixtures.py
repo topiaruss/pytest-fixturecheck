@@ -15,7 +15,7 @@ from pytest_fixturecheck.validators_fix import (
 )
 
 
-class TestObject:
+class StrictFixtureTestObject:
     def __init__(self, name, value):
         self.name = name
         self.value = value
@@ -26,7 +26,7 @@ class TestObject:
 @with_property_values(name="test", value=42)
 def default_fixture():
     """Fixture with default strict behavior (will raise exception)."""
-    return TestObject("wrong", 99)  # Values don't match expected
+    return StrictFixtureTestObject("wrong", 99)
 
 
 # Fixture with explicit strict=True behavior (exceptions)
@@ -34,7 +34,7 @@ def default_fixture():
 @with_property_values(strict=True, name="test", value=42)
 def strict_fixture():
     """Fixture with strict=True (will raise exception)."""
-    return TestObject("wrong", 99)  # Values don't match expected
+    return StrictFixtureTestObject("wrong", 99)
 
 
 # Fixture with strict=False behavior (warnings)
@@ -42,7 +42,7 @@ def strict_fixture():
 @with_property_values(strict=False, name="test", value=42)
 def non_strict_fixture():
     """Fixture with strict=False (will issue warnings, not exceptions)."""
-    return TestObject("wrong", 99)  # Values don't match expected
+    return StrictFixtureTestObject("wrong", 99)
 
 
 # Test with default strict fixture - should fail
@@ -89,7 +89,7 @@ def test_non_strict_warnings():
     try:
         # Create and call the fixture directly
         fixture = with_property_values(strict=False, name="test", value=42)(
-            lambda: TestObject("wrong", 99)
+            lambda: StrictFixtureTestObject("wrong", 99)
         )
         result = fixture()
 
@@ -111,7 +111,7 @@ def test_non_strict_warnings():
 @fixturecheck(check_property_values(strict=False, name="test", value=42))
 def non_strict_check_fixture():
     """Fixture with strict=False using check_property_values."""
-    return TestObject("wrong", 99)  # Values don't match expected
+    return StrictFixtureTestObject("wrong", 99)
 
 
 def test_non_strict_check_fixture(non_strict_check_fixture):

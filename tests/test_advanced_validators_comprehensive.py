@@ -15,7 +15,7 @@ from unittest.mock import MagicMock
 
 
 # Class definitions first
-class TestObject:
+class MyTestObject:
     def __init__(self, name: str, value: Any):
         self.name = name
         self.value = value
@@ -334,18 +334,18 @@ class TestEdgeCases:
     )
 )
 def combine_type_value_fixture():
-    return TestObject("Combined", 100)
+    return MyTestObject("Combined", 100)
 
 
 @pytest.fixture
 @fixturecheck(
     combines_validators(
-        is_instance_of(TestObject),
+        is_instance_of(MyTestObject),
         nested_property_validator(name="Another", value=200)
     )
 )
 def combine_instance_value_fixture():
-    return TestObject("Another", 200)
+    return MyTestObject("Another", 200)
 
 
 class TestValidatorCombinations:
@@ -354,5 +354,5 @@ class TestValidatorCombinations:
         assert isinstance(combine_type_value_fixture.value, int)
 
     def test_combine_instance_and_value(self, combine_instance_value_fixture):
-        assert isinstance(combine_instance_value_fixture, TestObject)
+        assert isinstance(combine_instance_value_fixture, MyTestObject)
         assert combine_instance_value_fixture.name == "Another"

@@ -10,7 +10,7 @@ from pytest_fixturecheck.validators_fix import (
 )
 
 
-class TestObject:
+class FixValTestObject:
     """Test object with properties."""
 
     def __init__(self, name="test", value=42):
@@ -20,7 +20,7 @@ class TestObject:
 
 def test_direct_object():
     """Test a direct object without validation."""
-    obj = TestObject(name="direct")
+    obj = FixValTestObject(name="direct")
     assert obj.name == "direct"
     assert obj.value == 42
 
@@ -32,11 +32,11 @@ def test_property_values_validator():
     validator = property_values_validator({"name": "test", "value": 42})
 
     # Test with a matching object
-    validator(TestObject(), False)
+    validator(FixValTestObject(), False)
 
     # Test with a non-matching object
     with pytest.raises(ValueError):
-        validator(TestObject(name="wrong"), False)
+        validator(FixValTestObject(name="wrong"), False)
 
 
 # Test the check_property_values function
@@ -46,11 +46,11 @@ def test_check_property_values():
     validator = check_property_values(name="test", value=42)
 
     # Test with a matching object
-    validator(TestObject(), False)
+    validator(FixValTestObject(), False)
 
     # Test with a non-matching object
     with pytest.raises(ValueError):
-        validator(TestObject(name="wrong"), False)
+        validator(FixValTestObject(name="wrong"), False)
 
 
 # Testing fixtures with our validators
@@ -58,21 +58,21 @@ def test_check_property_values():
 @fixturecheck(property_values_validator({"name": "fixture1"}))
 def fixture_with_validator():
     """Fixture validated with property_values_validator."""
-    return TestObject(name="fixture1")
+    return FixValTestObject(name="fixture1")
 
 
 @pytest.fixture
 @fixturecheck(check_property_values(name="fixture2"))
 def fixture_with_check_property_values():
     """Fixture validated with check_property_values."""
-    return TestObject(name="fixture2")
+    return FixValTestObject(name="fixture2")
 
 
 @pytest.fixture
 @with_property_values(name="fixture3")
 def fixture_with_factory():
     """Fixture validated with with_property_values factory."""
-    return TestObject(name="fixture3")
+    return FixValTestObject(name="fixture3")
 
 
 def test_fixture_with_validator(fixture_with_validator):

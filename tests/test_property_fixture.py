@@ -5,7 +5,7 @@ import pytest
 from pytest_fixturecheck import check_property_values, fixturecheck
 
 
-class TestObject:
+class PropTestObject:
     """Test object with properties."""
 
     def __init__(self, name="test", value=42):
@@ -17,7 +17,7 @@ class TestObject:
 @fixturecheck(check_property_values(name="fixture_test"))
 def property_fixture():
     """A fixture with specific property values."""
-    return TestObject(name="fixture_test")
+    return PropTestObject(name="fixture_test")
 
 
 def test_property_fixture(property_fixture):

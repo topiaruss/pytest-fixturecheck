@@ -67,7 +67,7 @@ def phase_aware_validator(validator):
 
 
 # Test objects for validators
-class TestObject:
+class CompTestObject:
     """Simple test object with attributes and methods."""
 
     def __init__(self, name="test", value=42):
@@ -89,16 +89,16 @@ class TestIsInstanceOf:
 
     def test_basic_validation(self):
         """Test basic instance validation."""
-        obj = TestObject()
+        obj = CompTestObject()
         # Use our custom validator function
-        custom_is_instance_of(TestObject)(obj, False)
+        custom_is_instance_of(CompTestObject)(obj, False)
 
     def test_multi_type_validation(self):
         """Test validation with multiple accepted types."""
-        obj1 = TestObject()
+        obj1 = CompTestObject()
         obj2 = {"test": "value"}
         # Use our custom validator
-        validator = custom_is_instance_of((TestObject, dict))
+        validator = custom_is_instance_of((CompTestObject, dict))
         validator(obj1, False)
         validator(obj2, False)
 
@@ -108,8 +108,8 @@ class TestIsInstanceOf:
 
         # This should raise TypeError with the expected message
         with pytest.raises(TypeError) as excinfo:
-            custom_is_instance_of(TestObject)(obj, False)
-        assert "Expected instance of TestObject" in str(excinfo.value)
+            custom_is_instance_of(CompTestObject)(obj, False)
+        assert "Expected instance of CompTestObject" in str(excinfo.value)
 
     def test_multi_type_failed_validation(self):
         """Test validation failure with multiple types."""
@@ -117,7 +117,7 @@ class TestIsInstanceOf:
 
         # This should raise TypeError with the expected message
         with pytest.raises(TypeError) as excinfo:
-            custom_is_instance_of((TestObject, dict))(obj, False)
+            custom_is_instance_of((CompTestObject, dict))(obj, False)
         assert "Expected instance of one of" in str(excinfo.value)
 
 
@@ -128,21 +128,21 @@ class TestHasRequiredFields:
     def test_basic_validation(self):
         """Test validation of required fields."""
         validator = has_required_fields("name", "value")
-        obj = TestObject()
+        obj = CompTestObject()
         # Should not raise exception
         validator(obj, False)
 
     def test_collection_phase_skipping(self):
         """Test that validation is skipped during collection phase."""
         validator = has_required_fields("nonexistent")
-        obj = TestObject()
+        obj = CompTestObject()
         # Should not raise exception during collection phase
         validator(obj, True)
 
     def test_missing_field(self):
         """Test validation when a field is missing."""
         validator = has_required_fields("name", "nonexistent")
-        obj = TestObject()
+        obj = CompTestObject()
 
         with pytest.raises(AttributeError) as excinfo:
             validator(obj, False)
@@ -151,7 +151,7 @@ class TestHasRequiredFields:
     def test_none_field(self):
         """Test validation when a field is None."""
         validator = has_required_fields("name", "value")
-        obj = TestObject()
+        obj = CompTestObject()
         obj.name = None
 
         with pytest.raises(ValueError) as excinfo:
@@ -198,7 +198,7 @@ class TestHasRequiredMethods:
                         f"'{method}' is not callable in {obj.__class__.__name__}"
                     )
 
-        obj = TestObject()
+        obj = CompTestObject()
         # Should not raise exception
         method_validator(obj, False)
 
@@ -219,7 +219,7 @@ class TestHasRequiredMethods:
                         f"'{method}' is not callable in {obj.__class__.__name__}"
                     )
 
-        obj = TestObject()
+        obj = CompTestObject()
 
         with pytest.raises(AttributeError) as excinfo:
             method_validator(obj, False)
@@ -242,7 +242,7 @@ class TestHasRequiredMethods:
                         f"'{method}' is not callable in {obj.__class__.__name__}"
                     )
 
-        obj = TestObject()
+        obj = CompTestObject()
 
         with pytest.raises(TypeError) as excinfo:
             method_validator(obj, False)
@@ -273,7 +273,7 @@ class TestHasPropertyValues:
                         f"Expected {prop_name}={expected_value}, got {actual_value}"
                     )
 
-        obj = TestObject()
+        obj = CompTestObject()
         # Should not raise exception
         property_validator(obj, False)
 
@@ -297,7 +297,7 @@ class TestHasPropertyValues:
                         f"Expected {prop_name}={expected_value}, got {actual_value}"
                     )
 
-        obj = TestObject()
+        obj = CompTestObject()
 
         with pytest.raises(AttributeError) as excinfo:
             property_validator(obj, False)
@@ -323,7 +323,7 @@ class TestHasPropertyValues:
                         f"Expected {prop_name}={expected_value}, got {actual_value}"
                     )
 
-        obj = TestObject()
+        obj = CompTestObject()
 
         with pytest.raises(ValueError) as excinfo:
             property_validator(obj, False)
@@ -341,9 +341,9 @@ class TestCombinesValidators:
         def instance_validator(obj, is_collection_phase=False):
             if is_collection_phase:
                 return
-            if not isinstance(obj, TestObject):
+            if not isinstance(obj, CompTestObject):
                 raise TypeError(
-                    f"Expected instance of TestObject, got {type(obj).__name__}"
+                    f"Expected instance of CompTestObject, got {type(obj).__name__}"
                 )
 
         def fields_validator(obj, is_collection_phase=False):
@@ -377,7 +377,7 @@ class TestCombinesValidators:
             fields_validator(obj, is_collection_phase)
             methods_validator(obj, is_collection_phase)
 
-        obj = TestObject()
+        obj = CompTestObject()
         # Should not raise exception
         combined_validator(obj, False)
 
@@ -388,9 +388,9 @@ class TestCombinesValidators:
         def instance_validator(obj, is_collection_phase=False):
             if is_collection_phase:
                 return
-            if not isinstance(obj, TestObject):
+            if not isinstance(obj, CompTestObject):
                 raise TypeError(
-                    f"Expected instance of TestObject, got {type(obj).__name__}"
+                    f"Expected instance of CompTestObject, got {type(obj).__name__}"
                 )
 
         def fields_validator(obj, is_collection_phase=False):
@@ -407,7 +407,7 @@ class TestCombinesValidators:
             instance_validator(obj, is_collection_phase)
             fields_validator(obj, is_collection_phase)
 
-        obj = TestObject()
+        obj = CompTestObject()
 
         with pytest.raises(AttributeError) as excinfo:
             combined_validator(obj, False)
@@ -429,9 +429,9 @@ class TestCombinesValidators:
         def instance_validator(obj, is_collection_phase=False):
             if is_collection_phase:
                 return
-            if not isinstance(obj, TestObject):
+            if not isinstance(obj, CompTestObject):
                 raise TypeError(
-                    f"Expected instance of TestObject, got {type(obj).__name__}"
+                    f"Expected instance of CompTestObject, got {type(obj).__name__}"
                 )
 
         # Create a combined validator
@@ -439,7 +439,7 @@ class TestCombinesValidators:
             fields_validator(obj, is_collection_phase)
             instance_validator(obj, is_collection_phase)
 
-        obj = TestObject()
+        obj = CompTestObject()
         # Should not raise during collection phase
         combined_validator(obj, True)
         # Should raise during execution phase
@@ -468,7 +468,7 @@ class TestCustomValidators:
 
         # Test successful validation
         validator = has_specific_value(42)
-        obj = TestObject()
+        obj = CompTestObject()
         validator(obj, False)
 
         # Test failed validation
@@ -480,15 +480,15 @@ class TestCustomValidators:
 
 # Fixture using the validator
 @pytest.fixture
-@fixturecheck(phase_aware_validator(custom_is_instance_of(TestObject)))
+@fixturecheck(phase_aware_validator(custom_is_instance_of(CompTestObject)))
 def valid_object_fixture():
     """Fixture that returns a valid object."""
-    return TestObject()
+    return CompTestObject()
 
 
 def test_fixture_with_validator(valid_object_fixture):
     """Test using a fixture with a validator."""
-    assert isinstance(valid_object_fixture, TestObject)
+    assert isinstance(valid_object_fixture, CompTestObject)
     assert valid_object_fixture.name == "test"
     assert valid_object_fixture.value == 42
 

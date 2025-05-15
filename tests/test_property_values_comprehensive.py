@@ -16,7 +16,7 @@ from pytest_fixturecheck.utils import creates_validator
 
 
 # Test class with properties
-class TestObject:
+class PropValCompTestObject:
     """Test object with properties."""
 
     def __init__(self, name="test", value=42, is_active=True):
@@ -43,7 +43,7 @@ class TestHasPropertyValues:
     def test_basic_validation(self):
         """Test basic property validation."""
         validator = check_property_values(name="test", value=42)
-        obj = TestObject()
+        obj = PropValCompTestObject()
 
         # Should not raise exception
         validator(obj, False)
@@ -51,7 +51,7 @@ class TestHasPropertyValues:
     def test_collection_phase_skipping(self):
         """Test that validation is skipped during collection phase."""
         validator = check_property_values(name="wrong", value="wrong")
-        obj = TestObject()
+        obj = PropValCompTestObject()
 
         # Should not raise exception during collection phase
         validator(obj, True)
@@ -77,7 +77,7 @@ class TestHasPropertyValues:
     def test_missing_property(self):
         """Test validation when a property is missing."""
         validator = check_property_values(name="test", nonexistent="value")
-        obj = TestObject()
+        obj = PropValCompTestObject()
 
         with pytest.raises(AttributeError) as excinfo:
             validator(obj, False)
@@ -86,7 +86,7 @@ class TestHasPropertyValues:
     def test_wrong_value(self):
         """Test validation when a property has the wrong value."""
         validator = check_property_values(name="wrong_name", value=42)
-        obj = TestObject()
+        obj = PropValCompTestObject()
 
         with pytest.raises(ValueError) as excinfo:
             validator(obj, False)
@@ -95,7 +95,7 @@ class TestHasPropertyValues:
     def test_none_value(self):
         """Test validation when a property is None."""
         validator = check_property_values(name=None)
-        obj = TestObject(name=None)
+        obj = PropValCompTestObject(name=None)
 
         # Should not raise exception - None is a valid value if expected
         validator(obj, False)
@@ -150,7 +150,7 @@ class TestFactoryFunction:
 
         @with_property_values(name="test", value=42)
         def fixture():
-            return TestObject()
+            return PropValCompTestObject()
 
         # Check fixture is decorated correctly
         assert hasattr(fixture, "_fixturecheck")
@@ -160,12 +160,12 @@ class TestFactoryFunction:
 
         # Executing the fixture should return a TestObject
         result = fixture()
-        assert isinstance(result, TestObject)
+        assert isinstance(result, PropValCompTestObject)
 
     def test_factory_with_wrong_value(self):
         """Test the factory function with a wrong property value."""
         # Create a simple object directly
-        test_obj = TestObject()
+        test_obj = PropValCompTestObject()
 
         # Create a validator directly
         validator = check_property_values(name="wrong")
@@ -180,9 +180,9 @@ class TestFactoryFunction:
 
         class NestedObject:
             def __init__(self):
-                self.inner = TestObject()
+                self.inner = PropValCompTestObject()
 
-        validator = check_property_values(inner=TestObject())
+        validator = check_property_values(inner=PropValCompTestObject())
         obj = NestedObject()
 
         # This should fail because object equality is by identity, not by value
@@ -190,7 +190,7 @@ class TestFactoryFunction:
             validator(obj, False)
 
         # Test with direct reference
-        inner_obj = TestObject()
+        inner_obj = PropValCompTestObject()
         obj2 = NestedObject()
         obj2.inner = inner_obj
 
@@ -203,7 +203,7 @@ class TestFactoryFunction:
 @fixturecheck(check_property_values(name="fixture_test"))
 def test_property_fixture():
     """Fixture that returns an object with specific property values."""
-    return TestObject(name="fixture_test")
+    return PropValCompTestObject(name="fixture_test")
 
 
 def test_property_fixture_usage(test_property_fixture):
@@ -216,7 +216,7 @@ def test_property_fixture_usage(test_property_fixture):
 @fixturecheck(check_property_values(name="wrong_value"), expect_validation_error=True)
 def expected_failure_fixture():
     """Fixture expected to fail validation."""
-    return TestObject(name="not_wrong_value")
+    return PropValCompTestObject(name="not_wrong_value")
 
 
 def test_expected_failure(expected_failure_fixture):

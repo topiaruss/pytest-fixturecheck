@@ -5,7 +5,7 @@ import pytest
 from pytest_fixturecheck import fixturecheck, property_values_validator
 
 
-class TestObject:
+class PropFixedTestObject:
     """Test object with properties."""
 
     def __init__(self, name="test", value=42):
@@ -19,14 +19,14 @@ def test_fixed_validator():
     validator = property_values_validator({"name": "test", "value": 42})
 
     # Create a test object
-    obj = TestObject()
+    obj = PropFixedTestObject()
 
     # Test validation - should not raise
     validator(obj, False)
 
     # Test with a wrong value - should raise
     with pytest.raises(ValueError):
-        validator(TestObject(name="wrong"), False)
+        validator(PropFixedTestObject(name="wrong"), False)
 
     # Test with missing property - should raise
     with pytest.raises(AttributeError):
@@ -37,7 +37,7 @@ def test_fixed_validator():
 @fixturecheck(property_values_validator({"name": "fixture_test"}))
 def test_property_fixture():
     """Fixture with specific property value."""
-    return TestObject(name="fixture_test")
+    return PropFixedTestObject(name="fixture_test")
 
 
 def test_fixture_with_property_validator(test_property_fixture):

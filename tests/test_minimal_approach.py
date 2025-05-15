@@ -5,7 +5,7 @@ import pytest
 from pytest_fixturecheck import fixturecheck
 
 
-class TestObject:
+class MinTestObject:
     """Test object with properties."""
 
     def __init__(self, name="test", value=42):
@@ -15,7 +15,7 @@ class TestObject:
 
 def test_direct_object():
     """Test a direct object without validation."""
-    obj = TestObject(name="direct")
+    obj = MinTestObject(name="direct")
     assert obj.name == "direct"
     assert obj.value == 42
 
@@ -34,14 +34,14 @@ def validate_name_is_test(obj, is_collection_phase=False):
 @pytest.fixture
 def simple_object():
     """A simple fixture without validation."""
-    return TestObject()
+    return MinTestObject()
 
 
 @pytest.fixture
 @fixturecheck(validate_name_is_test)
 def validated_object():
     """A fixture with validation."""
-    return TestObject()
+    return MinTestObject()
 
 
 def test_simple_object(simple_object):
