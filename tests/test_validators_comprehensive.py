@@ -12,6 +12,7 @@ from pytest_fixturecheck import (
     has_property_values,
     has_required_fields,
     has_required_methods,
+    is_instance_of,
 )
 
 
@@ -90,17 +91,17 @@ class TestIsInstanceOf:
     def test_basic_validation(self):
         """Test basic instance validation."""
         obj = CompTestObject()
-        # Use our custom validator function
-        custom_is_instance_of(CompTestObject)(obj, False)
+        # Use the actual validator from the library
+        is_instance_of(CompTestObject)(obj)
 
     def test_multi_type_validation(self):
         """Test validation with multiple accepted types."""
         obj1 = CompTestObject()
         obj2 = {"test": "value"}
-        # Use our custom validator
-        validator = custom_is_instance_of((CompTestObject, dict))
-        validator(obj1, False)
-        validator(obj2, False)
+        # Use the actual validator
+        validator = is_instance_of((CompTestObject, dict))
+        validator(obj1)
+        validator(obj2)
 
     def test_failed_validation(self):
         """Test validation failure."""
@@ -108,8 +109,8 @@ class TestIsInstanceOf:
 
         # This should raise TypeError with the expected message
         with pytest.raises(TypeError) as excinfo:
-            custom_is_instance_of(CompTestObject)(obj, False)
-        assert "Expected instance of CompTestObject" in str(excinfo.value)
+            is_instance_of(CompTestObject)(obj)
+        assert "Expected instance of CompTestObject, got str" in str(excinfo.value)
 
     def test_multi_type_failed_validation(self):
         """Test validation failure with multiple types."""
@@ -117,8 +118,8 @@ class TestIsInstanceOf:
 
         # This should raise TypeError with the expected message
         with pytest.raises(TypeError) as excinfo:
-            custom_is_instance_of((CompTestObject, dict))(obj, False)
-        assert "Expected instance of one of" in str(excinfo.value)
+            is_instance_of((CompTestObject, dict))(obj)
+        assert "Expected instance of one of (CompTestObject, dict), got int" in str(excinfo.value)
 
 
 # Test for has_required_fields validator
@@ -183,69 +184,27 @@ class TestHasRequiredMethods:
 
     def test_basic_validation(self):
         """Test validation of required methods."""
-
-        # Create our own validator for testing since has_required_methods might have issues
-        def method_validator(obj, is_collection_phase=False):
-            if is_collection_phase:
-                return
-            for method in ["method1", "method2"]:
-                if not hasattr(obj, method):
-                    raise AttributeError(
-                        f"Required method '{method}' missing from {obj.__class__.__name__}"
-                    )
-                if not callable(getattr(obj, method)):
-                    raise TypeError(
-                        f"'{method}' is not callable in {obj.__class__.__name__}"
-                    )
-
+        validator_instance = has_required_methods("method1", "method2")
         obj = CompTestObject()
         # Should not raise exception
-        method_validator(obj, False)
+        validator_instance(obj)
 
     def test_missing_method(self):
         """Test validation when a method is missing."""
-
-        # Create our own validator for testing since has_required_methods might have issues
-        def method_validator(obj, is_collection_phase=False):
-            if is_collection_phase:
-                return
-            for method in ["method1", "nonexistent"]:
-                if not hasattr(obj, method):
-                    raise AttributeError(
-                        f"Required method '{method}' missing from {obj.__class__.__name__}"
-                    )
-                if not callable(getattr(obj, method)):
-                    raise TypeError(
-                        f"'{method}' is not callable in {obj.__class__.__name__}"
-                    )
-
+        validator_instance = has_required_methods("method1", "nonexistent")
         obj = CompTestObject()
 
         with pytest.raises(AttributeError) as excinfo:
-            method_validator(obj, False)
+            validator_instance(obj)
         assert "Required method 'nonexistent' missing" in str(excinfo.value)
 
     def test_non_callable_attribute(self):
         """Test validation when an attribute exists but is not callable."""
-
-        # Create our own validator for testing since has_required_methods might have issues
-        def method_validator(obj, is_collection_phase=False):
-            if is_collection_phase:
-                return
-            for method in ["method1", "name"]:
-                if not hasattr(obj, method):
-                    raise AttributeError(
-                        f"Required method '{method}' missing from {obj.__class__.__name__}"
-                    )
-                if not callable(getattr(obj, method)):
-                    raise TypeError(
-                        f"'{method}' is not callable in {obj.__class__.__name__}"
-                    )
-
+        validator_instance = has_required_methods("method1", "name") # 'name' is an attribute, not a method
         obj = CompTestObject()
 
         with pytest.raises(TypeError) as excinfo:
-            method_validator(obj, False)
+            validator_instance(obj)
         assert "'name' is not callable" in str(excinfo.value)
 
 
@@ -254,80 +213,29 @@ class TestHasPropertyValues:
     """Tests for has_property_values validator."""
 
     def test_basic_validation(self):
-        """Test validation of property values."""
-
-        # Create our own validator for testing
-        def property_validator(obj, is_collection_phase=False):
-            if is_collection_phase:
-                return
-            expected_values = {"name": "test", "value": 42}
-            for prop_name, expected_value in expected_values.items():
-                if not hasattr(obj, prop_name):
-                    raise AttributeError(
-                        f"Property '{prop_name}' missing from {obj.__class__.__name__}"
-                    )
-
-                actual_value = getattr(obj, prop_name)
-                if actual_value != expected_value:
-                    raise ValueError(
-                        f"Expected {prop_name}={expected_value}, got {actual_value}"
-                    )
-
-        obj = CompTestObject()
+        """Test basic property value validation."""
+        validator_instance = has_property_values(name="test", value=42)
+        obj = CompTestObject(name="test", value=42)
         # Should not raise exception
-        property_validator(obj, False)
+        validator_instance(obj)
 
     def test_missing_property(self):
         """Test validation when a property is missing."""
-
-        # Create our own validator for testing
-        def property_validator(obj, is_collection_phase=False):
-            if is_collection_phase:
-                return
-            expected_values = {"name": "test", "nonexistent": "value"}
-            for prop_name, expected_value in expected_values.items():
-                if not hasattr(obj, prop_name):
-                    raise AttributeError(
-                        f"Property '{prop_name}' missing from {obj.__class__.__name__}"
-                    )
-
-                actual_value = getattr(obj, prop_name)
-                if actual_value != expected_value:
-                    raise ValueError(
-                        f"Expected {prop_name}={expected_value}, got {actual_value}"
-                    )
-
+        validator_instance = has_property_values(name="test", nonexistent_prop=123)
         obj = CompTestObject()
 
         with pytest.raises(AttributeError) as excinfo:
-            property_validator(obj, False)
-        assert "Property 'nonexistent' missing" in str(excinfo.value)
+            validator_instance(obj)
+        assert "Property 'nonexistent_prop' missing" in str(excinfo.value)
 
     def test_wrong_value(self):
         """Test validation when a property has the wrong value."""
-
-        # Create our own validator for testing
-        def property_validator(obj, is_collection_phase=False):
-            if is_collection_phase:
-                return
-            expected_values = {"name": "not_test", "value": 42}
-            for prop_name, expected_value in expected_values.items():
-                if not hasattr(obj, prop_name):
-                    raise AttributeError(
-                        f"Property '{prop_name}' missing from {obj.__class__.__name__}"
-                    )
-
-                actual_value = getattr(obj, prop_name)
-                if actual_value != expected_value:
-                    raise ValueError(
-                        f"Expected {prop_name}={expected_value}, got {actual_value}"
-                    )
-
-        obj = CompTestObject()
+        validator_instance = has_property_values(name="test", value=99)
+        obj = CompTestObject(name="test", value=42) # Actual value is 42
 
         with pytest.raises(ValueError) as excinfo:
-            property_validator(obj, False)
-        assert "Expected name=not_test, got test" in str(excinfo.value)
+            validator_instance(obj)
+        assert "Expected value=99, got 42" in str(excinfo.value)
 
 
 # Test for combines_validators
@@ -335,116 +243,72 @@ class TestCombinesValidators:
     """Tests for combines_validators."""
 
     def test_combined_validators_success(self):
-        """Test that combined validators work when all pass."""
+        """Test combining validators that should all succeed."""
+        obj = CompTestObject(name="test", value=123)
 
-        # Create custom validators for testing
-        def instance_validator(obj, is_collection_phase=False):
-            if is_collection_phase:
-                return
-            if not isinstance(obj, CompTestObject):
-                raise TypeError(
-                    f"Expected instance of CompTestObject, got {type(obj).__name__}"
-                )
-
-        def fields_validator(obj, is_collection_phase=False):
-            if is_collection_phase:
-                return
-            for field in ["name", "value"]:
-                if not hasattr(obj, field):
-                    raise AttributeError(
-                        f"Required field '{field}' missing from {obj.__class__.__name__}"
-                    )
-                if getattr(obj, field) is None:
-                    raise ValueError(
-                        f"Required field '{field}' is None in {obj.__class__.__name__}"
-                    )
-
-        def methods_validator(obj, is_collection_phase=False):
-            if is_collection_phase:
-                return
-            if not hasattr(obj, "method1"):
-                raise AttributeError(
-                    f"Required method 'method1' missing from {obj.__class__.__name__}"
-                )
-            if not callable(getattr(obj, "method1")):
-                raise TypeError(
-                    f"'method1' is not callable in {obj.__class__.__name__}"
-                )
-
-        # Create a combined validator
-        def combined_validator(obj, is_collection_phase=False):
-            instance_validator(obj, is_collection_phase)
-            fields_validator(obj, is_collection_phase)
-            methods_validator(obj, is_collection_phase)
-
-        obj = CompTestObject()
+        # Use actual validators from the library
+        validator = combines_validators(
+            is_instance_of(CompTestObject),
+            has_required_fields("name", "value"),
+            has_required_methods("method1"),
+            has_property_values(name="test", value=123)
+        )
         # Should not raise exception
-        combined_validator(obj, False)
+        validator(obj, is_collection_phase=False)
 
     def test_combined_validators_failure(self):
-        """Test that combined validators fail when one fails."""
+        """Test combining validators where one should fail."""
+        obj = CompTestObject(name="test", value=123)
 
-        # Create custom validators for testing
-        def instance_validator(obj, is_collection_phase=False):
-            if is_collection_phase:
-                return
-            if not isinstance(obj, CompTestObject):
-                raise TypeError(
-                    f"Expected instance of CompTestObject, got {type(obj).__name__}"
-                )
+        # Use actual validators, one of which will fail (wrong type for has_property_values)
+        validator = combines_validators(
+            is_instance_of(CompTestObject),
+            has_required_fields("name", "value"),
+            has_property_values(name="test", value="wrong_type") # This should fail
+        )
 
-        def fields_validator(obj, is_collection_phase=False):
-            if is_collection_phase:
-                return
-            for field in ["name", "nonexistent"]:
-                if not hasattr(obj, field):
-                    raise AttributeError(
-                        f"Required field '{field}' missing from {obj.__class__.__name__}"
-                    )
-
-        # Create a combined validator
-        def combined_validator(obj, is_collection_phase=False):
-            instance_validator(obj, is_collection_phase)
-            fields_validator(obj, is_collection_phase)
-
-        obj = CompTestObject()
-
-        with pytest.raises(AttributeError) as excinfo:
-            combined_validator(obj, False)
-        assert "Required field 'nonexistent' missing" in str(excinfo.value)
+        with pytest.raises(ValueError) as excinfo:
+            validator(obj, is_collection_phase=False)
+        assert "Expected value=wrong_type, got 123" in str(excinfo.value)
 
     def test_collection_phase_handling(self):
-        """Test that collection phase is passed to all validators."""
-
-        # Create a validator that would fail in execution phase
-        def fields_validator(obj, is_collection_phase=False):
-            if is_collection_phase:
-                return
-            for field in ["nonexistent"]:
-                if not hasattr(obj, field):
-                    raise AttributeError(
-                        f"Required field '{field}' missing from {obj.__class__.__name__}"
-                    )
-
-        def instance_validator(obj, is_collection_phase=False):
-            if is_collection_phase:
-                return
-            if not isinstance(obj, CompTestObject):
-                raise TypeError(
-                    f"Expected instance of CompTestObject, got {type(obj).__name__}"
-                )
-
-        # Create a combined validator
-        def combined_validator(obj, is_collection_phase=False):
-            fields_validator(obj, is_collection_phase)
-            instance_validator(obj, is_collection_phase)
+        """Test that combines_validators respects is_collection_phase."""
+        # Create a mock validator that would fail if not in collection phase
+        def mock_failing_validator(obj, is_collection_phase):
+            if not is_collection_phase:
+                raise AssertionError("Should fail only in non-collection phase")
+            # else: implicitly return None to signify success/skip
+        
+        # Set the necessary attribute for it to be treated as a validator
+        mock_failing_validator._is_pytest_fixturecheck_validator = True
 
         obj = CompTestObject()
-        # Should not raise during collection phase
-        combined_validator(obj, True)
-        # Should raise during execution phase
-        with pytest.raises(AttributeError):
-            combined_validator(obj, False)
+
+        # Combine with a validator that would fail
+        combined = combines_validators(
+            is_instance_of(CompTestObject),
+            mock_failing_validator
+        )
+
+        # Should not raise exception when is_collection_phase is True
+        try:
+            combined(obj, is_collection_phase=True)
+        except AssertionError:
+            pytest.fail("Validator was not skipped during collection phase")
+
+        # Should raise exception when is_collection_phase is False
+        with pytest.raises(AssertionError, match="Should fail only in non-collection phase"):
+            combined(obj, is_collection_phase=False)
+
+    def test_empty_combines_validators(self):
+        """Test combines_validators with no validators."""
+        obj = CompTestObject()
+        validator = combines_validators()
+        try:
+            validator(obj, is_collection_phase=False)
+            validator(obj, is_collection_phase=True)
+        except Exception as e:
+            pytest.fail(f"combines_validators with no args raised an exception: {e}")
 
 
 # Test for custom validators
