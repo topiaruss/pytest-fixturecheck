@@ -5,7 +5,7 @@ These validators help identify common issues with Django model fixtures.
 """
 
 import inspect
-from typing import Any, Callable, List, Optional, Type, Union
+from typing import Any, Callable, List, Optional, Type, Union, cast
 
 from .utils import creates_validator
 
@@ -29,6 +29,10 @@ DjangoValidationError = DjangoValidationErrorBase
 # Aliases for common testing usage
 ValidationError = DjangoValidationError
 FieldDoesNotExist = DjangoFieldDoesNotExist
+
+# Define these unconditionally so they can be imported regardless of Django availability
+ValidationError_Export: Type[Exception] = cast(Type[Exception], DjangoValidationError)
+FieldDoesNotExist_Export: Type[Exception] = cast(Type[Exception], DjangoFieldDoesNotExist)
 
 
 # Define dummy structures for type hints and basic attribute access if Django is not available
@@ -88,16 +92,9 @@ try:
     django_models = django_models_real
     DjangoField = DjangoField_real  # type: ignore
 
-    # Export the exceptions for use by other modules
-    # Use different names to avoid name conflicts with type annotations
-    from typing import cast
-
-    ValidationError_Export: Type[Exception] = cast(
-        Type[Exception], DjangoValidationError
-    )
-    FieldDoesNotExist_Export: Type[Exception] = cast(
-        Type[Exception], DjangoFieldDoesNotExist
-    )
+    # Update the exported exceptions with the real ones
+    ValidationError_Export = cast(Type[Exception], DjangoValidationError)
+    FieldDoesNotExist_Export = cast(Type[Exception], DjangoFieldDoesNotExist)
 
     DJANGO_AVAILABLE = True
 

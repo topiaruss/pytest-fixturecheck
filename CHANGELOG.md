@@ -1,5 +1,27 @@
 # Changelog
 
+## 0.4.2 (2025-05-22)
+
+### Bug Fixes
+- Fixed ImportError when importing `FieldDoesNotExist_Export` or `ValidationError_Export` from `pytest_fixturecheck.django_validators` when Django is not installed
+- Improved Django integration layer to ensure graceful imports even when Django is not available
+- Enhanced documentation in TROUBLESHOOTING.md with guidance for Django validator import errors
+- Updated test suite to ensure compatibility with and without Django installed
+
+## 0.4.1 (2025-05-18)
+
+### Bug Fixes and Improvements
+- Enhanced error reporting in plugin.py to better identify when errors come from user code vs. the package
+- Created comprehensive TROUBLESHOOTING.md guide with sections on:
+  - Import errors and how to resolve them
+  - Examples of correctly structured validators
+  - Best practices for validator patterns 
+- Added examples of:
+  - Recommended validator pattern with local imports
+  - Using expect_validation_error=True for testing validation failures
+- Fixed code formatting issues
+- Fixed f-string issues 
+
 ## 0.4.0 (2025-05-15)
 
 ### Bug Fixes and Improvements

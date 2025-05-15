@@ -97,6 +97,31 @@ When using the Django-specific validators, you might encounter:
    
    **Solution**: Check that you're validating against the correct model and field names
 
+### Django Validator Import Errors
+
+Starting in version 0.4.2, we improved how Django validators are imported. You might have seen this error in earlier versions:
+
+```
+ImportError: cannot import name 'FieldDoesNotExist_Export' from 'pytest_fixturecheck.django_validators'
+```
+
+This happens when your code imports from the Django validators module but Django is not installed. Django is an optional dependency, so the package should still work without it.
+
+**Solutions:**
+
+1. **Install Django** if you need the Django validators: `pip install Django` or `pip install pytest-fixturecheck[django]`
+
+2. **Update to pytest-fixturecheck 0.4.2 or higher** which handles imports properly without Django installed
+
+3. **Conditionally import** Django validators in your code:
+   ```python
+   try:
+       from pytest_fixturecheck.django_validators import django_model_has_fields
+   except ImportError:
+       # Handle the case where Django validators are not available
+       pass
+   ```
+
 ## General Troubleshooting Steps
 
 1. **Check your fixture definition** - make sure it's correctly decorated with `@pytest.fixture`
