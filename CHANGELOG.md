@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.4.3 (2025-05-15)
+
+### Bug Fixes and Improvements
+- Fixed formatting issues in django_validators.py to comply with Black style rules
+- Added automation for PyPI badge updates during releases
+- Enhanced release process with automatic version bumping
+- Improved handling of Django import errors
+
 ## 0.4.2 (2025-05-15)
 
 ### Bug Fixes
