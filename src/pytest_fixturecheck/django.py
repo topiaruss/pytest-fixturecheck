@@ -214,8 +214,8 @@ def _extract_model_field_accesses(source_code: str, model_var: str) -> List[str]
     return list(fields)
 
 
-@creates_validator
-def django_model_has_fields(*field_names: str) -> Callable[[Any], None]:
+# @creates_validator # REMOVED
+def django_model_has_fields(*field_names: str) -> Callable[[Any, bool], None]: # Signature of returned validator updated
     """
     Create a validator that checks if a Django model has certain fields.
 
@@ -223,7 +223,7 @@ def django_model_has_fields(*field_names: str) -> Callable[[Any], None]:
         field_names: Names of fields to check for
 
     Returns:
-        A validator function
+        A validator function that accepts (obj, is_collection_phase)
 
     Example:
         @pytest.fixture
@@ -232,40 +232,60 @@ def django_model_has_fields(*field_names: str) -> Callable[[Any], None]:
             return User.objects.create(...)
     """
 
-    def validator(obj: Any) -> None:
+    def validator_logic(obj: Any, is_collection_phase: bool = False) -> None:
+        if is_collection_phase:
+            if inspect.isfunction(obj) or inspect.isclass(obj):
+                return
+            # Skip actual validation logic during collection for non-functions/classes as well,
+            # as obj might be a placeholder or default value not suitable for ._meta.get_field.
+            return
+
         if not DJANGO_AVAILABLE:
             raise ImportError("Django is required for model validation")
 
         if not is_django_model(obj):
-            raise TypeError(f"Object is not a Django model instance: {type(obj)}")
+            raise TypeError(f"Object is not a Django model: {type(obj).__name__}")
 
         for field_name in field_names:
             try:
                 obj._meta.get_field(field_name)  # type: ignore
-            except FieldDoesNotExist:
+            except FieldDoesNotExist as e:
                 raise AttributeError(
-                    f"Field '{field_name}' does not exist on model {obj.__class__.__name__}"
-                )
+                    f"Required field '{field_name}' missing from {obj.__class__.__name__}"
+                ) from e
+            except Exception as e: # Catch other potential errors from get_field
+                raise AttributeError(
+                    f"Error while checking field '{field_name}' on {obj.__class__.__name__}: {e}"
+                ) from e
+                
+    validator_logic._validator = True  # type: ignore
+    validator_logic._fixturecheck = True  # type: ignore
+    validator_logic._expect_validation_error = False  # type: ignore
+    return validator_logic
 
-    return validator
 
-
-def django_model_validates() -> Callable[[Any, bool], None]:
+def django_model_validates() -> Callable[[], Callable[[Any, bool], None]]:
     """
     Create a validator that performs Django's full_clean validation on a model.
+    Any `ValidationError` (or subclass) raised by `full_clean` will be propagated directly.
 
     Returns:
-        A validator function
-
-    Example:
-        @pytest.fixture
-        @fixturecheck(django_model_validates())
-        def user_fixture():
-            return User.objects.create(...)
+        A validator function that accepts (obj, is_collection_phase)
     """
 
-    @creates_validator
-    def validator(obj: Any) -> None:
+    def validator_logic(obj: Any, is_collection_phase: bool = False) -> None:
+        if is_collection_phase:
+            # If obj is the fixture function itself during collection, or a class, skip actual validation
+            # full_clean typically doesn't make sense on a function or class definition.
+            if inspect.isfunction(obj) or inspect.isclass(obj):
+                return
+            # For other object types during collection, proceed cautiously or decide if an error is better.
+            # For now, we'll let it proceed to DJANGO_AVAILABLE check, which is safe.
+            # If not a function/class, it might be a default value. Still, full_clean might be too much for collection.
+            # Let's assume for now that if it's not a function/class, we might want to see if it's a model instance.
+            # However, the safest for collection phase if not a function/class is often to just return.
+            return # Simplified: skip full_clean during collection phase for all inputs.
+
         if not DJANGO_AVAILABLE:
             raise ImportError("Django is required for model validation")
 
@@ -273,9 +293,10 @@ def django_model_validates() -> Callable[[Any, bool], None]:
             raise TypeError(f"Object is not a Django model instance: {type(obj)}")
 
         # Call full_clean to run Django's built-in validation
-        try:
-            obj.full_clean()
-        except ValidationError as e:
-            raise ValidationError(f"Django model validation failed: {e}")
+        obj.full_clean() # Let exception propagate directly for now
 
-    return validator
+    # Manually mark the validator
+    validator_logic._validator = True  # type: ignore
+    validator_logic._fixturecheck = True  # type: ignore
+    validator_logic._expect_validation_error = False  # type: ignore
+    return validator_logic

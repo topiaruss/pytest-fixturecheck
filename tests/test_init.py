@@ -48,9 +48,11 @@ def test_exported_symbols():
 
     # Test version
     assert isinstance(__version__, str)
-    assert __version__.count('.') == 2, "Version should follow semantic versioning format"
+    assert (
+        __version__.count(".") == 2
+    ), "Version should follow semantic versioning format"
     # Check if it matches the pattern x.y.z where x, y, and z are integers
-    major, minor, patch = __version__.split('.')
+    major, minor, patch = __version__.split(".")
     assert major.isdigit(), "Major version should be a number"
     assert minor.isdigit(), "Minor version should be a number"
     assert patch.isdigit(), "Patch version should be a number"
@@ -76,6 +78,10 @@ def test_exported_symbols():
         "simple_validator",
         "with_nested_properties",
         "with_type_checks",
+        # Decorator factory functions (from decorator.py, added in __init__)
+        "with_required_fields",
+        "with_required_methods",
+        "with_model_validation",
     ]
     for symbol in expected_symbols:
         assert symbol in __all__
@@ -96,11 +102,11 @@ def test_import_star():
         except (AssertionError, KeyError):
             # Skip advanced validators that might not be available in partial installs
             if symbol not in [
-                "nested_property_validator", 
-                "type_check_properties", 
-                "simple_validator", 
-                "with_nested_properties", 
-                "with_type_checks"
+                "nested_property_validator",
+                "type_check_properties",
+                "simple_validator",
+                "with_nested_properties",
+                "with_type_checks",
             ]:
                 raise
 

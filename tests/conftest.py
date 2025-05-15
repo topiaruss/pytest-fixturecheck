@@ -1,11 +1,38 @@
 """Test configuration for pytest-fixturecheck."""
 
 import inspect
-
 import pytest
+
+# Configure Django settings centrally for all tests that might need it
+try:
+    import django
+    from django.conf import settings
+
+    if not settings.configured:
+        settings.configure(
+            DATABASES={
+                "default": {
+                    "ENGINE": "django.db.backends.sqlite3",
+                    "NAME": ":memory:",
+                }
+            },
+            INSTALLED_APPS=[
+                "django.contrib.auth",
+                "django.contrib.contenttypes",
+                # "pytest_fixturecheck.tests", # Removed this, as it's not an importable module
+            ],
+            # Minimal other settings if required by auth or other apps
+            SECRET_KEY='dummysecret',
+        )
+    DJANGO_SETUP_SUCCESS = True
+except ImportError:
+    DJANGO_SETUP_SUCCESS = False
+
 
 from pytest_fixturecheck import fixturecheck, has_required_fields
 from pytest_fixturecheck.utils import creates_validator
+from pytest_fixturecheck.validators_advanced import nested_property_validator
+from pytest_fixturecheck.validators import is_instance_of
 
 
 class User:
@@ -89,3 +116,25 @@ class TestObject:
 def property_fixture():
     """A fixture with specific property values."""
     return TestObject(name="fixture_test")
+
+
+# Added from test_advanced_validators_comprehensive.py for working_camera_fixture
+class Config:
+    def __init__(self, resolution: str, frame_rate: int):
+        self.resolution = resolution
+        self.frame_rate = frame_rate
+
+class Camera:
+    def __init__(self, name: str, config: Config):
+        self.name = name
+        self.config = config
+
+# Define the validator instance separately
+_working_camera_validator_instance = nested_property_validator(
+    name="Test", config__resolution="1280x720", config__frame_rate=30
+)
+
+@pytest.fixture
+@fixturecheck(validator=_working_camera_validator_instance)
+def working_camera_fixture():
+    return Camera("Test", Config("1280x720", 30))

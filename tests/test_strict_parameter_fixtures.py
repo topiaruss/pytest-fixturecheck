@@ -9,7 +9,10 @@ These tests verify that:
 import warnings
 import pytest
 from pytest_fixturecheck import fixturecheck
-from pytest_fixturecheck.validators_fix import check_property_values, with_property_values
+from pytest_fixturecheck.validators_fix import (
+    check_property_values,
+    with_property_values,
+)
 
 
 class TestObject:
@@ -74,27 +77,27 @@ def test_non_strict_fixture(non_strict_fixture):
 def test_non_strict_warnings():
     """Test that non-strict fixture validation issues warnings."""
     warnings_list = []
-    
+
     # Create a function to record warnings
     def record_warning(message, category, filename, lineno, file=None, line=None):
         warnings_list.append(str(message))
-    
+
     # Register our warning handler
     original_showwarning = warnings.showwarning
     warnings.showwarning = record_warning
-    
+
     try:
         # Create and call the fixture directly
         fixture = with_property_values(strict=False, name="test", value=42)(
             lambda: TestObject("wrong", 99)
         )
         result = fixture()
-        
+
         # Verify warnings were issued
         assert len(warnings_list) == 2
         assert "Expected name=test, got wrong" in warnings_list[0]
         assert "Expected value=42, got 99" in warnings_list[1]
-        
+
         # Verify the fixture still returns the result
         assert result.name == "wrong"
         assert result.value == 99
@@ -115,4 +118,4 @@ def test_non_strict_check_fixture(non_strict_check_fixture):
     """Test that non-strict check_property_values passes the test but issues warnings."""
     # This test should run and pass
     assert non_strict_check_fixture.name == "wrong"  # Not "test"
-    assert non_strict_check_fixture.value == 99  # Not 42 
+    assert non_strict_check_fixture.value == 99  # Not 42

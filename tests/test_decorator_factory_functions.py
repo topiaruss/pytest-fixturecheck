@@ -4,7 +4,29 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-from pytest_fixturecheck import fixturecheck
+from pytest_fixturecheck import fixturecheck, with_required_fields, with_property_values
+from pytest_fixturecheck.decorator import _default_validator as decorator_default_validator
+
+# Try to import Django and set up a simple model for django_model_instance
+try:
+    import django # Rely on conftest.py for django.setup() and settings.configure()
+    from django.db import models
+    # from django.conf import settings # Not needed here anymore
+
+    # if not settings.configured: # Remove this block
+    # ...
+    # django.setup() # Remove this
+
+    class MyDjangoModel(models.Model):
+        name = models.CharField(max_length=100)
+        class Meta:
+            app_label = 'tests' # Using a simple app_label
+            managed = False # Make it unmanaged
+
+    DJANGO_AVAILABLE = True
+except ImportError:
+    DJANGO_AVAILABLE = False
+    MyDjangoModel = None # type: ignore
 
 
 class TestFactoryFunctions:
@@ -121,7 +143,7 @@ def test_fixturecheck_empty():
     assert hasattr(test_fixture, "_fixturecheck")
     assert test_fixture._fixturecheck is True
     assert hasattr(test_fixture, "_validator")
-    assert test_fixture._validator is None
+    assert test_fixture._validator is decorator_default_validator
 
 
 def test_fixturecheck_none():
@@ -135,4 +157,59 @@ def test_fixturecheck_none():
     assert hasattr(test_fixture, "_fixturecheck")
     assert test_fixture._fixturecheck is True
     assert hasattr(test_fixture, "_validator")
-    assert test_fixture._validator is None
+    assert test_fixture._validator is decorator_default_validator
+
+
+# Test compatibility with fixturecheck called with empty parentheses
+# @pytest.mark.parametrize("arg", [None, False, True, 1, "string", list(), dict()]) # Removing this for now
+# def test_fixturecheck_various_args(arg):
+#     """Test fixturecheck called with various non-validator arguments."""
+# ... (rest of parameterized test commented out or removed for simplicity for now)
+
+@pytest.mark.skipif(not DJANGO_AVAILABLE, reason="Django not available")
+@pytest.mark.django_db
+@pytest.fixture
+def setup_my_django_model_db(): # New fixture to create the table
+    from django.db import connection, DatabaseError # Import DatabaseError
+    table_name = MyDjangoModel._meta.db_table
+    with connection.cursor() as cursor:
+        try:
+            cursor.execute(f"SELECT 1 FROM {table_name} LIMIT 1;")
+        except DatabaseError: # Catch the imported DatabaseError
+            # Table does not exist, create it
+            cursor.execute(f"""
+                CREATE TABLE "{table_name}" (
+                    "id" integer NOT NULL PRIMARY KEY AUTOINCREMENT,
+                    "name" varchar(100) NOT NULL
+                )
+            """)
+
+@pytest.mark.skipif(not DJANGO_AVAILABLE, reason="Django not available")
+@pytest.mark.django_db # Added to allow database access
+@pytest.fixture
+def django_model_instance(setup_my_django_model_db): # Depend on table creation
+    return MyDjangoModel.objects.create(name="Test Model")
+
+
+@pytest.mark.django_db # This one should be kept
+# @pytest.mark.django_db # This is the duplicate to remove
+def test_is_django_model_positive_case(django_model_instance):
+    # Test that is_django_model correctly identifies a Django model instance.
+    from pytest_fixturecheck.django import is_django_model # Import here to use updated DJANGO_AVAILABLE
+    assert is_django_model(django_model_instance) is True
+
+
+def test_is_django_model_negative_case():
+    # Test that is_django_model correctly identifies a non-Django model instance.
+    from pytest_fixturecheck.django import is_django_model
+    assert is_django_model(None) is False
+
+
+class NonDjangoModel:
+    # A simple class that is not a Django model.
+    pass # Added pass to fix IndentationError
+
+
+# Removing the incomplete fixture definition at the end of the file
+# @pytest.fixture
+# # ... existing code ...

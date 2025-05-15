@@ -3,6 +3,7 @@
 import importlib.metadata
 
 from .decorator import fixturecheck
+from .decorator import with_required_fields, with_required_methods, with_model_validation
 from .django import django_model_has_fields, django_model_validates, is_django_model
 from .utils import creates_validator
 from .validators import (
@@ -60,6 +61,10 @@ __all__ = [
     "simple_validator",
     "with_nested_properties",
     "with_type_checks",
+    # Decorator factory functions (compatibility, from decorator.py)
+    "with_required_fields",
+    "with_required_methods",
+    "with_model_validation",
 ]
 
 # Add our fixed with_property_values to fixturecheck

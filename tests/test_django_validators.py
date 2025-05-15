@@ -17,33 +17,18 @@ from pytest_fixturecheck import (
 )
 
 # Skip all tests if Django is not installed
+# The actual settings.configure and django.setup() should be in conftest.py
 try:
-    import django
-    from django.conf import settings
-
-    # Configure minimal Django settings for tests
-    if not settings.configured:
-        settings.configure(
-            DATABASES={
-                "default": {
-                    "ENGINE": "django.db.backends.sqlite3",
-                    "NAME": ":memory:",
-                }
-            },
-            INSTALLED_APPS=[
-                "django.contrib.auth",
-                "django.contrib.contenttypes",
-            ],
-        )
-        django.setup()
-
-    from django.contrib.auth.models import User
-    from django.db import models
-
+    import django # Just check if Django itself is importable
+    from django.db import models # and models can be imported
+    from django.contrib.auth.models import User # and auth models
+    # If conftest.py failed to set up Django, these imports might still work
+    # but DJANGO_SETUP_SUCCESS from conftest would be False.
+    # For this file, we primarily care if Django modules are present.
     DJANGO_AVAILABLE = True
 except ImportError:
     DJANGO_AVAILABLE = False
-    pytestmark = pytest.mark.skip(reason="Django not installed")
+    pytestmark = pytest.mark.skip(reason="Django not installed or setup failed in conftest")
 
 
 # Define a test model if Django is available
@@ -62,6 +47,7 @@ if DJANGO_AVAILABLE:
             app_label = "tests"
 
 
+@pytest.mark.django_db
 @pytest.fixture
 def setup_django_db():
     """Setup Django database if available."""
@@ -167,6 +153,7 @@ def book_with_missing_field(setup_django_db):
 
 # Tests
 @pytest.mark.skipif(not DJANGO_AVAILABLE, reason="Django not installed")
+@pytest.mark.django_db
 def test_django_model_has_fields(sample_book):
     """Test that django_model_has_fields validator works."""
     assert sample_book.title == "Test Book"
@@ -175,6 +162,7 @@ def test_django_model_has_fields(sample_book):
 
 # Modified to use sample_book instead of valid_book because the valid_book fixture may not be properly registered
 @pytest.mark.skipif(not DJANGO_AVAILABLE, reason="Django not installed")
+@pytest.mark.django_db
 def test_django_model_validates(sample_book):
     """Test that django_model_validates validator works."""
     assert sample_book.title == "Test Book"
@@ -186,6 +174,7 @@ def test_django_model_validates(sample_book):
 
 # Also use sample_book instead of custom_validated_book for the same reason
 @pytest.mark.skipif(not DJANGO_AVAILABLE, reason="Django not installed")
+@pytest.mark.django_db
 def test_custom_validator(sample_book):
     """Test that a custom validator created with creates_validator works."""
     assert sample_book.title == "Test Book"
@@ -202,6 +191,7 @@ def test_custom_validator(sample_book):
 
 
 @pytest.mark.skipif(not DJANGO_AVAILABLE, reason="Django not installed")
+@pytest.mark.django_db
 def test_expect_validation_error(book_with_missing_field):
     """Test that expect_validation_error works with Django validators."""
     assert book_with_missing_field.title == "Invalid Book"

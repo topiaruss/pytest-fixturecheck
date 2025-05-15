@@ -14,13 +14,15 @@ from pytest_fixturecheck import fixturecheck
 # Mock Django model classes for documentation purposes
 # In a real project, these would be your actual Django models
 
+
 class User:
     """Mock User model."""
+
     def __init__(self, username, email, is_active=True):
         self.username = username
         self.email = email
         self.is_active = is_active
-        self._meta = type('_meta', (), {'get_field': lambda self, name: None})
+        self._meta = type("_meta", (), {"get_field": lambda self, name: None})
 
     def save(self):
         """Save the user."""
@@ -33,10 +35,11 @@ class User:
 
 class Book:
     """Mock Book model."""
+
     def __init__(self, title, author):
         self.title = title
         self.author = author
-        self._meta = type('_meta', (), {'get_field': lambda self, name: None})
+        self._meta = type("_meta", (), {"get_field": lambda self, name: None})
 
     def save(self):
         """Save the book."""
@@ -46,6 +49,7 @@ class Book:
 #
 # Example 1: Auto-detected Django model validation
 #
+
 
 @pytest.fixture
 @fixturecheck  # Auto-detects Django models
@@ -57,6 +61,7 @@ def user_fixture():
 #
 # Example 2: Using factory functions for common validation patterns
 #
+
 
 # Check that specific fields exist
 @pytest.fixture
@@ -94,15 +99,16 @@ def user_with_properties():
 # Example 3: Custom validator function
 #
 
+
 def validate_user_email(obj, is_collection_phase):
     """Custom validator that checks the email domain."""
     if is_collection_phase:
         return  # No validation during collection phase
 
-    if not hasattr(obj, 'email'):
+    if not hasattr(obj, "email"):
         raise AttributeError("User object missing email field")
 
-    if not obj.email.endswith('@example.com'):
+    if not obj.email.endswith("@example.com"):
         raise ValueError(f"Email {obj.email} must end with @example.com")
 
 
@@ -116,6 +122,7 @@ def custom_validated_user():
 #
 # Example Tests
 #
+
 
 def test_user_fixture(user_fixture):
     """Test using the auto-validated user fixture."""
@@ -155,6 +162,7 @@ def test_custom_validated_user(custom_validated_user):
 #
 # Example of broken fixture (will be skipped if auto-skip is enabled)
 #
+
 
 @pytest.fixture
 @fixturecheck.with_property_values(is_active=True, username="wronguser")

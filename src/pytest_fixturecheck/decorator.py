@@ -1,6 +1,6 @@
 import functools
 import inspect
-from typing import Any, Callable, List, Optional, TypeVar, Union, cast
+from typing import Any, Callable, List, Optional, TypeVar, Union, cast, overload
 
 # Create type variables for better typing
 F = TypeVar("F", bound=Callable[..., Any])
@@ -12,101 +12,89 @@ from .utils import creates_validator
 from .validators_fix import check_property_values
 
 
+@overload
+def fixturecheck(fixture_or_validator: F) -> F:
+    ...
+
 def fixturecheck(
-    fixture_or_validator: Union[F, Optional[ValidatorFunc]] = None,
+    fixture_or_validator: Optional[Union[F, ValidatorFunc]] = None,
     validator: Optional[ValidatorFunc] = None,
-    expect_validation_error: bool = False,
+    expect_validation_error: Union[bool, type[Exception]] = False,
 ) -> Union[F, Callable[[F], F]]:
-    """
-    Decorator to validate pytest fixtures before they're used in tests.
+    # (Removed print(locals()) for now)
+    # print(f"FIXTURECHECK_DECORATOR_ENTRY: {{'fixture_or_validator': {fixture_or_validator}, 'validator': {validator}, 'expect_validation_error': {expect_validation_error}}}")
 
-    Can be used in several ways:
+    # Case 1: fixture_or_validator is explicitly a validator instance (or function acting as one)
+    if validator is None and getattr(fixture_or_validator, "_is_pytest_fixturecheck_validator", False):
+        actual_validator_to_use = cast(ValidatorFunc, fixture_or_validator)
+        # print(f"FIXTURECHECK_DEBUG: Using marked validator: {actual_validator_to_use!r}")
 
-    1. As a simple decorator:
-       @fixturecheck
-       @pytest.fixture
-       def my_fixture():
-           ...
+        def decorator_for_marked_validator(fixture_body: F) -> F:
+            @functools.wraps(fixture_body)
+            def wrapped_fixture(*args: Any, **kwargs: Any) -> Any:
+                return fixture_body(*args, **kwargs)
+            wrapped_fixture._fixturecheck = True # type: ignore
+            wrapped_fixture._validator = actual_validator_to_use # type: ignore
+            wrapped_fixture._expect_validation_error = expect_validation_error # type: ignore
+            return cast(F, wrapped_fixture)
+        return decorator_for_marked_validator
 
-    2. With a validator function:
-       @fixturecheck(my_validator_function)
-       @pytest.fixture
-       def my_fixture():
-           ...
-
-    3. With expected validation error:
-       @fixturecheck(my_validator_function, expect_validation_error=True)
-       @pytest.fixture
-       def my_fixture():
-           ...
-
-    The validator function should accept:
-    - The fixture value or fixture function (depending on when it's called)
-    - A boolean flag indicating if it's being called during collection phase
-
-    Args:
-        fixture_or_validator: Either the fixture function or a validator function
-        validator: Optional validator function (not used in the current implementation)
-        expect_validation_error: Whether to expect a validation error (for testing validators)
-
-    Returns:
-        A decorated fixture function or a decorator function
-    """
-    # Called as @fixturecheck with no arguments - apply to the function directly
+    # Case 2: Default behavior / other validators / fixture body processing
+    # This is the original logic path, slightly re-ordered for clarity
     if (
         fixture_or_validator is not None
         and callable(fixture_or_validator)
-        and not hasattr(fixture_or_validator, "__self__")
+        # and not hasattr(fixture_or_validator, "__self__") # Not strictly needed if we check for marker first
         and validator is None
+        # AND it's NOT a marked validator (already handled above)
+        and not getattr(fixture_or_validator, "_is_pytest_fixturecheck_validator", False)
     ):
-        # Check if this looks like a validator function (has the right signature)
-        if len(inspect.signature(fixture_or_validator).parameters) >= 2:
-            # This is a validator function - create a decorator to apply later
-            validation_func = cast(ValidatorFunc, fixture_or_validator)
+        num_params = -1
+        try:
+            sig = inspect.signature(fixture_or_validator)
+            num_params = len(sig.parameters)
+        except Exception:
+            pass # Error inspecting, num_params remains -1
 
-            def decorator(fixture: F) -> F:
+        if num_params >= 2: # Potential unmarked validator (e.g. user-defined, takes obj & phase)
+            validation_func = cast(ValidatorFunc, fixture_or_validator)
+            # print(f"FIXTURECHECK_DEBUG: Using unmarked 2-param validator: {validation_func!r}")
+            def decorator_for_unmarked_validator(fixture: F) -> F:
+                # ... (same wrapping as decorator_for_marked_validator) ...
                 @functools.wraps(fixture)
                 def wrapped_fixture(*args: Any, **kwargs: Any) -> Any:
                     return fixture(*args, **kwargs)
-
-                # Mark this fixture for validation
-                wrapped_fixture._fixturecheck = True  # type: ignore
-                wrapped_fixture._validator = validation_func  # type: ignore
-                wrapped_fixture._expect_validation_error = expect_validation_error  # type: ignore
+                wrapped_fixture._fixturecheck = True; wrapped_fixture._validator = validation_func; wrapped_fixture._expect_validation_error = expect_validation_error
                 return cast(F, wrapped_fixture)
+            return decorator_for_unmarked_validator
+        else: # Assumed to be fixture body (0 or 1 param), or error in signature
+            fixture_body_to_wrap = cast(F, fixture_or_validator)
+            # print(f"FIXTURECHECK_DEBUG: Treating as fixture body (or 1-param validator to use default): {fixture_body_to_wrap!r}")
+            @functools.wraps(fixture_body_to_wrap)
+            def wrapped_direct_fixture(*args: Any, **kwargs: Any) -> Any:
+                return fixture_body_to_wrap(*args, **kwargs)
+            wrapped_direct_fixture._fixturecheck = True # type: ignore
+            wrapped_direct_fixture._validator = _default_validator # type: ignore
+            wrapped_direct_fixture._expect_validation_error = expect_validation_error # type: ignore
+            return cast(F, wrapped_direct_fixture)
+    else: # Called as @fixturecheck() or with explicit validator=validator_func or fixture_or_validator is None
+        validator_to_assign = validator if validator is not None else _default_validator
+        if fixture_or_validator is not None and not callable(fixture_or_validator) and validator is None:
+            # This case implies @fixturecheck(non_callable_thing) which is an error or needs specific handling.
+            # For now, assume validator_to_assign (default or None) applies.
+            # This also covers @fixturecheck(None, expect_validation_error=True)
+            if fixture_or_validator is not None: # e.g. @fixturecheck(None) or @fixturecheck(True) (if bool was validator)
+                 validator_to_assign = cast(ValidatorFunc, fixture_or_validator) # This path seems problematic for non-callables
 
-            return decorator
-        else:
-            # This is a fixture function - wrap it directly
-            fixture = cast(F, fixture_or_validator)
-
+        def decorator_for_factory_style(fixture: F) -> F:
             @functools.wraps(fixture)
             def wrapped_fixture(*args: Any, **kwargs: Any) -> Any:
                 return fixture(*args, **kwargs)
-
-            # Mark this fixture for validation
-            wrapped_fixture._fixturecheck = True  # type: ignore
-            # Use the default validator
-            wrapped_fixture._validator = _default_validator  # type: ignore
-            wrapped_fixture._expect_validation_error = expect_validation_error  # type: ignore
+            wrapped_fixture._fixturecheck = True # type: ignore
+            wrapped_fixture._validator = validator_to_assign # type: ignore
+            wrapped_fixture._expect_validation_error = expect_validation_error # type: ignore
             return cast(F, wrapped_fixture)
-    # Called as @fixturecheck() or with a non-callable validator
-    else:
-        # This is for cases like @fixturecheck() or @fixturecheck(None)
-        validation_func = cast(Optional[ValidatorFunc], fixture_or_validator)
-
-        def decorator(fixture: F) -> F:
-            @functools.wraps(fixture)
-            def wrapped_fixture(*args: Any, **kwargs: Any) -> Any:
-                return fixture(*args, **kwargs)
-
-            # Mark this fixture for validation
-            wrapped_fixture._fixturecheck = True  # type: ignore
-            wrapped_fixture._validator = validation_func  # type: ignore
-            wrapped_fixture._expect_validation_error = expect_validation_error  # type: ignore
-            return cast(F, wrapped_fixture)
-
-        return decorator
+        return decorator_for_factory_style
 
 
 def _default_validator(obj: Any, is_collection_phase: bool = False) -> None:

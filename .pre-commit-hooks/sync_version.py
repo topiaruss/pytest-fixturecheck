@@ -27,7 +27,7 @@ def main():
     pyproject_files = [f for f in args.filenames if f.endswith("pyproject.toml")]
     if not pyproject_files:
         return 0
-    
+
     # Get version from pyproject.toml
     try:
         version = get_pyproject_version(pyproject_files[0])
@@ -39,4 +39,4 @@ def main():
 
 
 if __name__ == "__main__":
-    sys.exit(main()) 
+    sys.exit(main())

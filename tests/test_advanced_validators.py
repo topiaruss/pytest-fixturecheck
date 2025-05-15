@@ -136,7 +136,7 @@ def validate_user_has_username(user):
 
 
 @pytest.fixture
-@validate_user_has_username
+@fixturecheck(validate_user_has_username)
 def simple_validated_user():
     return User(username="simple")
 
@@ -220,15 +220,15 @@ def test_nested_validator_direct():
     """Test property access and validation manually instead of using the validator."""
     camera_config = Config("1280x720", 30)
     camera = Camera("Test Camera", camera_config)
-    
+
     # Manually check the same properties we would with the validator
     assert camera.name == "Test Camera"
     assert camera.config.resolution == "1280x720"
-    
+
     # Check that wrong values would be detected
     wrong_config = Config("wrong", 60)
     wrong_camera = Camera("Wrong Name", wrong_config)
-    
+
     assert wrong_camera.name != "Test Camera"
     assert wrong_camera.config.resolution != "1280x720"
 
@@ -236,17 +236,19 @@ def test_nested_validator_direct():
 def test_type_validator_direct():
     """Test type checking manually instead of using the validator."""
     user = User("testuser", "test@example.com", 30)
-    
+
     # Check types directly
     assert isinstance(user.username, str)
     assert isinstance(user.email, str)
     assert isinstance(user.age, int)
-    
+
     # Create an object with a wrong type
-    wrong_user = User(123, "test@example.com", "30")  # username should be str, age should be int
-    
+    wrong_user = User(
+        123, "test@example.com", "30"
+    )  # username should be str, age should be int
+
     # Verify types are wrong
     assert not isinstance(wrong_user.username, str)
     assert isinstance(wrong_user.username, int)
     assert not isinstance(wrong_user.age, int)
-    assert isinstance(wrong_user.age, str) 
+    assert isinstance(wrong_user.age, str)
