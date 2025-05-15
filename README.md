@@ -33,22 +33,6 @@ from pytest_fixturecheck import fixturecheck
 def my_fixture():
     # This fixture will be validated before tests run
     return "hello world"
-
-# With custom validator
-def validate_user(obj, is_collection_phase=False):
-    if is_collection_phase:
-        # Skip validation during collection phase
-        return
-    if not hasattr(obj, 'username'):
-        raise AttributeError("User object must have a username")
-    if obj.username is None:
-        raise ValueError("Username cannot be None")
-
-@pytest.fixture
-@fixturecheck(validate_user)
-def user():
-    # This fixture will be validated using the custom validator
-    return User(username="testuser")
 ```
 
 ## Using Built-in Validators
@@ -73,6 +57,26 @@ def complete_user_fixture():
 def active_user_fixture():
     # This fixture must return an object with username="testuser" and is_active=True
     return User(username="testuser", is_active=True)
+```
+
+## With custom validator
+
+```python
+
+def validate_user(obj, is_collection_phase=False):
+    if is_collection_phase:
+        # Skip validation during collection phase
+        return
+    if not hasattr(obj, 'username'):
+        raise AttributeError("User object must have a username")
+    if obj.username is None:
+        raise ValueError("Username cannot be None")
+
+@pytest.fixture
+@fixturecheck(validate_user)
+def user():
+    # This fixture will be validated using the custom validator
+    return User(username="testuser")
 ```
 
 ## Django Support
