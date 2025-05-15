@@ -305,12 +305,44 @@ def report_fixture_errors(failed_fixtures: List[Tuple]) -> None:
         print(f"\nFixture '{fixture_name}' in {location} failed validation:")
         print(f"  {error.__class__.__name__}: {error}")
 
+        # Check if this is likely a user-defined validator error
+        error_in_user_code = False
+        if isinstance(error, ImportError):
+            # For import errors, check if it's from a user-defined module (not pytest_fixturecheck)
+            if "pytest_fixturecheck" not in str(error) and tb:
+                # Check the traceback to see if the ImportError is coming from user code
+                user_paths = [
+                    line for line in tb.splitlines() 
+                    if "site-packages/pytest_fixturecheck" not in line 
+                    and "File" in line
+                ]
+                if user_paths:
+                    error_in_user_code = True
+                    # Extract the path of the file with the import error
+                    import_error_file = user_paths[0].split('"')[1] if '"' in user_paths[0] else "<unknown file>"
+                    print(f"\n  POSSIBLE USER CODE ERROR: The import error appears to be in your code.")
+                    print(f"  The error occurred in file: {import_error_file}")
+                    print(f"  Check that all imports in your validator function are correct and the packages are installed.")
+
         # Print a simplified traceback
         if isinstance(tb, str) and tb.strip():
-            for line in tb.splitlines()[1:]:
-                if line.strip() and not line.startswith("During"):
-                    print(f"  {line}")
+            # If it's a user code error, print a more helpful message
+            if error_in_user_code and isinstance(error, ImportError):
+                print("\n  Traceback (most relevant parts):")
+                for line in tb.splitlines()[1:]:
+                    if "File" in line or "ImportError" in line:
+                        print(f"  {line}")
+            else:
+                # Standard traceback handling
+                for line in tb.splitlines()[1:]:
+                    if line.strip() and not line.startswith("During"):
+                        print(f"  {line}")
 
     print("\n" + "=" * 80)
     print("Fix these fixture issues before running your tests.")
+    if any(isinstance(error, ImportError) for _, error, _ in failed_fixtures):
+        print("\nIMPORT ERRORS DETECTED:")
+        print("  • If the import error is in your custom validator, ensure all required packages are installed.")
+        print("  • Custom validators should be defined in your own files, not in the pytest_fixturecheck package.")
+        print("  • For validator examples, see https://github.com/topiaruss/pytest-fixturecheck#property-validators")
     print("=" * 80)
