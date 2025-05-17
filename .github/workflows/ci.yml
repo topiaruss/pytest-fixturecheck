@@ -22,6 +22,8 @@ jobs:
             tox-env: "mypy"
           - python-version: "3.13"
             tox-env: "django"
+          - python-version: "3.13"
+            tox-env: "nodjango"
 
     steps:
       - uses: actions/checkout@v4
