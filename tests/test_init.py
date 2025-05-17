@@ -1,7 +1,6 @@
 """Test for the __init__.py file."""
 
 import pytest
-from unittest.mock import patch
 
 from pytest_fixturecheck import (
     __all__,
@@ -103,9 +102,8 @@ def test_import_star():
     for symbol in __all__:
         try:
             assert symbol in module_dict, f"Symbol {symbol} was not imported with '*'"
-            if (
-                symbol != "DJANGO_AVAILABLE"
-            ):  # Skip callable check for non-callable symbols
+            # Skip callable check for non-callable symbols
+            if symbol != "DJANGO_AVAILABLE":
                 assert callable(module_dict[symbol]), f"Symbol {symbol} is not callable"
         except (AssertionError, KeyError):
             # Skip advanced validators that might not be available in partial installs

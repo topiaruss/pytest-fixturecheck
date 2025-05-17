@@ -16,25 +16,24 @@ _InitialImportError: Optional[ImportError] = None
 
 # Define base dummy exceptions that can be raised/caught
 class DjangoFieldDoesNotExistBase(Exception):
+    """Base class for Django's FieldDoesNotExist when Django is not installed."""
     pass
 
 
 class DjangoValidationErrorBase(Exception):
+    """Base class for Django's ValidationError when Django is not installed."""
     pass
 
 
+# Initial definitions with dummy values
 DjangoFieldDoesNotExist = DjangoFieldDoesNotExistBase
 DjangoValidationError = DjangoValidationErrorBase
 
 # Aliases for common testing usage
 ValidationError = DjangoValidationError
 FieldDoesNotExist = DjangoFieldDoesNotExist
-
-# Define these unconditionally so they can be imported regardless of Django availability
-ValidationError_Export: Type[Exception] = cast(Type[Exception], DjangoValidationError)
-FieldDoesNotExist_Export: Type[Exception] = cast(
-    Type[Exception], DjangoFieldDoesNotExist
-)
+ValidationError_Export = cast(Type[Exception], DjangoValidationError)
+FieldDoesNotExist_Export = cast(Type[Exception], DjangoFieldDoesNotExist)
 
 
 # Define dummy structures for type hints and basic attribute access if Django is not available
@@ -71,41 +70,43 @@ class _MockDjangoModelsModule:
     # NOT_PROVIDED = object() # If used
 
 
+# Initialize with dummy objects
 django_models: Any = _MockDjangoModelsModule()
 DjangoField: Any = _DummyDjangoField
 
 
-# Define stub functions and classes unconditionally
-def django_model_has_fields(*args, **kwargs):
-    def validator(obj, *a, **k):
-        raise ImportError("Django is required for django_model_has_fields")
-
-    return validator
-
-
-def django_model_validates(*args, **kwargs):
-    def validator(obj, *a, **k):
-        raise ImportError("Django is required for django_model_validates")
-
-    return validator
-
-
-def is_django_model(obj):
+# Dummy functions for non-Django environments
+def _is_django_model_dummy(obj: Any) -> bool:
+    """
+    Check if an object is a Django model instance (stub when Django is not available).
+    
+    Args:
+        obj: The object to check
+        
+    Returns:
+        False when Django is not available
+    """
     return False
 
 
-class FieldDoesNotExist_Export(Exception):
-    """Stub for Django's FieldDoesNotExist when Django is not installed."""
-
-    pass
-
-
-class ValidationError_Export(Exception):
-    """Stub for Django's ValidationError when Django is not installed."""
-
-    pass
+# Stub functions that raise ImportError immediately when called
+def _django_model_has_fields_stub(*args, **kwargs):
+    """Stub validator factory when Django is not installed."""
+    raise ImportError("Django is required for django_model_has_fields")
 
 
+def _django_model_validates_stub(*args, **kwargs):
+    """Stub validator factory when Django is not installed."""
+    raise ImportError("Django is required for django_model_validates")
+
+
+# Set initial references to dummy functions
+is_django_model = _is_django_model_dummy
+django_model_has_fields = _django_model_has_fields_stub
+django_model_validates = _django_model_validates_stub
+
+
+# Try to import Django
 try:
     from django.conf import settings
 
@@ -126,57 +127,117 @@ try:
     FieldDoesNotExist_Export = cast(Type[Exception], DjangoFieldDoesNotExist)
 
     DJANGO_AVAILABLE = True
+    
+    # Define real implementations when Django is available
+    def _is_django_model_real(obj: Any) -> bool:
+        """
+        Check if an object is a Django model instance.
+
+        This is a more robust check than just isinstance(obj, Model).
+
+        Args:
+            obj: The object to check
+
+        Returns:
+            True if the object is a Django model instance, False otherwise
+        """
+        if obj is None:
+            return False
+
+        # Check if object has _meta which is a good indicator of a Django model
+        if not hasattr(obj, "_meta"):
+            return False
+
+        try:
+            # Try the direct isinstance check first
+            if isinstance(obj, django_models.Model):
+                return True
+
+            # As a fallback in test environments where class hierarchies might be complex,
+            # check if any base class is named 'Model' and from django.db.models
+            for base in type(obj).__mro__:
+                if base.__name__ == "Model" and base.__module__.startswith(
+                    "django.db.models"
+                ):
+                    return True
+        except (ImportError, AttributeError, TypeError):
+            # Handle any issues with the checks above
+            pass
+
+        return False
+
+    @creates_validator
+    def _django_model_has_fields_real(*required_fields: str, allow_empty: bool = False):
+        """
+        Validator factory: Checks if a Django model instance has specific fields populated.
+        """
+
+        def validator(model_instance: Any, is_collection_phase: bool = False) -> None:
+            # Real implementation
+            if is_collection_phase:
+                return
+            if not is_django_model(model_instance):
+                return
+            missing_fields: List[str] = []
+            empty_fields: List[str] = []
+
+            for field_name in required_fields:
+                try:
+                    value = getattr(model_instance, field_name)
+                    if (
+                        not allow_empty and value is None
+                    ):  # Simplified check for "empty"
+                        empty_fields.append(field_name)
+                except AttributeError:
+                    missing_fields.append(field_name)
+                except DjangoFieldDoesNotExist:  # pragma: no cover
+                    missing_fields.append(f"{field_name} (FieldDoesNotExist)")
+
+            error_messages: List[str] = []
+            if missing_fields:
+                error_messages.append(f"Missing fields: {', '.join(missing_fields)}.")
+            if empty_fields:
+                error_messages.append(
+                    f"Fields are empty (None): {', '.join(empty_fields)}."
+                )
+
+            if error_messages:
+                # Use getattr to safely access pk even if it doesn't exist
+                model_pk = getattr(model_instance, "pk", None)
+                full_message = (
+                    f"Django model <{type(model_instance).__name__} pk={model_pk}> "
+                    + " ".join(error_messages)
+                )
+                raise DjangoValidationError(full_message)  # type: ignore
+
+        return validator
+
+    @creates_validator
+    def _django_model_validates_real():
+        """
+        Validator factory: Checks if a Django model instance passes model.full_clean().
+        """
+
+        def validator(model_instance: Any, is_collection_phase: bool = False) -> None:
+            # Real implementation
+            if is_collection_phase:
+                return
+            if not is_django_model(model_instance):
+                return
+            model_instance.full_clean()
+
+        return validator
+
+    # Replace dummy functions with real implementations
+    is_django_model = _is_django_model_real
+    django_model_has_fields = _django_model_has_fields_real
+    django_model_validates = _django_model_validates_real
 
 except ImportError as e:
     _InitialImportError = e
     # DJANGO_AVAILABLE remains False
     # Stub functions and classes defined above will be used.
     pass
-
-# --- Validator Functions ---
-# These functions should check DJANGO_AVAILABLE before performing Django-specific operations.
-
-
-def is_django_model(obj: Any) -> bool:
-    """
-    Check if an object is a Django model instance.
-
-    This is a more robust check than just isinstance(obj, Model).
-
-    Args:
-        obj: The object to check
-
-    Returns:
-        True if the object is a Django model instance, False otherwise
-    """
-    if not DJANGO_AVAILABLE:
-        return False
-
-    # Basic checks before attempting to access Django-specific attributes
-    if obj is None:
-        return False
-
-    # Check if object has _meta which is a good indicator of a Django model
-    if not hasattr(obj, "_meta"):
-        return False
-
-    try:
-        # Try the direct isinstance check first
-        if isinstance(obj, django_models.Model):
-            return True
-
-        # As a fallback in test environments where class hierarchies might be complex,
-        # check if any base class is named 'Model' and from django.db.models
-        for base in type(obj).__mro__:
-            if base.__name__ == "Model" and base.__module__.startswith(
-                "django.db.models"
-            ):
-                return True
-    except (ImportError, AttributeError, TypeError):
-        # Handle any issues with the checks above
-        pass
-
-    return False
 
 
 @creates_validator
@@ -259,86 +320,6 @@ def validate_model_fields(
         else:  # pragma: no cover (should not happen if DJANGO_AVAILABLE is false from start)
             raise ValueError(error_message)
     # If no errors, validation passes, return None implicitly.
-
-
-# --- Validator Factories ---
-# Define decorated validator factories conditionally
-
-if DJANGO_AVAILABLE:
-
-    @creates_validator
-    def django_model_has_fields(*required_fields: str, allow_empty: bool = False):
-        """
-        Validator factory: Checks if a Django model instance has specific fields populated.
-        """
-
-        def validator(model_instance: Any, is_collection_phase: bool = False) -> None:
-            # Real implementation
-            if is_collection_phase:
-                return
-            if not is_django_model(model_instance):
-                return
-            missing_fields: List[str] = []
-            empty_fields: List[str] = []
-
-            for field_name in required_fields:
-                try:
-                    value = getattr(model_instance, field_name)
-                    if (
-                        not allow_empty and value is None
-                    ):  # Simplified check for "empty"
-                        empty_fields.append(field_name)
-                except AttributeError:
-                    missing_fields.append(field_name)
-                except DjangoFieldDoesNotExist:  # pragma: no cover
-                    missing_fields.append(f"{field_name} (FieldDoesNotExist)")
-
-            error_messages: List[str] = []
-            if missing_fields:
-                error_messages.append(f"Missing fields: {', '.join(missing_fields)}.")
-            if empty_fields:
-                error_messages.append(
-                    f"Fields are empty (None): {', '.join(empty_fields)}."
-                )
-
-            if error_messages:
-                # Use getattr to safely access pk even if it doesn't exist
-                model_pk = getattr(model_instance, "pk", None)
-                full_message = (
-                    f"Django model <{type(model_instance).__name__} pk={model_pk}> "
-                    + " ".join(error_messages)
-                )
-                raise DjangoValidationError(full_message)  # type: ignore
-
-        return validator
-
-    @creates_validator
-    def django_model_validates():
-        """
-        Validator factory: Checks if a Django model instance passes model.full_clean().
-        """
-
-        def validator(model_instance: Any, is_collection_phase: bool = False) -> None:
-            # Real implementation
-            if is_collection_phase:
-                return
-            if not is_django_model(model_instance):
-                return
-            model_instance.full_clean()
-
-        return validator
-
-else:
-
-    @creates_validator
-    def django_model_has_fields(obj):
-        """Stub validator factory when Django is not installed."""
-        raise ImportError("Django is required for django_model_has_fields")
-
-    @creates_validator
-    def django_model_validates(obj):
-        """Stub validator factory when Django is not installed."""
-        raise ImportError("Django is required for django_model_validates")
 
 
 # Ensure __all__ is defined if this is intended as a non-trivial package component
