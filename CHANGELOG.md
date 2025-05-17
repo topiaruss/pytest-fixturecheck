@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.5.0 (2024-05-17)
+
+### Bug Fixes and Improvements
+- Fixed flake8 redefinition errors in django_validators.py
+- Restructured function definitions to properly handle stub functionality when Django is not available
+- Fixed test compatibility in the nodjango environment
+- Improved type annotations in __init__.py to avoid mypy redefinition errors
+- Enhanced robustness of Django import handling with better fallback mechanisms
+- Reformatted code to comply with Black style requirements
+
 ## 0.4.3 (2025-05-15)
 
 ### Bug Fixes and Improvements
