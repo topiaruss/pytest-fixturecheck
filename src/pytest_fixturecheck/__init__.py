@@ -11,29 +11,38 @@ from .decorator import (
     with_required_methods,
 )
 
+
 # Create base exception classes to use when Django is not available
 class _FieldDoesNotExistBase(Exception):
     """Base class for Django's FieldDoesNotExist when Django is not installed."""
+
     pass
+
 
 class _ValidationErrorBase(Exception):
     """Base class for Django's ValidationError when Django is not installed."""
+
     pass
+
 
 # Default implementations when Django is not available
 DJANGO_AVAILABLE = False
+
 
 def _is_django_model_fallback(obj: Any) -> bool:
     """Stub for is_django_model when Django is not installed."""
     return False
 
+
 def _django_model_has_fields_fallback(*args: Any, **kwargs: Any) -> Any:
     """Stub for django_model_has_fields when Django is not installed."""
     raise ImportError("Django is required for django_model_has_fields")
 
+
 def _django_model_validates_fallback(*args: Any, **kwargs: Any) -> Any:
     """Stub for django_model_validates when Django is not installed."""
     raise ImportError("Django is required for django_model_validates")
+
 
 # Try to import Django components
 try:
@@ -45,11 +54,11 @@ try:
         is_django_model,
         DJANGO_AVAILABLE,
     )
-    
+
     # Use the real Django exceptions
     FieldDoesNotExist = FieldDoesNotExist_Export
     ValidationError = ValidationError_Export
-    
+
 except ImportError:
     # Use our fallback implementations
     FieldDoesNotExist = _FieldDoesNotExistBase
@@ -113,7 +122,7 @@ __all__ = [
     "django_model_has_fields",
     "django_model_validates",
     "FieldDoesNotExist",
-    "ValidationError", 
+    "ValidationError",
     # Advanced validators (new in 0.3.4)
     "nested_property_validator",
     "type_check_properties",
