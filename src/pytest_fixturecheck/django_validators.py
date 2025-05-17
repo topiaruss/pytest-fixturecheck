@@ -17,11 +17,13 @@ _InitialImportError: Optional[ImportError] = None
 # Define base dummy exceptions that can be raised/caught
 class DjangoFieldDoesNotExistBase(Exception):
     """Base class for Django's FieldDoesNotExist when Django is not installed."""
+
     pass
 
 
 class DjangoValidationErrorBase(Exception):
     """Base class for Django's ValidationError when Django is not installed."""
+
     pass
 
 
@@ -79,10 +81,10 @@ DjangoField: Any = _DummyDjangoField
 def _is_django_model_dummy(obj: Any) -> bool:
     """
     Check if an object is a Django model instance (stub when Django is not available).
-    
+
     Args:
         obj: The object to check
-        
+
     Returns:
         False when Django is not available
     """
@@ -127,7 +129,7 @@ try:
     FieldDoesNotExist_Export = cast(Type[Exception], DjangoFieldDoesNotExist)
 
     DJANGO_AVAILABLE = True
-    
+
     # Define real implementations when Django is available
     def _is_django_model_real(obj: Any) -> bool:
         """

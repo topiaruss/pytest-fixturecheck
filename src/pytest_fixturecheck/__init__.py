@@ -1,6 +1,7 @@
 """pytest-fixturecheck - A pytest plugin to validate fixtures before tests."""
 
 import importlib.metadata
+from typing import Type
 
 from . import validators
 from .decorator import (
@@ -9,6 +10,11 @@ from .decorator import (
     with_required_fields,
     with_required_methods,
 )
+
+# Initialize variables to avoid mypy redefinition errors
+DJANGO_AVAILABLE = False
+FieldDoesNotExist: Type[Exception]
+ValidationError: Type[Exception]
 
 # Django validators - only import if Django is available
 try:
@@ -22,8 +28,6 @@ try:
     )
 except ImportError:
     # Stub types for when Django is not installed
-    DJANGO_AVAILABLE = False
-
     class FieldDoesNotExist(Exception):
         """Stub for Django's FieldDoesNotExist when Django is not installed."""
 
