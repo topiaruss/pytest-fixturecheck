@@ -1,7 +1,7 @@
 """pytest-fixturecheck - A pytest plugin to validate fixtures before tests."""
 
 import importlib.metadata
-from typing import Type
+from typing import Any, Callable, Optional, Type, TypeVar, cast
 
 from . import validators
 from .decorator import (
@@ -11,45 +11,52 @@ from .decorator import (
     with_required_methods,
 )
 
-# Initialize variables to avoid mypy redefinition errors
-DJANGO_AVAILABLE = False
-FieldDoesNotExist: Type[Exception]
-ValidationError: Type[Exception]
+# Create base exception classes to use when Django is not available
+class _FieldDoesNotExistBase(Exception):
+    """Base class for Django's FieldDoesNotExist when Django is not installed."""
+    pass
 
-# Django validators - only import if Django is available
+class _ValidationErrorBase(Exception):
+    """Base class for Django's ValidationError when Django is not installed."""
+    pass
+
+# Default implementations when Django is not available
+DJANGO_AVAILABLE = False
+
+def _is_django_model_fallback(obj: Any) -> bool:
+    """Stub for is_django_model when Django is not installed."""
+    return False
+
+def _django_model_has_fields_fallback(*args: Any, **kwargs: Any) -> Any:
+    """Stub for django_model_has_fields when Django is not installed."""
+    raise ImportError("Django is required for django_model_has_fields")
+
+def _django_model_validates_fallback(*args: Any, **kwargs: Any) -> Any:
+    """Stub for django_model_validates when Django is not installed."""
+    raise ImportError("Django is required for django_model_validates")
+
+# Try to import Django components
 try:
     from .django_validators import (
-        FieldDoesNotExist_Export as FieldDoesNotExist,
-        ValidationError_Export as ValidationError,
+        FieldDoesNotExist_Export,
+        ValidationError_Export,
         django_model_has_fields,
         django_model_validates,
         is_django_model,
         DJANGO_AVAILABLE,
     )
+    
+    # Use the real Django exceptions
+    FieldDoesNotExist = FieldDoesNotExist_Export
+    ValidationError = ValidationError_Export
+    
 except ImportError:
-    # Stub types for when Django is not installed
-    class FieldDoesNotExist(Exception):
-        """Stub for Django's FieldDoesNotExist when Django is not installed."""
-
-        pass
-
-    class ValidationError(Exception):
-        """Stub for Django's ValidationError when Django is not installed."""
-
-        pass
-
-    def is_django_model(obj):
-        """Stub for is_django_model when Django is not installed."""
-        return False
-
-    def django_model_has_fields(*args, **kwargs):
-        """Stub for django_model_has_fields when Django is not installed."""
-        raise ImportError("Django is required for django_model_has_fields")
-
-    def django_model_validates(*args, **kwargs):
-        """Stub for django_model_validates when Django is not installed."""
-        raise ImportError("Django is required for django_model_validates")
-
+    # Use our fallback implementations
+    FieldDoesNotExist = _FieldDoesNotExistBase
+    ValidationError = _ValidationErrorBase
+    is_django_model = _is_django_model_fallback
+    django_model_has_fields = _django_model_has_fields_fallback
+    django_model_validates = _django_model_validates_fallback
 
 from .utils import creates_validator
 from .validators import (
@@ -105,6 +112,8 @@ __all__ = [
     "is_django_model",
     "django_model_has_fields",
     "django_model_validates",
+    "FieldDoesNotExist",
+    "ValidationError", 
     # Advanced validators (new in 0.3.4)
     "nested_property_validator",
     "type_check_properties",
