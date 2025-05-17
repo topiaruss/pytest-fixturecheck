@@ -9,13 +9,44 @@ from .decorator import (
     with_required_fields,
     with_required_methods,
 )
-from .django_validators import FieldDoesNotExist_Export as FieldDoesNotExist
-from .django_validators import ValidationError_Export as ValidationError
-from .django_validators import (
-    django_model_has_fields,
-    django_model_validates,
-    is_django_model,
-)
+
+# Django validators - only import if Django is available
+try:
+    from .django_validators import (
+        FieldDoesNotExist_Export as FieldDoesNotExist,
+        ValidationError_Export as ValidationError,
+        django_model_has_fields,
+        django_model_validates,
+        is_django_model,
+        DJANGO_AVAILABLE,
+    )
+except ImportError:
+    # Stub types for when Django is not installed
+    DJANGO_AVAILABLE = False
+
+    class FieldDoesNotExist(Exception):
+        """Stub for Django's FieldDoesNotExist when Django is not installed."""
+
+        pass
+
+    class ValidationError(Exception):
+        """Stub for Django's ValidationError when Django is not installed."""
+
+        pass
+
+    def is_django_model(obj):
+        """Stub for is_django_model when Django is not installed."""
+        return False
+
+    def django_model_has_fields(*args, **kwargs):
+        """Stub for django_model_has_fields when Django is not installed."""
+        raise ImportError("Django is required for django_model_has_fields")
+
+    def django_model_validates(*args, **kwargs):
+        """Stub for django_model_validates when Django is not installed."""
+        raise ImportError("Django is required for django_model_validates")
+
+
 from .utils import creates_validator
 from .validators import (
     combines_validators,
@@ -50,19 +81,23 @@ except importlib.metadata.PackageNotFoundError:
     # Package is not installed, use a default version
     __version__ = "0.4.3"
 
+# Define what gets imported with "from pytest_fixturecheck import *"
 __all__ = [
+    # Main decorator
     "fixturecheck",
+    # Validator decorator
     "creates_validator",
-    # Validators
+    # Main validators
     "is_instance_of",
     "has_required_fields",
     "has_required_methods",
-    "has_property_values",  # Keep for backward compatibility
-    "property_values_validator",  # Fixed property validator that works with a dictionary
-    "check_property_values",  # Fixed property validator that works with keyword arguments
-    "with_property_values",  # Fixed with_property_values factory function
+    "has_property_values",
+    "property_values_validator",
+    "check_property_values",
+    "with_property_values",
     "combines_validators",
     # Django validators
+    "DJANGO_AVAILABLE",
     "is_django_model",
     "django_model_has_fields",
     "django_model_validates",
@@ -72,7 +107,7 @@ __all__ = [
     "simple_validator",
     "with_nested_properties",
     "with_type_checks",
-    # Decorator factory functions (compatibility, from decorator.py)
+    # Decorator factory functions (from decorator.py, added in __init__)
     "with_required_fields",
     "with_required_methods",
     "with_model_validation",
