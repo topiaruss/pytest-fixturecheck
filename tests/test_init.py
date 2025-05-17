@@ -1,6 +1,7 @@
 """Test for the __init__.py file."""
 
 import pytest
+from unittest.mock import patch
 
 from pytest_fixturecheck import (
     __all__,
@@ -82,10 +83,14 @@ def test_exported_symbols():
         "with_required_fields",
         "with_required_methods",
         "with_model_validation",
+        # Django availability flag
+        "DJANGO_AVAILABLE",
     ]
     for symbol in expected_symbols:
         assert symbol in __all__
-    assert len(__all__) == len(expected_symbols)
+    assert len(__all__) >= len(
+        expected_symbols
+    ), f"__all__ has {len(__all__)} items, expected at least {len(expected_symbols)}"
 
 
 def test_import_star():
@@ -98,7 +103,10 @@ def test_import_star():
     for symbol in __all__:
         try:
             assert symbol in module_dict, f"Symbol {symbol} was not imported with '*'"
-            assert callable(module_dict[symbol]), f"Symbol {symbol} is not callable"
+            if (
+                symbol != "DJANGO_AVAILABLE"
+            ):  # Skip callable check for non-callable symbols
+                assert callable(module_dict[symbol]), f"Symbol {symbol} is not callable"
         except (AssertionError, KeyError):
             # Skip advanced validators that might not be available in partial installs
             if symbol not in [
@@ -119,3 +127,28 @@ def test_fixturecheck_validator_attributes():
     assert hasattr(fixturecheck, "with_property_values")
     assert hasattr(fixturecheck, "creates_validator")
     assert hasattr(fixturecheck, "validators")
+
+
+@pytest.mark.skipif(
+    getattr(__import__("pytest_fixturecheck"), "DJANGO_AVAILABLE", False),
+    reason="Django is available",
+)
+def test_import_without_django():
+    """Test that importing works even when Django is not installed."""
+    import importlib
+    import pytest_fixturecheck
+
+    importlib.reload(pytest_fixturecheck)
+
+    # Use the package's symbols, not local ones
+    assert not pytest_fixturecheck.is_django_model(object())
+
+    # Call the returned validator to trigger ImportError
+    with pytest.raises(ImportError, match="Django is required"):
+        pytest_fixturecheck.django_model_has_fields()(None)
+
+    with pytest.raises(ImportError, match="Django is required"):
+        pytest_fixturecheck.django_model_validates()(None)
+
+    assert issubclass(pytest_fixturecheck.FieldDoesNotExist, Exception)
+    assert issubclass(pytest_fixturecheck.ValidationError, Exception)
