@@ -431,6 +431,126 @@ class FixtureCheckPlugin:
         
         return existing_checks
 
+    def get_opportunities_details(self, content: str, filename: str) -> List[Dict[str, Any]]:
+        """Get detailed information about fixtures that could benefit from fixturecheck."""
+        details = []
+        tree = ast.parse(content)
+        
+        for node in ast.walk(tree):
+            if isinstance(node, ast.FunctionDef):
+                # Check if this is a fixture
+                is_fixture = False
+                fixture_decorator = None
+                
+                for decorator in node.decorator_list:
+                    if isinstance(decorator, ast.Call):
+                        if isinstance(decorator.func, ast.Name):
+                            if decorator.func.id in ["fixture", "pytest.fixture", "pytest_asyncio.fixture"]:
+                                is_fixture = True
+                                fixture_decorator = decorator
+                                break
+                        elif isinstance(decorator.func, ast.Attribute):
+                            if decorator.func.attr == "fixture":
+                                is_fixture = True
+                                fixture_decorator = decorator
+                                break
+                    elif isinstance(decorator, ast.Name):
+                        if decorator.id in ["fixture", "pytest.fixture", "pytest_asyncio.fixture"]:
+                            is_fixture = True
+                            fixture_decorator = decorator
+                            break
+                    elif isinstance(decorator, ast.Attribute):
+                        if decorator.attr == "fixture":
+                            is_fixture = True
+                            fixture_decorator = decorator
+                            break
+                
+                if is_fixture:
+                    # Check if it already has fixturecheck
+                    has_fixturecheck = False
+                    for decorator in node.decorator_list:
+                        if isinstance(decorator, ast.Call):
+                            if isinstance(decorator.func, ast.Name):
+                                if decorator.func.id == "fixturecheck":
+                                    has_fixturecheck = True
+                                    break
+                    
+                    if not has_fixturecheck:
+                        # Extract function parameters
+                        params = [arg.arg for arg in node.args.args]
+                        
+                        detail = {
+                            'name': node.name,
+                            'line_number': node.lineno,
+                            'params': params,
+                            'filename': filename,
+                            'validator': None  # No validator for opportunities
+                        }
+                        details.append(detail)
+        
+        return details
+
+    def get_existing_checks_details(self, content: str, filename: str) -> List[Dict[str, Any]]:
+        """Get detailed information about existing fixture checks."""
+        details = []
+        tree = ast.parse(content)
+        
+        for node in ast.walk(tree):
+            if isinstance(node, ast.FunctionDef):
+                # Check if this function has fixturecheck decorator
+                fixturecheck_decorator = None
+                for decorator in node.decorator_list:
+                    if isinstance(decorator, ast.Call):
+                        if isinstance(decorator.func, ast.Name):
+                            if decorator.func.id == "fixturecheck":
+                                fixturecheck_decorator = decorator
+                                break
+                
+                if fixturecheck_decorator:
+                    # Extract function parameters
+                    params = [arg.arg for arg in node.args.args]
+                    
+                    # Extract validator information
+                    validator_info = self._extract_validator_info(fixturecheck_decorator)
+                    
+                    detail = {
+                        'name': node.name,
+                        'line_number': node.lineno,
+                        'params': params,
+                        'filename': filename,
+                        'validator': validator_info
+                    }
+                    details.append(detail)
+        
+        return details
+
+    def _extract_validator_info(self, decorator: ast.Call) -> Optional[str]:
+        """Extract validator information from a fixturecheck decorator."""
+        if not decorator.args:
+            return "Default validator"
+        
+        # Get the first argument (the validator)
+        validator_arg = decorator.args[0]
+        
+        if isinstance(validator_arg, ast.Name):
+            return validator_arg.id
+        elif isinstance(validator_arg, ast.Attribute):
+            return ast.unparse(validator_arg) if hasattr(ast, 'unparse') else f"{validator_arg.attr}"
+        elif isinstance(validator_arg, ast.Call):
+            if hasattr(ast, 'unparse'):
+                return ast.unparse(validator_arg)
+            else:
+                # Fallback for older Python versions
+                if isinstance(validator_arg.func, ast.Name):
+                    return f"{validator_arg.func.id}(...)"
+                else:
+                    return "Complex validator call"
+        else:
+            if hasattr(ast, 'unparse'):
+                return ast.unparse(validator_arg)
+            else:
+                return "Custom validator"
+
     def add_fixture_checks(self, content: str) -> str:
         """Add fixturecheck decorators to fixtures that don't have them."""
         tree = ast.parse(content)
