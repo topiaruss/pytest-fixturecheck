@@ -274,7 +274,9 @@ The CLI uses consistent separator patterns:
 
 ## File Patterns
 
-The CLI supports glob patterns for file matching:
+The CLI supports glob patterns for file matching. **Note: `conftest.py` files are always included automatically, regardless of the specified pattern.**
+
+### Pattern Examples
 
 | Pattern | Matches |
 |---------|---------|
@@ -282,7 +284,19 @@ The CLI supports glob patterns for file matching:
 | `*_test.py` | Files ending with "_test.py" |
 | `test*.py` | Files starting with "test" |
 | `*test*.py` | Files containing "test" |
-| `conftest.py` | Specific file name |
+
+### Special Case: conftest.py
+
+`conftest.py` files are **automatically included** in all searches, regardless of the pattern specified. This ensures that fixture definitions in conftest files are always analyzed, since they commonly contain shared fixtures used across multiple test files.
+
+**Examples:**
+
+```bash
+# These all include conftest.py files automatically
+fixturecheck report --pattern "test_*.py"      # Includes: test_*.py + conftest.py
+fixturecheck report --pattern "*_test.py"      # Includes: *_test.py + conftest.py  
+fixturecheck report --pattern "unit_*.py"      # Includes: unit_*.py + conftest.py
+```
 
 ## Best Practices
 
