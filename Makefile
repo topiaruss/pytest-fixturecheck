@@ -1,4 +1,15 @@
-.PHONY: clean install test test-all test-specific lint mypy format build publish tox pre-commit version-patch version-minor version-major release tag update-badge
+# pytest-fixturecheck Makefile
+#
+# Environment Variables for Release:
+#   UV_PUBLISH_TOKEN - PyPI API token for publishing (get from https://pypi.org/manage/account/#api-tokens)
+#
+# Usage:
+#   make build         - Build the package
+#   make publish-test  - Publish to TestPyPI 
+#   make publish       - Publish to PyPI
+#   make release       - Full release process
+
+.PHONY: clean install install-dev test test-all test-specific check format mypy build publish publish-test tox pre-commit version-patch version-minor version-major release tag update-badge
 
 clean:
 	rm -rf build/ dist/ *.egg-info/ .pytest_cache/ .coverage htmlcov/ .tox/ __pycache__/ */__pycache__/ */*/__pycache__/
@@ -18,18 +29,14 @@ test-all:
 test-specific:
 	PYTHONPATH=src pytest -xvs $(filter-out $@,$(MAKECMDGOALS))
 
-test-uv:
-	uvx pytest -xvs tests/
+check:
+	ruff check src tests
 
-lint:
-	flake8 src tests
+format:
+	ruff format src tests
 
 mypy:
 	mypy src
-
-format:
-	isort src tests
-	black src tests
 
 pre-commit:
 	pre-commit run --all-files
@@ -37,53 +44,24 @@ pre-commit:
 tox:
 	tox
 
-tox-py37:
-	tox -e py37
-
-tox-py38:
-	tox -e py38
-
-tox-py39:
-	tox -e py39
-
-tox-py310:
-	tox -e py310
-
-tox-py311:
-	tox -e py311
-
-tox-lint:
-	tox -e lint
-
-tox-mypy:
-	tox -e mypy
-
-tox-django:
-	tox -e django
-
 # Update the PyPI badge in README.md to match the current version
 update-badge:
 	python3 scripts/update_badge.py
 
-# Use the virtual environment python if it exists, otherwise try system python
 build:
-	(test -f .venv/bin/python && .venv/bin/python -m build) || \
-	(test -f env/bin/python && env/bin/python -m build) || \
-	(python3 -m build)
+	uv build
 
-# Upload to PyPI using the same Python as build
 publish:
-	(test -f .venv/bin/python && .venv/bin/python -m twine upload dist/*) || \
-	(test -f env/bin/python && env/bin/python -m twine upload dist/*) || \
-	(python3 -m twine upload dist/*)
+	uv publish
 
-# Tag the current version and push the tag
+publish-test:
+	uv publish --publish-url https://test.pypi.org/legacy/
+
 tag:
 	VERSION=$$(grep -m 1 "version" pyproject.toml | sed 's/.*"\(.*\)".*/\1/'); \
 	git tag -a "v$$VERSION" -m "Release v$$VERSION"; \
 	git push --tags
 
-# Full release process: update badge, build, publish and tag
 release: update-badge clean build publish tag
 	@echo "Release process completed!"
 

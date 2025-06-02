@@ -2,7 +2,7 @@
 
 [![CI](https://github.com/topiaruss/pytest-fixturecheck/actions/workflows/ci.yml/badge.svg)](https://github.com/topiaruss/pytest-fixturecheck/actions/workflows/ci.yml)
 [![codecov](https://codecov.io/gh/topiaruss/pytest-fixturecheck/branch/main/graph/badge.svg)](https://codecov.io/gh/topiaruss/pytest-fixturecheck)
-[![PyPI version](https://img.shields.io/pypi/v/pytest-fixturecheck.svg)](https://pypi.org/project/pytest-fixturecheck/0.4.3/)
+[![PyPI version](https://img.shields.io/pypi/v/pytest-fixturecheck.svg)](https://pypi.org/project/pytest-fixturecheck/0.6.0/)
 [![Python Versions](https://img.shields.io/pypi/pyversions/pytest-fixturecheck.svg)](https://pypi.org/project/pytest-fixturecheck/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![AI-assisted](https://img.shields.io/badge/code%20origin-AI--assisted-blueviolet)](#ai-generated-code-disclosure)
@@ -363,4 +363,37 @@ This project is tagged with the following keywords to improve discoverability:
 ## License
 
 MIT
+
+## 🚀 Development & Release Process
+
+This project uses `uv` for a streamlined build and release process.
+
+### Building & Publishing
+
+#### Prerequisites
+Set up your PyPI token as an environment variable:
+```bash
+export UV_PUBLISH_TOKEN="pypi-your-token-here"
+```
+
+#### Commands
+```bash
+# Build the package
+make build
+
+# Test release to TestPyPI
+make publish-test
+
+# Release to PyPI
+make publish
+
+# Full release process (builds, publishes, tags)
+make release
+```
+
+#### What's Different
+- ✅ **Faster**: `uv build` is 10-100x faster than traditional `python -m build`
+- ✅ **Simpler**: No more complex Python path detection or separate twine installs
+- ✅ **Consistent**: Uses `uv` throughout the entire development workflow
+- ✅ **Modern**: Uses hatchling build backend for better performance
 
