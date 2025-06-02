@@ -36,6 +36,9 @@ with patch.dict(
 ):
     from pytest_fixturecheck.django_validators import (
         DJANGO_AVAILABLE,
+        django_model_has_fields,
+        django_model_validates,
+        validate_model_fields,
     )
 
 
@@ -83,32 +86,27 @@ class TestDjangoValidators:
 
             return validator
 
-        # Mock the django_model_has_fields function
-        with patch(
-            "tests.test_django_mock.django_model_has_fields",
-            mock_django_model_has_fields,
-        ):
-            # Create a mock Django model
-            model = MockModel()
+        # Create a mock Django model
+        model = MockModel()
 
-            # Mock the get_field method
-            def get_field_side_effect(field_name):
-                if field_name in ["field1", "field2"]:
-                    return MagicMock()
-                raise MockFieldDoesNotExist(f"Field {field_name} not found")
+        # Mock the get_field method
+        def get_field_side_effect(field_name):
+            if field_name in ["field1", "field2"]:
+                return MagicMock()
+            raise MockFieldDoesNotExist(f"Field {field_name} not found")
 
-            model._meta.get_field.side_effect = get_field_side_effect
+        model._meta.get_field.side_effect = get_field_side_effect
 
-            # Test the function directly
-            validator = mock_django_model_has_fields("field1", "field2")
-            assert callable(validator)
+        # Test the function directly
+        validator = mock_django_model_has_fields("field1", "field2")
+        assert callable(validator)
 
-            # Should not raise for valid fields
-            validator(model)
+        # Should not raise for valid fields
+        validator(model)
 
-            # Should raise for missing field
-            with pytest.raises(AttributeError, match="does not have field"):
-                mock_django_model_has_fields("field1", "missing_field")(model)
+        # Should raise for missing field
+        with pytest.raises(AttributeError, match="does not have field"):
+            mock_django_model_has_fields("field1", "missing_field")(model)
 
     def test_django_model_validates(self):
         """Test django_model_validates function."""
@@ -125,24 +123,22 @@ class TestDjangoValidators:
         def mock_django_model_validates():
             return mock_validator
 
-        # Mock the function
-        with patch("tests.test_django_mock.django_model_validates", mock_django_model_validates):
-            # Create a mock Django model
-            model = MockModel()
+        # Create a mock Django model
+        model = MockModel()
 
-            # Test the function directly
-            validator = mock_django_model_validates()
-            assert callable(validator)
+        # Test the function directly
+        validator = mock_django_model_validates()
+        assert callable(validator)
 
-            # Should not raise when clean() succeeds
+        # Should not raise when clean() succeeds
+        validator(model)
+
+        # Should raise when clean() fails
+        model.clean.side_effect = ValueError("Validation error")
+        with pytest.raises(ValueError, match="Validation error"):
             validator(model)
 
-            # Should raise when clean() fails
-            model.clean.side_effect = ValueError("Validation error")
-            with pytest.raises(ValueError, match="Validation error"):
-                validator(model)
-
-    @patch("tests.test_django_mock.validate_model_fields")
+    @patch("pytest_fixturecheck.django_validators.validate_model_fields")
     def test_validate_model_fields(self, mock_validate):
         """Test validate_model_fields function by mocking it."""
         # Set up the mock
