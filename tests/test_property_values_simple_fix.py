@@ -29,15 +29,12 @@ def test_direct_validator():
         validator(SimpleObject(name="wrong"), False)
 
 
-# Define fixture first, then apply decorator
+# Define fixture with proper decorator stacking
 @pytest.fixture
+@fixturecheck(property_values_validator({"name": "fixture_test"}))
 def simple_fixture():
     """Fixture that returns an object with name='fixture_test'."""
     return SimpleObject(name="fixture_test")
-
-
-# Apply fixturecheck separately (this may avoid the fixture collection issue)
-simple_fixture = fixturecheck(property_values_validator({"name": "fixture_test"}))(simple_fixture)
 
 
 def test_with_fixture(simple_fixture):

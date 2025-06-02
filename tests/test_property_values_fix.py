@@ -56,7 +56,6 @@ def my_valid_object():
     return PropFixTestObject()
 
 
-@pytest.mark.skip(reason="Fixture discovery issue")
 def test_fixture_with_validator(my_valid_object):
     """Test using the fixture with our validator."""
     assert my_valid_object.name == "test"
