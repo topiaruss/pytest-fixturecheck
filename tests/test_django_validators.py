@@ -107,14 +107,18 @@ def sample_book(setup_django_db):
     return Book.objects.create(title="Test Book", author="Test Author")
 
 
-@pytest.fixture
-@fixturecheck(django_model_validates())
-def valid_book(setup_django_db):
-    """A fixture that returns a valid Book model instance."""
-    if not DJANGO_AVAILABLE:
+# Create a conditional fixture for django_model_validates
+if DJANGO_AVAILABLE:
+    @pytest.fixture
+    @fixturecheck(django_model_validates())
+    def valid_book(setup_django_db):
+        """A fixture that returns a valid Book model instance."""
+        return Book.objects.create(title="Valid Book", author="Valid Author")
+else:
+    @pytest.fixture
+    def valid_book(setup_django_db):
+        """A fixture stub when Django is not available."""
         return None
-
-    return Book.objects.create(title="Valid Book", author="Valid Author")
 
 
 # Create a custom Django validator using creates_validator
