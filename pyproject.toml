@@ -10,7 +10,7 @@ readme = "README.md"
 authors = [
     {name = "Russ Ferriday"}
 ]
-license = "MIT"
+license = {text = "MIT"}
 keywords = ["pytest", "testing", "fixtures", "python", "pytest-plugin", "validation"]
 classifiers = [
     "Development Status :: 3 - Alpha",
