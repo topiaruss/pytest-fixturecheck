@@ -10,13 +10,16 @@ install-dev:
 	uv pip install -e ".[dev]"
 
 test:
-	pytest -xvs
+	PYTHONPATH=src pytest -xvs
 
 test-all:
-	pytest -xvs tests/
+	PYTHONPATH=src pytest -xvs tests/
 
 test-specific:
-	pytest -xvs $(filter-out $@,$(MAKECMDGOALS))
+	PYTHONPATH=src pytest -xvs $(filter-out $@,$(MAKECMDGOALS))
+
+test-uv:
+	uvx pytest -xvs tests/
 
 lint:
 	flake8 src tests

@@ -1,6 +1,7 @@
 import inspect
 import sys
 import traceback
+import ast
 from typing import Any, Dict, List, Optional, Set, Tuple
 
 import pytest
@@ -361,3 +362,134 @@ def report_fixture_errors(failed_fixtures: List[Tuple]) -> None:
             "  • For validator examples, see https://github.com/topiaruss/pytest-fixturecheck#property-validators"
         )
     print("=" * 80)
+
+
+class FixtureCheckPlugin:
+    def __init__(self):
+        self.fixture_patterns = [
+            "@pytest.fixture",
+            "@fixture",
+            "@pytest_asyncio.fixture",
+        ]
+
+    def count_opportunities(self, content: str) -> int:
+        """Count the number of fixtures that could benefit from fixturecheck."""
+        opportunities = 0
+        tree = ast.parse(content)
+        
+        for node in ast.walk(tree):
+            if isinstance(node, ast.FunctionDef):
+                # Check if this is a fixture
+                is_fixture = False
+                for decorator in node.decorator_list:
+                    if isinstance(decorator, ast.Call):
+                        if isinstance(decorator.func, ast.Name):
+                            if decorator.func.id in ["fixture", "pytest.fixture", "pytest_asyncio.fixture"]:
+                                is_fixture = True
+                                break
+                        elif isinstance(decorator.func, ast.Attribute):
+                            if decorator.func.attr == "fixture":
+                                is_fixture = True
+                                break
+                    elif isinstance(decorator, ast.Name):
+                        if decorator.id in ["fixture", "pytest.fixture", "pytest_asyncio.fixture"]:
+                            is_fixture = True
+                            break
+                    elif isinstance(decorator, ast.Attribute):
+                        if decorator.attr == "fixture":
+                            is_fixture = True
+                            break
+                
+                if is_fixture:
+                    # Check if it already has fixturecheck
+                    has_fixturecheck = False
+                    for decorator in node.decorator_list:
+                        if isinstance(decorator, ast.Call):
+                            if isinstance(decorator.func, ast.Name):
+                                if decorator.func.id == "fixturecheck":
+                                    has_fixturecheck = True
+                                    break
+                    
+                    if not has_fixturecheck:
+                        opportunities += 1
+        
+        return opportunities
+
+    def count_existing_checks(self, content: str) -> int:
+        """Count the number of existing fixture checks."""
+        existing_checks = 0
+        tree = ast.parse(content)
+        
+        for node in ast.walk(tree):
+            if isinstance(node, ast.FunctionDef):
+                for decorator in node.decorator_list:
+                    if isinstance(decorator, ast.Call):
+                        if isinstance(decorator.func, ast.Name):
+                            if decorator.func.id == "fixturecheck":
+                                existing_checks += 1
+                                break
+        
+        return existing_checks
+
+    def add_fixture_checks(self, content: str) -> str:
+        """Add fixturecheck decorators to fixtures that don't have them."""
+        tree = ast.parse(content)
+        lines = content.splitlines()
+        
+        # Track which lines need fixturecheck added
+        lines_to_add = []
+        
+        for node in ast.walk(tree):
+            if isinstance(node, ast.FunctionDef):
+                # Check if this is a fixture and if it already has fixturecheck
+                is_fixture = False
+                fixture_decorator_line = None
+                has_fixturecheck = False
+                
+                for decorator in node.decorator_list:
+                    # Check for fixturecheck decorators first
+                    fixturecheck_found = False
+                    if isinstance(decorator, ast.Call):
+                        if isinstance(decorator.func, ast.Name) and decorator.func.id == "fixturecheck":
+                            fixturecheck_found = True
+                        elif isinstance(decorator.func, ast.Attribute) and decorator.func.attr == "fixturecheck":
+                            fixturecheck_found = True
+                    elif isinstance(decorator, ast.Name) and decorator.id == "fixturecheck":
+                        fixturecheck_found = True
+                    elif isinstance(decorator, ast.Attribute) and decorator.attr == "fixturecheck":
+                        fixturecheck_found = True
+                    
+                    if fixturecheck_found:
+                        has_fixturecheck = True
+                        continue
+                    
+                    # Check for fixture decorators
+                    if isinstance(decorator, ast.Call):
+                        if isinstance(decorator.func, ast.Name):
+                            if decorator.func.id in ["fixture", "pytest.fixture", "pytest_asyncio.fixture"]:
+                                is_fixture = True
+                                fixture_decorator_line = decorator.lineno
+                        elif isinstance(decorator.func, ast.Attribute):
+                            if decorator.func.attr == "fixture":
+                                is_fixture = True
+                                fixture_decorator_line = decorator.lineno
+                    elif isinstance(decorator, ast.Name):
+                        if decorator.id in ["fixture", "pytest.fixture", "pytest_asyncio.fixture"]:
+                            is_fixture = True
+                            fixture_decorator_line = decorator.lineno
+                    elif isinstance(decorator, ast.Attribute):
+                        if decorator.attr == "fixture":
+                            is_fixture = True
+                            fixture_decorator_line = decorator.lineno
+                
+                # Only add fixturecheck if it's a fixture and doesn't already have it
+                if is_fixture and not has_fixturecheck and fixture_decorator_line is not None:
+                    # Insert after the fixture decorator
+                    insert_line = fixture_decorator_line
+                    lines_to_add.append((insert_line, "@fixturecheck()"))
+        
+        # Add the decorators in reverse order to maintain line numbers
+        for line_num, decorator in sorted(lines_to_add, reverse=True):
+            lines.insert(line_num, decorator)
+        
+        return "\n".join(lines)

@@ -1,7 +1,8 @@
 """Utility functions for pytest-fixturecheck."""
 
 import inspect
-from typing import Any, Callable, Optional, TypeVar
+from pathlib import Path
+from typing import Any, Callable, Optional, TypeVar, List
 
 # Type variables for better typing
 F = TypeVar("F", bound=Callable[..., Any])
@@ -184,3 +185,30 @@ def is_coroutine(obj: Any) -> bool:
         True if the object is a coroutine, False otherwise
     """
     return inspect.iscoroutine(obj)
+
+
+def find_test_files(path: Path, pattern: str = "test_*.py") -> List[Path]:
+    """Find all test files in a directory matching the given pattern.
+    
+    Args:
+        path: The directory to search in
+        pattern: The glob pattern to match test files (default: test_*.py)
+        
+    Returns:
+        A list of Path objects for matching test files
+    """
+    if not isinstance(path, Path):
+        path = Path(path)
+    
+    if not path.exists():
+        return []
+    
+    if path.is_file():
+        return [path] if (path.match(pattern) or path.name == "conftest.py") else []
+    
+    # Find both test files and conftest.py files
+    test_files = list(path.glob(f"**/{pattern}"))
+    conftest_files = list(path.glob("**/conftest.py"))
+    
+    # Combine and deduplicate the results
+    return list(set(test_files + conftest_files))
