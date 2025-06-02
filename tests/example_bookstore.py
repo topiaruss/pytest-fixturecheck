@@ -29,20 +29,20 @@ class Book:
 
 
 # Define fixtures with fixturecheck validation
-@fixturecheck
 @pytest.fixture
+@fixturecheck()
 def publisher():
     return Publisher(name="Willow House Press")
 
 
-@fixturecheck
 @pytest.fixture
+@fixturecheck()
 def author():
     return Author(name="Marian Brook")
 
 
-@fixturecheck
 @pytest.fixture
+@fixturecheck()
 def book(author, publisher):
     return Book(
         title="Echoes of the Riverbank",
@@ -51,8 +51,8 @@ def book(author, publisher):
     )
 
 
-@fixturecheck
 @pytest.fixture
+@fixturecheck()
 def sequel(book):
     return Book(
         title="Whispers in the Willow",
