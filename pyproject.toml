@@ -10,7 +10,7 @@ readme = "README.md"
 authors = [
     {name = "Russ Ferriday"}
 ]
-license = {text = "MIT"}
+license = "MIT"
 keywords = ["pytest", "testing", "fixtures", "python", "pytest-plugin", "validation"]
 classifiers = [
     "Development Status :: 3 - Alpha",
@@ -28,6 +28,7 @@ classifiers = [
 requires-python = ">=3.8"
 dependencies = [
     "pytest>=6.0.0",
+    "click>=8.0.0",
 ]
 
 [project.optional-dependencies]
@@ -62,6 +63,9 @@ repository = "https://github.com/topiaruss/pytest-fixturecheck"
 
 [project.entry-points.pytest11]
 fixturecheck = "pytest_fixturecheck.plugin"
+
+[project.scripts]
+fixturecheck = "pytest_fixturecheck.cli:fixturecheck"
 
 [tool.bandit]
 exclude_dirs = ["tests", ".tox", ".venv"]
