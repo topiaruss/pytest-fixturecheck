@@ -14,6 +14,7 @@ A pytest plugin to validate fixtures before they're used in tests.
 - Validates fixtures during test collection, catching errors early
 - Auto-detects Django models and validates field access
 - Works with any pytest fixture workflow
+- **Command-line interface for analyzing and managing fixture checks**
 - Flexible validation options:
   - No validator (simple existence check)
   - Custom validator functions
@@ -32,9 +33,121 @@ pip install pytest-fixturecheck
 ## Documentation
 
 - [Quick Start Guide](docs/QUICKSTART.md)
+- [Command-Line Interface (CLI)](docs/CLI.md)
 - [Property Validators](docs/PROPERTY_VALIDATORS.md)
 - [Django Validators](docs/DJANGO_VALIDATORS.md)
 - [Troubleshooting Guide](docs/TROUBLESHOOTING.md)
+
+## Command-Line Interface
+
+pytest-fixturecheck provides a powerful command-line interface to analyze and manage fixture checks in your codebase.
+
+### Report Command
+
+Analyze your test suite to find opportunities for fixture checks and count existing ones:
+
+```bash
+# Basic report
+fixturecheck report
+
+# Detailed report with fixture information
+fixturecheck report -v
+
+# Full report with validator details
+fixturecheck report -vv
+
+# Analyze specific directory
+fixturecheck report --path tests/
+
+# Use custom file pattern
+fixturecheck report --pattern "*_test.py"
+```
+
+**Example output:**
+
+```bash
+$ fixturecheck report
+Found 23 opportunities for fixture checks
+Found 15 existing fixture checks
+
+$ fixturecheck report -v
+FIXTURE CHECK REPORT
+==================================================
+
+File: tests/test_user.py
+----------------------------------------
+
+Opportunities for fixture checks:
+  Line 12: user_fixture
+    Parameters: db
+    ------------------------------
+  Line 18: admin_user
+    Parameters: user_fixture
+    ------------------------------
+
+Existing fixture checks:
+  Line 25: validated_user
+    Parameters: db
+    ------------------------------
+  Line 32: checked_admin
+    Parameters: validated_user
+    ------------------------------
+
+==================================================
+Found 23 opportunities for fixture checks
+Found 15 existing fixture checks
+
+$ fixturecheck report -vv
+FIXTURE CHECK REPORT
+==================================================
+
+File: tests/test_user.py
+----------------------------------------
+
+Existing fixture checks:
+  Line 25: validated_user
+    Parameters: db
+    Validator: Default validator
+    ------------------------------
+  Line 32: checked_admin
+    Parameters: validated_user
+    Validator: validate_admin_user
+    ------------------------------
+
+==================================================
+Found 23 opportunities for fixture checks
+Found 15 existing fixture checks
+```
+
+### Add Command
+
+Automatically add `@fixturecheck()` decorators to fixtures that don't have them:
+
+```bash
+# Dry run - see what would be changed
+fixturecheck add --dry-run
+
+# Add decorators to fixtures
+fixturecheck add
+
+# Add decorators in specific directory
+fixturecheck add --path tests/unit/
+
+# Add decorators with custom pattern
+fixturecheck add --pattern "test_*.py"
+```
+
+**Example output:**
+
+```bash
+$ fixturecheck add --dry-run
+Would modify tests/test_user.py
+Would modify tests/test_orders.py
+
+$ fixturecheck add
+Modified tests/test_user.py
+Modified tests/test_orders.py
+```
 
 ## Basic Usage
 

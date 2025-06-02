@@ -1,5 +1,30 @@
 # Changelog
 
+## 0.6.0 (2024-12-20)
+
+### New Features
+- **Added Command-Line Interface (CLI) for fixture analysis and management:**
+  - `fixturecheck report` - Analyze test suites to find fixture check opportunities and count existing ones
+  - `fixturecheck add` - Automatically add `@fixturecheck()` decorators to fixtures that don't have them
+  - `--dry-run` option for `add` command to preview changes without modifying files
+  - `--path` option to specify target directory (default: current directory)
+  - `--pattern` option to specify file pattern (default: test_*.py)
+- **Added verbose reporting options for detailed fixture analysis:**
+  - `-v` flag shows detailed fixture information including line numbers, names, and parameters
+  - `-vv` flag shows full details including validator information
+  - Proper separator blocks between fixture entries for improved readability
+- **Enhanced FixtureCheckPlugin with detailed analysis methods:**
+  - `get_opportunities_details()` - Extract detailed information about fixtures without checks
+  - `get_existing_checks_details()` - Extract detailed information about existing fixture checks
+  - `_extract_validator_info()` - Parse validator information from AST decorators
+- **Comprehensive CLI test suite with 10+ test cases covering all verbose scenarios**
+- **Full backward compatibility maintained with existing fixture validation functionality**
+
+### Documentation
+- Updated README.md with comprehensive CLI documentation and examples
+- Added detailed command usage examples with sample output
+- Enhanced feature list to highlight CLI capabilities
+
 ## 0.5.0 (2024-05-17)
 
 ### Bug Fixes and Improvements
