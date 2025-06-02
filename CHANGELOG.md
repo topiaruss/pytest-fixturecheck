@@ -1,6 +1,6 @@
 # Changelog
 
-## 0.6.0 (2024-12-20)
+## 0.6.0 (2025-06-02)
 
 ### New Features
 - **Added Command-Line Interface (CLI) for fixture analysis and management:**
@@ -17,13 +17,31 @@
   - `get_opportunities_details()` - Extract detailed information about fixtures without checks
   - `get_existing_checks_details()` - Extract detailed information about existing fixture checks
   - `_extract_validator_info()` - Parse validator information from AST decorators
+- **Smart path exclusion to prevent analyzing irrelevant directories:**
+  - Automatically excludes virtual environments (`.venv`, `venv`, `.env`, `env`, etc.)
+  - Excludes package directories (`site-packages`, `dist-packages`, `node_modules`, etc.)
+  - Excludes build/cache directories (`.pytest_cache`, `.mypy_cache`, `build`, `dist`, etc.)
+  - Prevents CLI from processing hundreds of irrelevant test files in dependencies
 - **Comprehensive CLI test suite with 10+ test cases covering all verbose scenarios**
 - **Full backward compatibility maintained with existing fixture validation functionality**
 
+### Bug Fixes
+- **Fixed Django compatibility issues when Django is not installed:**
+  - Resolved ImportError when Django validators are used at import time without Django available
+  - Added conditional fixture definitions to prevent import-time failures
+  - Ensured graceful fallback behavior when Django is unavailable
+- **Improved conftest.py handling:**
+  - Clarified in documentation that conftest.py files are always included regardless of pattern
+  - Fixed documentation that incorrectly suggested conftest.py was only included when specifically targeted
+
 ### Documentation
-- Updated README.md with comprehensive CLI documentation and examples
-- Added detailed command usage examples with sample output
-- Enhanced feature list to highlight CLI capabilities
+- **Added comprehensive CLI documentation and examples:**
+  - Complete CLI guide with installation, usage, and examples
+  - Detailed explanation of verbose options with sample outputs
+  - Best practices, workflow examples, and CI/CD integration guidance
+  - Added automatic exclusions section explaining which directories are skipped
+- **Updated README.md with CLI documentation and examples**
+- **Enhanced feature list to highlight CLI capabilities**
 
 ## 0.5.0 (2024-05-17)
 

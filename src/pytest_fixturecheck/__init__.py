@@ -97,9 +97,8 @@ except ImportError:
 # Get version from package metadata
 try:
     __version__ = importlib.metadata.version("pytest-fixturecheck")
-except importlib.metadata.PackageNotFoundError:
-    # Package is not installed, use a default version
-    __version__ = "0.5.0"
+except ImportError:
+    __version__ = "0.6.0"
 
 # Define what gets imported with "from pytest_fixturecheck import *"
 __all__ = [
