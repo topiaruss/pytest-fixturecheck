@@ -33,6 +33,7 @@ jobs:
         with:
           enable-cache: true
           cache-suffix: ${{ matrix.python-version }}-${{ matrix.tox-env }}
+          prune-cache: false
 
       - name: Set up Python ${{ matrix.python-version }}
         run: uv python install ${{ matrix.python-version }}
@@ -69,6 +70,7 @@ jobs:
         with:
           enable-cache: true
           cache-suffix: build
+          prune-cache: false
 
       - name: Set up Python
         run: uv python install 3.13
