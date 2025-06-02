@@ -1,7 +1,7 @@
 """pytest-fixturecheck - A pytest plugin to validate fixtures before tests."""
 
 import importlib.metadata
-from typing import Any, Callable, Optional, Type, TypeVar, cast
+from typing import Any
 
 from . import validators
 from .decorator import (
@@ -47,12 +47,12 @@ def _django_model_validates_fallback(*args: Any, **kwargs: Any) -> Any:
 # Try to import Django components
 try:
     from .django_validators import (
+        DJANGO_AVAILABLE,
         FieldDoesNotExist_Export,
         ValidationError_Export,
         django_model_has_fields,
         django_model_validates,
         is_django_model,
-        DJANGO_AVAILABLE,
     )
 
     # Use the real Django exceptions

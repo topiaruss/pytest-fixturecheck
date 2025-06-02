@@ -8,7 +8,6 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-import pytest_fixturecheck.django_validators  # Ensure the module is imported
 from pytest_fixturecheck import decorator as fc_decorator
 
 # Assuming _default_validator is accessible for testing.
@@ -36,21 +35,19 @@ class TestDecoratorGetattrErrors:
     def test_getattr_raises_attribute_error_in_direct_call_heuristic(self, mocker):
         """Test that AttributeError is caught for _is_... checks in direct call heuristic."""
         obj = self.RaisesAttributeError()
-        mock_default_validator = mocker.patch(
-            "pytest_fixturecheck.decorator._default_validator"
-        )
+        mock_default_validator = mocker.patch("pytest_fixturecheck.decorator._default_validator")
 
         # Case 1: @fixturecheck applied to an object that raises AttributeError on getattr
         # This object is not a validator/creator and fails inspect.signature, so it should be treated as a fixture body.
         # The getattr calls for _is_validator_check_val/_is_creator_check_val should hit the `except AttributeError`.
         try:
             decorated_func = fc_decorator.fixturecheck(obj)
-            assert hasattr(
-                decorated_func, "_validator"
-            ), "Wrapped function should have _validator attribute"
-            assert (
-                decorated_func._validator == mock_default_validator
-            ), "Should fall back to default validator"
+            assert hasattr(decorated_func, "_validator"), (
+                "Wrapped function should have _validator attribute"
+            )
+            assert decorated_func._validator == mock_default_validator, (
+                "Should fall back to default validator"
+            )
         except Exception as e:
             pytest.fail(
                 f"Applying fixturecheck to RaisesAttributeError object (direct) failed: {e}"
@@ -59,9 +56,7 @@ class TestDecoratorGetattrErrors:
     def test_getattr_raises_attribute_error_in_decorator_args(self, mocker):
         """Test AttributeError for _is_... checks when obj is passed as validator/creator arg."""
         obj = self.RaisesAttributeError()
-        mock_default_validator = mocker.patch(
-            "pytest_fixturecheck.decorator._default_validator"
-        )
+        mock_default_validator = mocker.patch("pytest_fixturecheck.decorator._default_validator")
 
         # Case 2: fixturecheck(obj) where obj is intended as a validator/creator but raises AttributeError
         decorator_instance_pos = fc_decorator.fixturecheck(obj)
@@ -71,9 +66,9 @@ class TestDecoratorGetattrErrors:
             return "pos"
 
         assert hasattr(my_fixture_pos, "_validator")
-        assert (
-            my_fixture_pos._validator == mock_default_validator
-        ), "Should use default validator if creator/validator lookup fails"
+        assert my_fixture_pos._validator == mock_default_validator, (
+            "Should use default validator if creator/validator lookup fails"
+        )
 
         # Case 3: fixturecheck(validator=obj) where obj raises AttributeError
         decorator_instance_kw = fc_decorator.fixturecheck(validator=obj)
@@ -83,9 +78,9 @@ class TestDecoratorGetattrErrors:
             return "kw"
 
         assert hasattr(my_fixture_kw, "_validator")
-        assert (
-            my_fixture_kw._validator == mock_default_validator
-        ), "Should use default validator if kwarg validator lookup fails"
+        assert my_fixture_kw._validator == mock_default_validator, (
+            "Should use default validator if kwarg validator lookup fails"
+        )
 
 
 # Test default validator
@@ -123,9 +118,7 @@ class TestDefaultValidator:
         if hasattr(mock_obj, "_meta"):
             del mock_obj._meta
 
-        with patch(
-            "pytest_fixturecheck.django_validators.DJANGO_AVAILABLE", True
-        ), patch(
+        with patch("pytest_fixturecheck.django_validators.DJANGO_AVAILABLE", True), patch(
             "pytest_fixturecheck.django_validators.validate_model_fields",
             new_callable=MagicMock,
         ) as mock_validate_django:
@@ -137,11 +130,9 @@ class TestDefaultValidator:
         mock_obj = MagicMock()
         mock_obj._meta = MagicMock()
 
-        with patch(
-            "pytest_fixturecheck.django_validators.DJANGO_AVAILABLE", True
-        ), patch("django.db.models.Model", new_callable=MagicMock) as MockModel, patch(
-            "builtins.isinstance", return_value=False
-        ) as mock_isinstance, patch(
+        with patch("pytest_fixturecheck.django_validators.DJANGO_AVAILABLE", True), patch(
+            "django.db.models.Model", new_callable=MagicMock
+        ) as MockModel, patch("builtins.isinstance", return_value=False) as mock_isinstance, patch(
             "pytest_fixturecheck.django_validators.validate_model_fields",
             new_callable=MagicMock,
         ) as mock_validate_django:
@@ -154,20 +145,15 @@ class TestDefaultValidator:
         mock_obj = MagicMock()
         mock_obj._meta = MagicMock()
 
-        with patch(
-            "pytest_fixturecheck.django_validators.DJANGO_AVAILABLE", True
-        ), patch(
+        with patch("pytest_fixturecheck.django_validators.DJANGO_AVAILABLE", True), patch(
             "django.db.models.Model", new_callable=MagicMock
-        ) as MockModelMetaclass, patch(
-            "builtins.isinstance"
-        ) as mock_isinstance, patch(
+        ) as MockModelMetaclass, patch("builtins.isinstance") as mock_isinstance, patch(
             "pytest_fixturecheck.django_validators.validate_model_fields",
             new_callable=MagicMock,
         ) as mock_validate_django:
             # Make isinstance(mock_obj, MockModelMetaclass) True
             mock_isinstance.side_effect = (
-                lambda obj, model_cls: obj is mock_obj
-                and model_cls is MockModelMetaclass
+                lambda obj, model_cls: obj is mock_obj and model_cls is MockModelMetaclass
             )
 
             _default_validator(mock_obj, is_collection_phase=False)
@@ -180,9 +166,7 @@ class TestDefaultValidator:
         mock_obj = MagicMock()
         mock_obj._meta = MagicMock()
 
-        with patch(
-            "pytest_fixturecheck.django_validators.DJANGO_AVAILABLE", True
-        ), patch(
+        with patch("pytest_fixturecheck.django_validators.DJANGO_AVAILABLE", True), patch(
             "django.db.models.Model", side_effect=ImportError("Cannot import Model")
         ), patch(
             "pytest_fixturecheck.django_validators.validate_model_fields",
@@ -196,9 +180,7 @@ class TestDefaultValidator:
         # This test targets the outer try-except ImportError in _default_validator for django_validators import.
         mock_obj = MagicMock()
 
-        with patch(
-            "pytest_fixturecheck.django_validators.DJANGO_AVAILABLE", True
-        ), patch(
+        with patch("pytest_fixturecheck.django_validators.DJANGO_AVAILABLE", True), patch(
             "pytest_fixturecheck.django_validators.validate_model_fields",
             side_effect=ImportError("Cannot import v_m_f from dv"),
         ), patch(
@@ -294,9 +276,7 @@ class TestDefaultValidator:
         class SomeObject:
             pass
 
-        obj = (
-            SomeObject()
-        )  # Not a Django model, but the import fail should happen first
+        obj = SomeObject()  # Not a Django model, but the import fail should happen first
 
         try:
             fc_decorator._default_validator(obj, is_collection_phase=False)
@@ -312,14 +292,11 @@ class TestDefaultValidator:
 
 # --- Tests for initial imports in decorator.py ---
 class TestDecoratorInitialImports:
-
     def _mock_import_for_django_validators_failure(self, name, package=None):
         """Side effect for importlib.import_module to simulate django_validators import failure."""
         # Check for absolute import name or relative import from pytest_fixturecheck package
         if name == "pytest_fixturecheck.django_validators" or (
-            name == ".django_validators"
-            and package
-            and package.startswith("pytest_fixturecheck")
+            name == ".django_validators" and package and package.startswith("pytest_fixturecheck")
         ):
             raise ImportError(
                 "Simulated import error for django_validators by test_decorator_internals"
@@ -329,16 +306,12 @@ class TestDecoratorInitialImports:
     # Removed @patch.dict(sys.modules, {'pytest_fixturecheck.django_validators': None})
     # Patch importlib.import_module instead
     @patch("importlib.import_module")
-    def test_django_validators_import_error_fallback(
-        self, mock_importlib_import_module
-    ):
+    def test_django_validators_import_error_fallback(self, mock_importlib_import_module):
         """
         Test that if 'from .django_validators import ...' fails in decorator.py,
         DJANGO_AVAILABLE is False and django_validate_model_fields is a no-op.
         """
-        mock_importlib_import_module.side_effect = (
-            self._mock_import_for_django_validators_failure
-        )
+        mock_importlib_import_module.side_effect = self._mock_import_for_django_validators_failure
 
         original_decorator_module = sys.modules.get("pytest_fixturecheck.decorator")
         if "pytest_fixturecheck.decorator" in sys.modules:
@@ -351,15 +324,14 @@ class TestDecoratorInitialImports:
             # The patched importlib.import_module should cause the ImportError for .django_validators
             import pytest_fixturecheck.decorator as decorator_module_reloaded
 
-            assert (
-                decorator_module_reloaded.DJANGO_AVAILABLE is False
-            ), "DJANGO_AVAILABLE should be False when .django_validators import fails"
+            assert decorator_module_reloaded.DJANGO_AVAILABLE is False, (
+                "DJANGO_AVAILABLE should be False when .django_validators import fails"
+            )
 
             # Check if django_validate_model_fields is a no-op
-            assert (
-                decorator_module_reloaded.django_validate_model_fields("any_obj")
-                is None
-            ), "Fallback django_validate_model_fields should be a no-op"
+            assert decorator_module_reloaded.django_validate_model_fields("any_obj") is None, (
+                "Fallback django_validate_model_fields should be a no-op"
+            )
 
         finally:
             # Restore original decorator module
@@ -378,7 +350,6 @@ from pytest_fixturecheck.decorator import fixturecheck
 
 
 class TestFixtureCheckDecoratorLogic:
-
     def test_direct_apply_inspect_signature_fails(self):
         """
         Test @fixturecheck applied directly to a callable where inspect.signature fails.
@@ -392,9 +363,9 @@ class TestFixtureCheckDecoratorLogic:
             # We need to get the actual decorated function to check its attributes
             decorated_fixture = fixturecheck(mock_fixture_body)
 
-        assert (
-            decorated_fixture._validator == _default_validator
-        ), "Should use _default_validator when inspect.signature fails on direct apply"
+        assert decorated_fixture._validator == _default_validator, (
+            "Should use _default_validator when inspect.signature fails on direct apply"
+        )
         assert decorated_fixture._fixturecheck is True
 
     def test_factory_returns_none_uses_default_validator(self):
@@ -412,9 +383,9 @@ class TestFixtureCheckDecoratorLogic:
         def my_fixture():
             return "test_value"
 
-        assert (
-            my_fixture._validator == _default_validator
-        ), "Should use _default_validator when factory returns None"
+        assert my_fixture._validator == _default_validator, (
+            "Should use _default_validator when factory returns None"
+        )
         assert my_fixture._fixturecheck is True
         assert my_fixture() == "test_value"  # Ensure fixture still works
 
@@ -443,9 +414,9 @@ class TestFixtureCheckDecoratorLogic:
             # fixturecheck(uninspectable_callable) returns a decorator, then apply to fixture_body
             decorated_fixture = fixturecheck(uninspectable_callable)(fixture_body)
 
-        assert (
-            decorated_fixture._validator == _default_validator
-        ), "Should use _default_validator when inspect on arg fails in _decorator_to_return"
+        assert decorated_fixture._validator == _default_validator, (
+            "Should use _default_validator when inspect on arg fails in _decorator_to_return"
+        )
         assert decorated_fixture._fixturecheck is True
         assert decorated_fixture() == "data"
 
@@ -479,9 +450,7 @@ class TestFixtureCheckDecoratorLogic:
     def test_validator_kwarg_is_creator(self, mocker):
         """Test coverage for line 84: validator kwarg is a creator."""
         mock_inner_validator = mocker.Mock(spec=fc_decorator.ValidatorFunc)
-        mock_inner_validator._is_pytest_fixturecheck_validator = (
-            True  # Mark it as a validator
-        )
+        mock_inner_validator._is_pytest_fixturecheck_validator = True  # Mark it as a validator
 
         @fc_decorator.creates_validator
         def my_creator_for_kwarg():
@@ -498,9 +467,7 @@ class TestFixtureCheckDecoratorLogic:
 
     def test_unmarked_callable_inspect_signature_fails(self, mocker):
         """Test lines 100-102: inspect.signature fails for unmarked callable."""
-        mock_default_validator = mocker.patch(
-            "pytest_fixturecheck.decorator._default_validator"
-        )
+        mock_default_validator = mocker.patch("pytest_fixturecheck.decorator._default_validator")
 
         # An object that is callable but inspect.signature might fail for it
         # or a C extension type for which signature is not available.
@@ -538,9 +505,7 @@ class TestFixtureCheckDecoratorLogic:
 
     def test_unmarked_callable_lt2_params_fallback(self, mocker):
         """Test line 100: unmarked callable with <2 params falls back to default validator."""
-        mock_default_validator = mocker.patch(
-            "pytest_fixturecheck.decorator._default_validator"
-        )
+        mock_default_validator = mocker.patch("pytest_fixturecheck.decorator._default_validator")
 
         # A callable that is not marked as validator/creator and has 1 parameter.
         # This should ideally be caught by the direct application heuristic (lines 70-72).

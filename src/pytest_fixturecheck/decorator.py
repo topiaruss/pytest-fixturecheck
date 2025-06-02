@@ -1,6 +1,6 @@
 import functools
 import inspect
-from typing import Any, Callable, List, Optional, Type, TypeVar, Union, cast
+from typing import Any, Callable, Optional, Type, TypeVar, Union, cast
 
 # Create type variables for better typing
 F = TypeVar("F", bound=Callable[..., Any])
@@ -8,7 +8,6 @@ ValidatorFunc = Callable[[Any, bool], None]
 
 # Import validators and utils
 from . import validators
-from .utils import creates_validator
 from .validators_fix import check_property_values
 
 # Try to import from .django_validators. These names should always be available from there.
@@ -39,9 +38,7 @@ def fixturecheck(
     # print(f"FIXTURECHECK_DECORATOR_ENTRY: {{'fixture_or_validator': {fixture_or_validator}, 'validator': {validator}, 'expect_validation_error': {expect_validation_error}}}")
 
     # This inner function applies the chosen validator to the fixture body
-    def _apply_validator_and_wrap(
-        fixture_body_func: F, chosen_validator_func: ValidatorFunc
-    ) -> F:
+    def _apply_validator_and_wrap(fixture_body_func: F, chosen_validator_func: ValidatorFunc) -> F:
         @functools.wraps(fixture_body_func)
         def wrapped_fixture(*args: Any, **kwargs: Any) -> Any:
             return fixture_body_func(*args, **kwargs)
@@ -65,18 +62,14 @@ def fixturecheck(
                 fixture_or_validator, "_is_pytest_fixturecheck_validator", False
             )
         except AttributeError:
-            _is_validator_check_val = (
-                False  # Should not happen with default, but being defensive
-            )
+            _is_validator_check_val = False  # Should not happen with default, but being defensive
 
         try:
             _is_creator_check_val = getattr(
                 fixture_or_validator, "_is_pytest_fixturecheck_creator", False
             )
         except AttributeError:
-            _is_creator_check_val = (
-                False  # Should not happen with default, but being defensive
-            )
+            _is_creator_check_val = False  # Should not happen with default, but being defensive
 
     if (
         validator is None
@@ -88,15 +81,9 @@ def fixturecheck(
             sig = inspect.signature(fixture_or_validator)
             if len(sig.parameters) < 2:
                 # Assumed to be fixture body
-                return _apply_validator_and_wrap(
-                    cast(F, fixture_or_validator), _default_validator
-                )
-        except (
-            Exception
-        ):  # Not inspectable, assume fixture body if other conditions met
-            return _apply_validator_and_wrap(
-                cast(F, fixture_or_validator), _default_validator
-            )
+                return _apply_validator_and_wrap(cast(F, fixture_or_validator), _default_validator)
+        except Exception:  # Not inspectable, assume fixture body if other conditions met
+            return _apply_validator_and_wrap(cast(F, fixture_or_validator), _default_validator)
         # If it has >= 2 params, it will be handled by the logic below that returns a decorator
 
     # Case 2: Called as @fixturecheck(...) or @fixturecheck() or with validator=
@@ -115,12 +102,8 @@ def fixturecheck(
             # fixture_or_validator is the first positional arg
             if getattr(fixture_or_validator, "_is_pytest_fixturecheck_creator", False):
                 actual_validator_to_use = fixture_or_validator()  # type: ignore # Call factory
-            elif getattr(
-                fixture_or_validator, "_is_pytest_fixturecheck_validator", False
-            ):
-                actual_validator_to_use = (
-                    fixture_or_validator  # Use marked validator directly
-                )
+            elif getattr(fixture_or_validator, "_is_pytest_fixturecheck_validator", False):
+                actual_validator_to_use = fixture_or_validator  # Use marked validator directly
             else:
                 # Unmarked callable. Check signature again (it passed the <2 check above or wasn't fixture body)
                 try:
@@ -190,9 +173,7 @@ def with_required_fields(*field_names: str) -> Callable[[F], F]:
     def user(db):
         return User.objects.create_user(...)
     """
-    return lambda fixture: fixturecheck(validators.has_required_fields(*field_names))(
-        fixture
-    )
+    return lambda fixture: fixturecheck(validators.has_required_fields(*field_names))(fixture)
 
 
 def with_required_methods(*method_names: str) -> Callable[[F], F]:
@@ -207,9 +188,7 @@ def with_required_methods(*method_names: str) -> Callable[[F], F]:
     def model_instance(db):
         return MyModel.objects.create(...)
     """
-    return lambda fixture: fixturecheck(validators.has_required_methods(*method_names))(
-        fixture
-    )
+    return lambda fixture: fixturecheck(validators.has_required_methods(*method_names))(fixture)
 
 
 def with_model_validation(*field_names: str) -> Callable[[F], F]:
@@ -275,6 +254,4 @@ def with_property_values(**expected_values: Any) -> Callable[[F], F]:
         obj.value = 42
         return obj
     """
-    return lambda fixture: fixturecheck(check_property_values(**expected_values))(
-        fixture
-    )
+    return lambda fixture: fixturecheck(check_property_values(**expected_values))(fixture)

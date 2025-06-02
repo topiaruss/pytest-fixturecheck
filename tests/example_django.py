@@ -5,6 +5,7 @@ but it demonstrates the intended usage.
 """
 
 import pytest
+
 from pytest_fixturecheck import fixturecheck
 from pytest_fixturecheck.django import validate_model_fields
 

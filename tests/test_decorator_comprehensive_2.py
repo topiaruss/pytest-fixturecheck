@@ -1,6 +1,6 @@
 """Additional comprehensive tests for decorator.py."""
 
-from unittest.mock import MagicMock, patch
+from unittest.mock import MagicMock
 
 import pytest
 
@@ -145,12 +145,8 @@ class TestWithModelValidation:
         try:
             fixture._validator(MagicMock(), is_collection_phase=True)
         except Exception as e:
-            if not isinstance(
-                e, ImportError
-            ):  # ImportError is expected if Django is not available
-                pytest.fail(
-                    f"Validator should accept is_collection_phase but raised: {e}"
-                )
+            if not isinstance(e, ImportError):  # ImportError is expected if Django is not available
+                pytest.fail(f"Validator should accept is_collection_phase but raised: {e}")
 
 
 class TestFactoryFunctionAttributes:

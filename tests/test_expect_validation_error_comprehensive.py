@@ -1,7 +1,5 @@
 """Comprehensive tests for expect_validation_error parameter."""
 
-from unittest.mock import MagicMock, patch
-
 import pytest
 
 from pytest_fixturecheck import fixturecheck, has_required_fields, is_instance_of

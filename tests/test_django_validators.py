@@ -3,14 +3,11 @@
 These tests will only run if Django is installed.
 """
 
-import sys
-
 import pytest
 
 # Import the django validators
 from pytest_fixturecheck import (
     creates_validator,
-    django_model_has_fields,
     django_model_validates,
     fixturecheck,
     is_django_model,
@@ -29,9 +26,7 @@ try:
     DJANGO_AVAILABLE = True
 except ImportError:
     DJANGO_AVAILABLE = False
-    pytestmark = pytest.mark.skip(
-        reason="Django not installed or setup failed in conftest"
-    )
+    pytestmark = pytest.mark.skip(reason="Django not installed or setup failed in conftest")
 
 
 # Define a test model if Django is available
@@ -89,7 +84,7 @@ def has_model_fields(*fields):
             for field in fields:
                 try:
                     obj._meta.get_field(field)
-                except Exception as e:
+                except Exception:
                     raise AttributeError(
                         f"Required field '{field}' not found on {obj.__class__.__name__}"
                     )
@@ -109,12 +104,14 @@ def sample_book(setup_django_db):
 
 # Create a conditional fixture for django_model_validates
 if DJANGO_AVAILABLE:
+
     @pytest.fixture
     @fixturecheck(django_model_validates())
     def valid_book(setup_django_db):
         """A fixture that returns a valid Book model instance."""
         return Book.objects.create(title="Valid Book", author="Valid Author")
 else:
+
     @pytest.fixture
     def valid_book(setup_django_db):
         """A fixture stub when Django is not available."""

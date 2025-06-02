@@ -48,9 +48,7 @@ def test_exported_symbols():
 
     # Test version
     assert isinstance(__version__, str)
-    assert (
-        __version__.count(".") == 2
-    ), "Version should follow semantic versioning format"
+    assert __version__.count(".") == 2, "Version should follow semantic versioning format"
     # Check if it matches the pattern x.y.z where x, y, and z are integers
     major, minor, patch = __version__.split(".")
     assert major.isdigit(), "Major version should be a number"
@@ -87,9 +85,9 @@ def test_exported_symbols():
     ]
     for symbol in expected_symbols:
         assert symbol in __all__
-    assert len(__all__) >= len(
-        expected_symbols
-    ), f"__all__ has {len(__all__)} items, expected at least {len(expected_symbols)}"
+    assert len(__all__) >= len(expected_symbols), (
+        f"__all__ has {len(__all__)} items, expected at least {len(expected_symbols)}"
+    )
 
 
 def test_import_star():
@@ -134,6 +132,7 @@ def test_fixturecheck_validator_attributes():
 def test_import_without_django():
     """Test that importing works even when Django is not installed."""
     import importlib
+
     import pytest_fixturecheck
 
     importlib.reload(pytest_fixturecheck)

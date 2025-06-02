@@ -1,8 +1,7 @@
-import inspect
-import sys
-import traceback
 import ast
-from typing import Any, Dict, List, Optional, Set, Tuple
+import inspect
+import traceback
+from typing import Any, Dict, List, Optional, Tuple
 
 import pytest
 
@@ -30,9 +29,7 @@ def pytest_addoption(parser):
 
 def pytest_configure(config: Any) -> None:
     """Register the plugin with pytest."""
-    config.addinivalue_line(
-        "markers", "fixturecheck: mark a test as using fixture validation"
-    )
+    config.addinivalue_line("markers", "fixturecheck: mark a test as using fixture validation")
     # Note: We don't need to call addinivalue_line for fixturecheck-auto-skip
     # since it's already registered as a bool type option in pytest_addoption
 
@@ -74,9 +71,7 @@ def pytest_fixture_setup(fixturedef: Any, request: Any) -> None:
         current_func = fixture_func
         while hasattr(current_func, "__wrapped__"):
             if getattr(current_func, "_fixturecheck", False):
-                fixture_func = (
-                    current_func  # Use the wrapped function with fixturecheck
-                )
+                fixture_func = current_func  # Use the wrapped function with fixturecheck
                 break
             current_func = current_func.__wrapped__
 
@@ -90,7 +85,7 @@ def pytest_fixture_setup(fixturedef: Any, request: Any) -> None:
 
         # Pre-mark async fixtures to skip execution validation
         if is_async_fixture(fixturedef):
-            setattr(fixturedef, "_fixturecheck_skip", True)
+            fixturedef._fixturecheck_skip = True
 
 
 def pytest_collection_finish(session: Any) -> None:
@@ -111,9 +106,7 @@ def pytest_collection_finish(session: Any) -> None:
     for fixturedef in fixtures_to_validate:
         try:
             # Get the fixture function and validator
-            fixture_original_func = (
-                fixturedef.func
-            )  # The func pytest associates with fixturedef
+            fixture_original_func = fixturedef.func  # The func pytest associates with fixturedef
 
             # Default to attributes from this original_func.
             # These will be used if the original_func is not wrapped, or if it is wrapped
@@ -201,7 +194,7 @@ def pytest_collection_finish(session: Any) -> None:
                     # Handle coroutine objects (returned by async fixtures)
                     if is_coroutine(result):
                         # Mark it to skip validation - can't execute coroutines during collection
-                        setattr(fixturedef, "_fixturecheck_skip", True)
+                        fixturedef._fixturecheck_skip = True
                         continue
 
                     # If there's a validator function, run it on the fixture result
@@ -227,18 +220,15 @@ def pytest_collection_finish(session: Any) -> None:
                                 continue
                             else:
                                 # Unexpected error - record it
-                                failed_fixtures.append(
-                                    (fixturedef, e, traceback.format_exc())
-                                )
+                                failed_fixtures.append((fixturedef, e, traceback.format_exc()))
                                 continue
                 except Exception as e:
                     # Special handling for pytest-asyncio fixtures and other async-related errors
                     if any(
-                        x in str(e).lower()
-                        for x in ["asyncio", "coroutine", "awaitable", "async"]
+                        x in str(e).lower() for x in ["asyncio", "coroutine", "awaitable", "async"]
                     ):
                         # Skip asyncio fixtures - they can't be executed during collection
-                        setattr(fixturedef, "_fixturecheck_skip", True)
+                        fixturedef._fixturecheck_skip = True
                         continue
                     else:
                         # If we expected a validation error, this might be it
@@ -271,9 +261,7 @@ def pytest_collection_finish(session: Any) -> None:
                 _mark_dependent_tests_for_skip(session, fixturedef, error)
 
 
-def _mark_dependent_tests_for_skip(
-    session: Any, fixturedef: Any, error: Exception
-) -> None:
+def _mark_dependent_tests_for_skip(session: Any, fixturedef: Any, error: Exception) -> None:
     """Mark tests that depend on the failing fixture for skipping."""
     fixture_name = fixturedef.argname
 
@@ -315,16 +303,13 @@ def report_fixture_errors(failed_fixtures: List[Tuple]) -> None:
                 user_paths = [
                     line
                     for line in tb.splitlines()
-                    if "site-packages/pytest_fixturecheck" not in line
-                    and "File" in line
+                    if "site-packages/pytest_fixturecheck" not in line and "File" in line
                 ]
                 if user_paths:
                     error_in_user_code = True
                     # Extract the path of the file with the import error
                     import_error_file = (
-                        user_paths[0].split('"')[1]
-                        if '"' in user_paths[0]
-                        else "<unknown file>"
+                        user_paths[0].split('"')[1] if '"' in user_paths[0] else "<unknown file>"
                     )
                     print(
                         "\n  POSSIBLE USER CODE ERROR: The import error appears to be in your code."
@@ -439,9 +424,7 @@ class FixtureCheckPlugin:
 
         return existing_checks
 
-    def get_opportunities_details(
-        self, content: str, filename: str
-    ) -> List[Dict[str, Any]]:
+    def get_opportunities_details(self, content: str, filename: str) -> List[Dict[str, Any]]:
         """Get detailed information about fixtures that could benefit from fixturecheck."""
         details = []
         tree = ast.parse(content)
@@ -508,9 +491,7 @@ class FixtureCheckPlugin:
 
         return details
 
-    def get_existing_checks_details(
-        self, content: str, filename: str
-    ) -> List[Dict[str, Any]]:
+    def get_existing_checks_details(self, content: str, filename: str) -> List[Dict[str, Any]]:
         """Get detailed information about existing fixture checks."""
         details = []
         tree = ast.parse(content)
@@ -531,9 +512,7 @@ class FixtureCheckPlugin:
                     params = [arg.arg for arg in node.args.args]
 
                     # Extract validator information
-                    validator_info = self._extract_validator_info(
-                        fixturecheck_decorator
-                    )
+                    validator_info = self._extract_validator_info(fixturecheck_decorator)
 
                     detail = {
                         "name": node.name,
@@ -558,9 +537,7 @@ class FixtureCheckPlugin:
             return validator_arg.id
         elif isinstance(validator_arg, ast.Attribute):
             return (
-                ast.unparse(validator_arg)
-                if hasattr(ast, "unparse")
-                else f"{validator_arg.attr}"
+                ast.unparse(validator_arg) if hasattr(ast, "unparse") else f"{validator_arg.attr}"
             )
         elif isinstance(validator_arg, ast.Call):
             if hasattr(ast, "unparse"):
@@ -606,15 +583,9 @@ class FixtureCheckPlugin:
                             and decorator.func.attr == "fixturecheck"
                         ):
                             fixturecheck_found = True
-                    elif (
-                        isinstance(decorator, ast.Name)
-                        and decorator.id == "fixturecheck"
-                    ):
+                    elif isinstance(decorator, ast.Name) and decorator.id == "fixturecheck":
                         fixturecheck_found = True
-                    elif (
-                        isinstance(decorator, ast.Attribute)
-                        and decorator.attr == "fixturecheck"
-                    ):
+                    elif isinstance(decorator, ast.Attribute) and decorator.attr == "fixturecheck":
                         fixturecheck_found = True
 
                     if fixturecheck_found:
@@ -649,11 +620,7 @@ class FixtureCheckPlugin:
                             fixture_decorator_line = decorator.lineno
 
                 # Only add fixturecheck if it's a fixture and doesn't already have it
-                if (
-                    is_fixture
-                    and not has_fixturecheck
-                    and fixture_decorator_line is not None
-                ):
+                if is_fixture and not has_fixturecheck and fixture_decorator_line is not None:
                     # Insert after the fixture decorator
                     insert_line = fixture_decorator_line
                     lines_to_add.append((insert_line, "@fixturecheck()"))

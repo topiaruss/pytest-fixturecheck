@@ -5,7 +5,7 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-from pytest_fixturecheck import fixturecheck, with_property_values, with_required_fields
+from pytest_fixturecheck import fixturecheck
 from pytest_fixturecheck.decorator import (
     _default_validator as decorator_default_validator,
 )
@@ -40,9 +40,7 @@ class TestFactoryFunctions:
     def test_with_required_fields(self):
         """Test with_required_fields factory."""
         # Create a mock validator
-        with patch(
-            "pytest_fixturecheck.validators.has_required_fields"
-        ) as mock_validator:
+        with patch("pytest_fixturecheck.validators.has_required_fields") as mock_validator:
             mock_validator.return_value = lambda obj, is_collection_phase=False: None
 
             # Test fixture
@@ -62,9 +60,7 @@ class TestFactoryFunctions:
     def test_with_required_methods(self):
         """Test with_required_methods factory."""
         # Create a mock validator
-        with patch(
-            "pytest_fixturecheck.validators.has_required_methods"
-        ) as mock_validator:
+        with patch("pytest_fixturecheck.validators.has_required_methods") as mock_validator:
             mock_validator.return_value = lambda obj, is_collection_phase=False: None
 
             # Test fixture
@@ -219,13 +215,9 @@ def test_is_django_model_positive_case(django_model_instance):
     print(f"django_model_instance = {django_model_instance!r}")
     print(f"type(django_model_instance) = {type(django_model_instance)}")
     print(f"django_models.Model = {django_models.Model}")
-    print(
-        f"isinstance check = {isinstance(django_model_instance, django_models.Model)}"
-    )
+    print(f"isinstance check = {isinstance(django_model_instance, django_models.Model)}")
     print(f"hasattr check = {hasattr(django_model_instance, '_meta')}")
-    print(
-        f"django_model_instance class hierarchy = {inspect.getmro(type(django_model_instance))}"
-    )
+    print(f"django_model_instance class hierarchy = {inspect.getmro(type(django_model_instance))}")
 
     assert is_django_model(django_model_instance) is True
 
@@ -333,9 +325,7 @@ class TestCustomValidatorWithCreatesValidator:
         assert callable(wrapped._validator)
 
         # We can call the validator directly to ensure it works
-        wrapped._validator(
-            "factory_value", False
-        )  # This should succeed with no exception
+        wrapped._validator("factory_value", False)  # This should succeed with no exception
 
     def test_custom_validator_with_creates_validator_as_kwarg(self):
         """Test with a @creates_validator factory passed as a keyword argument."""
@@ -355,9 +345,7 @@ class TestCustomValidatorWithCreatesValidator:
             return "factory_value_kw"
 
         # Pass the factory as a keyword argument
-        wrapped = fixturecheck(validator=custom_validator_factory_kw)(
-            my_fixture_factory_kwarg
-        )
+        wrapped = fixturecheck(validator=custom_validator_factory_kw)(my_fixture_factory_kwarg)
 
         # Call the function directly
         assert wrapped() == "factory_value_kw"
@@ -367,6 +355,4 @@ class TestCustomValidatorWithCreatesValidator:
         assert wrapped._fixturecheck is True
         assert callable(wrapped._validator)
 
-        wrapped._validator(
-            "factory_value_kw", False
-        )  # This should succeed with no exception
+        wrapped._validator("factory_value_kw", False)  # This should succeed with no exception

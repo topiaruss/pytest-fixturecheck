@@ -1,7 +1,6 @@
 """Comprehensive tests for the has_property_values validator."""
 
 import inspect
-from unittest.mock import MagicMock, patch
 
 import pytest
 
@@ -9,10 +8,8 @@ import pytest
 from pytest_fixturecheck import (
     check_property_values,
     fixturecheck,
-    has_property_values,
     with_property_values,
 )
-from pytest_fixturecheck.utils import creates_validator
 
 
 # Test class with properties

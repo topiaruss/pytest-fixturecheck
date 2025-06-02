@@ -4,8 +4,7 @@ Django-specific fixture validators for pytest-fixturecheck.
 These validators help identify common issues with Django model fixtures.
 """
 
-import inspect
-from typing import Any, Callable, List, Optional, Type, Union, cast
+from typing import Any, List, Optional, Type, Union, cast
 
 from .utils import creates_validator
 
@@ -59,9 +58,7 @@ class _DummyDjangoModel:
     def __init__(self, *args: Any, **kwargs: Any) -> None:
         pass
 
-    def full_clean(
-        self, exclude: Optional[List[str]] = None, validate_unique: bool = True
-    ) -> None:
+    def full_clean(self, exclude: Optional[List[str]] = None, validate_unique: bool = True) -> None:
         pass
 
     # Add other methods/attributes as needed
@@ -158,9 +155,7 @@ try:
             # As a fallback in test environments where class hierarchies might be complex,
             # check if any base class is named 'Model' and from django.db.models
             for base in type(obj).__mro__:
-                if base.__name__ == "Model" and base.__module__.startswith(
-                    "django.db.models"
-                ):
+                if base.__name__ == "Model" and base.__module__.startswith("django.db.models"):
                     return True
         except (ImportError, AttributeError, TypeError):
             # Handle any issues with the checks above
@@ -186,9 +181,7 @@ try:
             for field_name in required_fields:
                 try:
                     value = getattr(model_instance, field_name)
-                    if (
-                        not allow_empty and value is None
-                    ):  # Simplified check for "empty"
+                    if not allow_empty and value is None:  # Simplified check for "empty"
                         empty_fields.append(field_name)
                 except AttributeError:
                     missing_fields.append(field_name)
@@ -199,9 +192,7 @@ try:
             if missing_fields:
                 error_messages.append(f"Missing fields: {', '.join(missing_fields)}.")
             if empty_fields:
-                error_messages.append(
-                    f"Fields are empty (None): {', '.join(empty_fields)}."
-                )
+                error_messages.append(f"Fields are empty (None): {', '.join(empty_fields)}.")
 
             if error_messages:
                 # Use getattr to safely access pk even if it doesn't exist
@@ -286,19 +277,13 @@ def validate_model_fields(
                     errors.append(f"Field '{field_name}' is None.")
             except AttributeError:
                 errors.append(f"Field '{field_name}' does not exist on model.")
-            except (
-                DjangoFieldDoesNotExist
-            ):  # pragma: no cover (AttributeError likely first)
-                errors.append(
-                    f"Field '{field_name}' (Django FieldDoesNotExist) on model."
-                )
+            except DjangoFieldDoesNotExist:  # pragma: no cover (AttributeError likely first)
+                errors.append(f"Field '{field_name}' (Django FieldDoesNotExist) on model.")
 
     # 2. Run full_clean()
     try:
         model_instance.full_clean()
-    except (
-        DjangoValidationError
-    ) as e:  # Use the (potentially dummied) DjangoValidationError
+    except DjangoValidationError as e:  # Use the (potentially dummied) DjangoValidationError
         # If Django is not available, this path shouldn't be hit due to DJANGO_AVAILABLE check.
         # If it is available, e.messages might exist.
         if hasattr(e, "message_dict"):

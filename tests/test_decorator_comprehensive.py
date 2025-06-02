@@ -2,11 +2,9 @@
 
 import inspect
 from functools import wraps
-from unittest.mock import MagicMock, patch
 
 import pytest
 
-from pytest_fixturecheck import fixturecheck
 from pytest_fixturecheck.decorator import _default_validator
 from pytest_fixturecheck.decorator import fixturecheck as fixturecheck_raw
 
@@ -50,9 +48,7 @@ class TestDecoratorBasics:
             return "test"
 
         # Apply decorator directly
-        decorated = fixturecheck_raw(lambda x, is_collection_phase=False: True)(
-            test_function
-        )
+        decorated = fixturecheck_raw(lambda x, is_collection_phase=False: True)(test_function)
 
         # Check that metadata is preserved
         assert decorated.__name__ == "test_function"
@@ -90,9 +86,7 @@ class TestDecoratorOrder:
             return "test"
 
         # Apply fixturecheck first
-        wrapped = fixturecheck_raw(lambda x, is_collection_phase=False: True)(
-            test_function
-        )
+        wrapped = fixturecheck_raw(lambda x, is_collection_phase=False: True)(test_function)
 
         # Then apply pytest.fixture
         fixture_func = pytest.fixture(wrapped)
@@ -112,9 +106,7 @@ class TestDecoratorOrder:
         fixture_func = pytest.fixture(test_function)
 
         # Then apply fixturecheck
-        wrapped = fixturecheck_raw(lambda x, is_collection_phase=False: True)(
-            fixture_func
-        )
+        wrapped = fixturecheck_raw(lambda x, is_collection_phase=False: True)(fixture_func)
 
         # Check that the function is marked
         assert hasattr(wrapped, "_fixturecheck")
@@ -143,9 +135,7 @@ class TestWithAdditionalDecorators:
         # Apply decorators directly in order
         decorated = custom_decorator(test_function)
         fixture_func = pytest.fixture(decorated)
-        wrapped = fixturecheck_raw(lambda x, is_collection_phase=False: True)(
-            fixture_func
-        )
+        wrapped = fixturecheck_raw(lambda x, is_collection_phase=False: True)(fixture_func)
 
         # Check that the function is still marked
         assert hasattr(wrapped, "_fixturecheck")
@@ -180,9 +170,7 @@ class TestExpectValidationErrorParameter:
             return "test"
 
         # Apply decorator without expect_validation_error
-        wrapped = fixturecheck_raw(lambda x, is_collection_phase=False: True)(
-            test_function
-        )
+        wrapped = fixturecheck_raw(lambda x, is_collection_phase=False: True)(test_function)
 
         # Check that expect_validation_error is False
         assert hasattr(wrapped, "_expect_validation_error")
@@ -236,9 +224,7 @@ class TestCallSignature:
             return "test"
 
         # Apply decorator directly
-        wrapped = fixturecheck_raw(lambda x, is_collection_phase=False: True)(
-            test_function
-        )
+        wrapped = fixturecheck_raw(lambda x, is_collection_phase=False: True)(test_function)
 
         # Check that the function is properly decorated
         assert hasattr(wrapped, "_fixturecheck")

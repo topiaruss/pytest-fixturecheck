@@ -1,6 +1,5 @@
 """Tests for core plugin validation functionality."""
 
-import sys
 from unittest.mock import MagicMock, patch
 
 import pytest
@@ -10,7 +9,6 @@ from pytest_fixturecheck.plugin import (
     _mark_dependent_tests_for_skip,
     is_async_fixture,
     pytest_addoption,
-    pytest_collection_finish,
     pytest_configure,
     pytest_fixture_setup,
     report_fixture_errors,
@@ -90,9 +88,7 @@ def test_pytest_fixture_setup():
 
     # Check that the fixture was registered
     assert hasattr(request.config, "_fixturecheck_fixtures")
-    assert (
-        len(request.config._fixturecheck_fixtures) == 1
-    )  # Should have one fixture registered
+    assert len(request.config._fixturecheck_fixtures) == 1  # Should have one fixture registered
 
     # Mock equality check doesn't work well with sets, so instead check that
     # the set is not empty after registration
@@ -117,10 +113,7 @@ def test_report_fixture_errors():
         report_fixture_errors([(fixturedef, error, tb)])
 
         # Verify the error was reported
-        assert any(
-            "Fixture 'broken_fixture'" in call[0][0]
-            for call in mock_print.call_args_list
-        )
+        assert any("Fixture 'broken_fixture'" in call[0][0] for call in mock_print.call_args_list)
         assert any(
             "ValueError: Fixture validation failed" in call[0][0]
             for call in mock_print.call_args_list

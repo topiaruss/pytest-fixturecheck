@@ -2,9 +2,7 @@
 
 import tempfile
 from pathlib import Path
-from unittest.mock import patch
 
-import pytest
 from click.testing import CliRunner
 
 from pytest_fixturecheck.cli import fixturecheck
@@ -12,11 +10,11 @@ from pytest_fixturecheck.cli import fixturecheck
 
 class TestVerboseReport:
     """Test the verbose options for the report command."""
-    
+
     def setup_method(self):
         """Set up test fixtures."""
         self.runner = CliRunner()
-        
+
         # Sample test content with various fixture types
         self.test_content = '''"""Test file with various fixtures."""
 
@@ -64,9 +62,9 @@ def expected_failure_fixture():
         with tempfile.TemporaryDirectory() as tmpdir:
             test_file = Path(tmpdir) / "test_example.py"
             test_file.write_text(self.test_content)
-            
-            result = self.runner.invoke(fixturecheck, ['report', '--path', tmpdir])
-            
+
+            result = self.runner.invoke(fixturecheck, ["report", "--path", tmpdir])
+
             assert result.exit_code == 0
             assert "Found 1 opportunities for fixture checks" in result.output
             assert "Found 3 existing fixture checks" in result.output
@@ -79,30 +77,30 @@ def expected_failure_fixture():
         with tempfile.TemporaryDirectory() as tmpdir:
             test_file = Path(tmpdir) / "test_example.py"
             test_file.write_text(self.test_content)
-            
-            result = self.runner.invoke(fixturecheck, ['report', '-v', '--path', tmpdir])
-            
+
+            result = self.runner.invoke(fixturecheck, ["report", "-v", "--path", tmpdir])
+
             assert result.exit_code == 0
-            
+
             # Should contain verbose headers
             assert "FIXTURE CHECK REPORT" in result.output
             assert "File: " in result.output
             assert "test_example.py" in result.output
-            
+
             # Should show opportunities
             assert "Opportunities for fixture checks:" in result.output
             assert "Line 16: simple_fixture" in result.output
-            
+
             # Should show existing checks
             assert "Existing fixture checks:" in result.output
             assert "Line 23: checked_fixture" in result.output
             assert "Line 30: validated_fixture" in result.output
             assert "Parameters: simple_fixture" in result.output
             assert "Line 37: expected_failure_fixture" in result.output
-            
+
             # Should NOT show validators with single -v
             assert "Validator:" not in result.output
-            
+
             # Should show summary
             assert "Found 1 opportunities for fixture checks" in result.output
             assert "Found 3 existing fixture checks" in result.output
@@ -112,18 +110,18 @@ def expected_failure_fixture():
         with tempfile.TemporaryDirectory() as tmpdir:
             test_file = Path(tmpdir) / "test_example.py"
             test_file.write_text(self.test_content)
-            
-            result = self.runner.invoke(fixturecheck, ['report', '-vv', '--path', tmpdir])
-            
+
+            result = self.runner.invoke(fixturecheck, ["report", "-vv", "--path", tmpdir])
+
             assert result.exit_code == 0
-            
+
             # Should contain all verbose content from single -v
             assert "FIXTURE CHECK REPORT" in result.output
             assert "File: " in result.output
             assert "Line 23: checked_fixture" in result.output
             assert "Line 30: validated_fixture" in result.output
             assert "Parameters: simple_fixture" in result.output
-            
+
             # Should ALSO show validators with -vv
             assert "Validator: Default validator" in result.output
             assert "Validator: validate_user" in result.output
@@ -133,9 +131,9 @@ def expected_failure_fixture():
         with tempfile.TemporaryDirectory() as tmpdir:
             test_file = Path(tmpdir) / "test_empty.py"
             test_file.write_text('"""Empty test file."""\n\ndef test_something():\n    pass\n')
-            
-            result = self.runner.invoke(fixturecheck, ['report', '-v', '--path', tmpdir])
-            
+
+            result = self.runner.invoke(fixturecheck, ["report", "-v", "--path", tmpdir])
+
             assert result.exit_code == 0
             assert "FIXTURE CHECK REPORT" in result.output
             assert "Found 0 opportunities for fixture checks" in result.output
@@ -162,13 +160,13 @@ def lambda_fixture():
 def complex_validator_fixture():
     return "test"
 '''
-        
+
         with tempfile.TemporaryDirectory() as tmpdir:
             test_file = Path(tmpdir) / "test_complex.py"
             test_file.write_text(complex_content)
-            
-            result = self.runner.invoke(fixturecheck, ['report', '-vv', '--path', tmpdir])
-            
+
+            result = self.runner.invoke(fixturecheck, ["report", "-vv", "--path", tmpdir])
+
             assert result.exit_code == 0
             assert "Validator:" in result.output
 
@@ -177,7 +175,7 @@ def complex_validator_fixture():
         with tempfile.TemporaryDirectory() as tmpdir:
             # First file
             test_file1 = Path(tmpdir) / "test_file1.py"
-            test_file1.write_text('''
+            test_file1.write_text("""
 import pytest
 from pytest_fixturecheck import fixturecheck
 
@@ -189,11 +187,11 @@ def fixture1():
 @fixturecheck()
 def checked1():
     return "checked1"
-''')
-            
+""")
+
             # Second file
             test_file2 = Path(tmpdir) / "test_file2.py"
-            test_file2.write_text('''
+            test_file2.write_text("""
 import pytest
 from pytest_fixturecheck import fixturecheck
 
@@ -205,10 +203,10 @@ def fixture2():
 @fixturecheck()
 def checked2():
     return "checked2"
-''')
-            
-            result = self.runner.invoke(fixturecheck, ['report', '-v', '--path', tmpdir])
-            
+""")
+
+            result = self.runner.invoke(fixturecheck, ["report", "-v", "--path", tmpdir])
+
             assert result.exit_code == 0
             assert "test_file1.py" in result.output
             assert "test_file2.py" in result.output
@@ -221,7 +219,7 @@ def checked2():
 
     def test_verbose_with_fixture_parameters(self):
         """Test verbose output shows fixture parameters correctly."""
-        param_content = '''
+        param_content = """
 import pytest
 from pytest_fixturecheck import fixturecheck
 
@@ -241,14 +239,14 @@ def multi_param_fixture(dependency1, dependency2, request):
 @fixturecheck()
 def checked_with_params(dependency1, dependency2):
     return f"checked-{dependency1}-{dependency2}"
-'''
-        
+"""
+
         with tempfile.TemporaryDirectory() as tmpdir:
             test_file = Path(tmpdir) / "test_params.py"
             test_file.write_text(param_content)
-            
-            result = self.runner.invoke(fixturecheck, ['report', '-v', '--path', tmpdir])
-            
+
+            result = self.runner.invoke(fixturecheck, ["report", "-v", "--path", tmpdir])
+
             assert result.exit_code == 0
             assert "Parameters: dependency1, dependency2, request" in result.output
             assert "Parameters: dependency1, dependency2" in result.output
@@ -258,14 +256,14 @@ def checked_with_params(dependency1, dependency2):
         with tempfile.TemporaryDirectory() as tmpdir:
             test_file = Path(tmpdir) / "test_separators.py"
             test_file.write_text(self.test_content)
-            
-            result = self.runner.invoke(fixturecheck, ['report', '-v', '--path', tmpdir])
-            
+
+            result = self.runner.invoke(fixturecheck, ["report", "-v", "--path", tmpdir])
+
             assert result.exit_code == 0
             # Should have multiple separator lines
             separator_count = result.output.count("------------------------------")
             assert separator_count >= 4  # At least one per fixture shown
-            
+
             # Should have file separator
             assert "----------------------------------------" in result.output
 
@@ -274,14 +272,14 @@ def checked_with_params(dependency1, dependency2):
         with tempfile.TemporaryDirectory() as tmpdir:
             test_file = Path(tmpdir) / "test_count.py"
             test_file.write_text(self.test_content)
-            
+
             # Test different ways to specify verbose levels
-            result1 = self.runner.invoke(fixturecheck, ['report', '-v', '--path', tmpdir])
-            result2 = self.runner.invoke(fixturecheck, ['report', '-vv', '--path', tmpdir])
-            
+            result1 = self.runner.invoke(fixturecheck, ["report", "-v", "--path", tmpdir])
+            result2 = self.runner.invoke(fixturecheck, ["report", "-vv", "--path", tmpdir])
+
             assert result1.exit_code == 0
             assert result2.exit_code == 0
-            
+
             # -v should not show validators
             assert "Validator:" not in result1.output
             # -vv should show validators
@@ -290,13 +288,13 @@ def checked_with_params(dependency1, dependency2):
 
 class TestVerboseHelp:
     """Test the help text for verbose options."""
-    
+
     def test_help_shows_verbose_option(self):
         """Test that help shows the verbose option."""
         runner = CliRunner()
-        result = runner.invoke(fixturecheck, ['report', '--help'])
-        
+        result = runner.invoke(fixturecheck, ["report", "--help"])
+
         assert result.exit_code == 0
         assert "-v, --verbose" in result.output
         assert "Verbose output" in result.output
-        assert "including validators" in result.output 
+        assert "including validators" in result.output

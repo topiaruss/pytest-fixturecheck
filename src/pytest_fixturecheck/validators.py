@@ -4,9 +4,7 @@ This module provides factory functions for creating common validators.
 """
 
 import inspect
-from typing import Any, Callable, Dict, List, Optional, Tuple, Type, Union
-
-from .utils import creates_validator
+from typing import Any, Callable, Tuple, Type, Union
 
 
 def is_instance_of(
@@ -73,9 +71,7 @@ def has_required_fields(*field_names: str) -> Callable[[Any, bool], None]:
                 )
 
             if getattr(obj, field) is None:
-                raise ValueError(
-                    f"Required field '{field}' is None in {obj.__class__.__name__}"
-                )
+                raise ValueError(f"Required field '{field}' is None in {obj.__class__.__name__}")
 
     return validator
 
@@ -105,9 +101,7 @@ def has_required_methods(*method_names: str) -> Callable[[Any, bool], None]:
                 )
 
             if not callable(getattr(obj, method)):
-                raise TypeError(
-                    f"'{method}' is not callable in {obj.__class__.__name__}"
-                )
+                raise TypeError(f"'{method}' is not callable in {obj.__class__.__name__}")
         validator._is_pytest_fixturecheck_validator = True
 
     return validator
@@ -139,9 +133,7 @@ def has_property_values(**expected_values: Any) -> Callable[[Any, bool], None]:
 
             actual_value = getattr(obj, prop_name)
             if actual_value != expected_value:
-                raise ValueError(
-                    f"Expected {prop_name}={expected_value}, got {actual_value}"
-                )
+                raise ValueError(f"Expected {prop_name}={expected_value}, got {actual_value}")
         validator._is_pytest_fixturecheck_validator = True
 
     return validator

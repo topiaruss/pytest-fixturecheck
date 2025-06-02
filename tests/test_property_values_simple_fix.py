@@ -37,9 +37,7 @@ def simple_fixture():
 
 
 # Apply fixturecheck separately (this may avoid the fixture collection issue)
-simple_fixture = fixturecheck(property_values_validator({"name": "fixture_test"}))(
-    simple_fixture
-)
+simple_fixture = fixturecheck(property_values_validator({"name": "fixture_test"}))(simple_fixture)
 
 
 def test_with_fixture(simple_fixture):

@@ -1,7 +1,5 @@
 """Tests for advanced validators in pytest-fixturecheck."""
 
-import warnings
-
 import pytest
 
 from pytest_fixturecheck import fixturecheck
@@ -244,9 +242,7 @@ def test_type_validator_direct():
     assert isinstance(user.age, int)
 
     # Create an object with a wrong type
-    wrong_user = User(
-        123, "test@example.com", "30"
-    )  # username should be str, age should be int
+    wrong_user = User(123, "test@example.com", "30")  # username should be str, age should be int
 
     # Verify types are wrong
     assert not isinstance(wrong_user.username, str)

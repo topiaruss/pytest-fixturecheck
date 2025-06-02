@@ -2,7 +2,6 @@
 
 import asyncio
 import inspect
-import sys
 
 import pytest
 
@@ -40,9 +39,7 @@ async def async_fixture_order2():
 async def test_async_fixture(async_fixture):
     """Test that async fixtures work with fixturecheck."""
     # Explicitly await the async fixture
-    result = (
-        await async_fixture if inspect.iscoroutine(async_fixture) else async_fixture
-    )
+    result = await async_fixture if inspect.iscoroutine(async_fixture) else async_fixture
     assert result == "async result"
 
 

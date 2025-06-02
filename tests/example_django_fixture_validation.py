@@ -9,6 +9,7 @@ This file demonstrates all the different ways to validate Django model fixtures:
 """
 
 import pytest
+
 from pytest_fixturecheck import fixturecheck
 
 # Mock Django model classes for documentation purposes

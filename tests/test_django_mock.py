@@ -1,6 +1,6 @@
 """Tests for django.py by mocking Django dependencies."""
 
-from unittest.mock import MagicMock, PropertyMock, patch
+from unittest.mock import MagicMock, patch
 
 import pytest
 
@@ -36,9 +36,6 @@ with patch.dict(
 ):
     from pytest_fixturecheck.django_validators import (
         DJANGO_AVAILABLE,
-        django_model_has_fields,
-        django_model_validates,
-        validate_model_fields,
     )
 
 
@@ -50,11 +47,7 @@ class TestDjangoValidators:
 
         # We'll create our own implementation to test the logic
         def mocked_is_django_model(obj):
-            if (
-                not hasattr(obj, "_meta")
-                or not hasattr(obj, "save")
-                or not hasattr(obj, "delete")
-            ):
+            if not hasattr(obj, "_meta") or not hasattr(obj, "save") or not hasattr(obj, "delete"):
                 return False
             return True
 
@@ -133,9 +126,7 @@ class TestDjangoValidators:
             return mock_validator
 
         # Mock the function
-        with patch(
-            "tests.test_django_mock.django_model_validates", mock_django_model_validates
-        ):
+        with patch("tests.test_django_mock.django_model_validates", mock_django_model_validates):
             # Create a mock Django model
             model = MockModel()
 

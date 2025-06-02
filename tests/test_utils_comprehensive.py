@@ -1,9 +1,7 @@
 """Comprehensive tests for the utils module."""
 
 import asyncio
-import functools
 import inspect
-from unittest.mock import MagicMock, patch
 
 import pytest
 

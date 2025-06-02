@@ -1,11 +1,9 @@
 """Comprehensive tests for AsyncIO compatibility."""
 
 import asyncio
-import inspect
 from unittest.mock import MagicMock, patch
 
 import pytest
-import pytest_asyncio
 
 from pytest_fixturecheck import fixturecheck
 from pytest_fixturecheck.plugin import is_async_fixture

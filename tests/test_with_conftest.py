@@ -1,7 +1,5 @@
 """Test file that uses fixtures from conftest.py."""
 
-import pytest
-
 
 def test_valid_user(valid_user):
     """Test that a valid user passes validation."""

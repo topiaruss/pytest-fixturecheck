@@ -32,7 +32,6 @@ except ImportError:
 
 from pytest_fixturecheck import fixturecheck, has_required_fields
 from pytest_fixturecheck.utils import creates_validator
-from pytest_fixturecheck.validators import is_instance_of
 from pytest_fixturecheck.validators_advanced import nested_property_validator
 
 
@@ -80,9 +79,7 @@ def conftest_property_values_validator(expected_values):
 
                 actual_value = getattr(obj, prop_name)
                 if actual_value != expected_value:
-                    raise ValueError(
-                        f"Expected {prop_name}={expected_value}, got {actual_value}"
-                    )
+                    raise ValueError(f"Expected {prop_name}={expected_value}, got {actual_value}")
 
         return inner_validator
 

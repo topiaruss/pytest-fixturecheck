@@ -3,10 +3,9 @@
 This module provides advanced validators for more complex validation scenarios.
 """
 
-import inspect
 import typing
 import warnings
-from typing import Any, Callable, Dict, List, Optional, Type, TypeVar, Union, cast
+from typing import Any, Callable, TypeVar
 
 # Import the fixturecheck function to prevent circular imports when using factory functions
 from .decorator import fixturecheck
@@ -54,7 +53,7 @@ def nested_property_validator(**expected_values: Any) -> Callable[[Any, bool], N
                         if strict:
                             raise AttributeError(error_msg)
                         else:
-                            warnings.warn(error_msg)
+                            warnings.warn(error_msg, stacklevel=2)
                             break
                     if i == len(segments) - 1:
                         actual_value = getattr(current, segment)
@@ -63,31 +62,27 @@ def nested_property_validator(**expected_values: Any) -> Callable[[Any, bool], N
                             if strict:
                                 raise ValueError(error_msg)
                             else:
-                                warnings.warn(error_msg)
+                                warnings.warn(error_msg, stacklevel=2)
                     else:
                         current = getattr(current, segment)
             else:  # Top-level properties
                 if not hasattr(obj, prop_path):
-                    error_msg = (
-                        f"Property '{prop_path}' missing from {obj.__class__.__name__}"
-                    )
+                    error_msg = f"Property '{prop_path}' missing from {obj.__class__.__name__}"
                     if strict:
                         raise AttributeError(error_msg)
                     else:
-                        warnings.warn(error_msg)
+                        warnings.warn(error_msg, stacklevel=2)
                         continue
                 actual_value = getattr(obj, prop_path)
                 if actual_value != expected_value:
-                    error_msg = (
-                        f"Expected {prop_path}={expected_value}, got {actual_value}"
-                    )
+                    error_msg = f"Expected {prop_path}={expected_value}, got {actual_value}"
                     if strict:
                         raise ValueError(error_msg)
                     else:
-                        warnings.warn(error_msg)
+                        warnings.warn(error_msg, stacklevel=2)
         # Inner validator implicitly returns None on success, or raises error.
 
-    setattr(validator, "_is_pytest_fixturecheck_validator", True)
+    validator._is_pytest_fixturecheck_validator = True
     return validator
 
 
@@ -115,13 +110,11 @@ def type_check_properties(**expected_values: Any) -> Callable[[Any, bool], None]
         # Validate property values
         for prop_name, expected_value in value_specs.items():
             if not hasattr(obj, prop_name):
-                error_msg = (
-                    f"Property '{prop_name}' missing from {obj.__class__.__name__}"
-                )
+                error_msg = f"Property '{prop_name}' missing from {obj.__class__.__name__}"
                 if strict:
                     raise AttributeError(error_msg)
                 else:
-                    warnings.warn(error_msg)
+                    warnings.warn(error_msg, stacklevel=2)
                     continue
             actual_value = getattr(obj, prop_name)
             if actual_value != expected_value:
@@ -129,22 +122,18 @@ def type_check_properties(**expected_values: Any) -> Callable[[Any, bool], None]
                 if strict:
                     raise ValueError(error_msg)
                 else:
-                    warnings.warn(error_msg)
+                    warnings.warn(error_msg, stacklevel=2)
         # Validate property types
         for prop_name, expected_type in type_specs.items():
             if not hasattr(obj, prop_name):
-                error_msg = (
-                    f"Property '{prop_name}' missing from {obj.__class__.__name__}"
-                )
+                error_msg = f"Property '{prop_name}' missing from {obj.__class__.__name__}"
                 if strict:
                     raise AttributeError(error_msg)
                 else:
-                    warnings.warn(error_msg)
+                    warnings.warn(error_msg, stacklevel=2)
                     continue
             actual_value = getattr(obj, prop_name)
-            if hasattr(typing, "get_origin") and hasattr(
-                typing, "get_args"
-            ):  # Handle Union types
+            if hasattr(typing, "get_origin") and hasattr(typing, "get_args"):  # Handle Union types
                 origin = typing.get_origin(expected_type)
                 if origin is typing.Union:
                     type_args = typing.get_args(expected_type)
@@ -153,17 +142,17 @@ def type_check_properties(**expected_values: Any) -> Callable[[Any, bool], None]
                         if strict:
                             raise TypeError(error_msg)
                         else:
-                            warnings.warn(error_msg)
+                            warnings.warn(error_msg, stacklevel=2)
                     continue
             if not isinstance(actual_value, expected_type):
                 error_msg = f"Expected {prop_name} to be of type {expected_type.__name__}, got {type(actual_value).__name__}"
                 if strict:
                     raise TypeError(error_msg)
                 else:
-                    warnings.warn(error_msg)
+                    warnings.warn(error_msg, stacklevel=2)
         # Inner validator implicitly returns None on success, or raises error.
 
-    setattr(validator, "_is_pytest_fixturecheck_validator", True)
+    validator._is_pytest_fixturecheck_validator = True
     return validator
 
 
@@ -179,7 +168,7 @@ class _SimpleValidatorCallable:
             return
         try:
             self.func_to_call(obj)
-        except Exception as e:
+        except Exception:
             raise
 
 

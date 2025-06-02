@@ -1,13 +1,11 @@
 """Comprehensive tests for validator functions."""
 
 from collections import namedtuple
-from typing import Any, Dict, List, Tuple, Type, Union
 
 import pytest
 
 from pytest_fixturecheck import (
     combines_validators,
-    creates_validator,
     fixturecheck,
     has_property_values,
     has_required_fields,
@@ -119,9 +117,7 @@ class TestIsInstanceOf:
         # This should raise TypeError with the expected message
         with pytest.raises(TypeError) as excinfo:
             is_instance_of((CompTestObject, dict))(obj)
-        assert "Expected instance of one of (CompTestObject, dict), got int" in str(
-            excinfo.value
-        )
+        assert "Expected instance of one of (CompTestObject, dict), got int" in str(excinfo.value)
 
 
 # Test for has_required_fields validator
@@ -290,9 +286,7 @@ class TestCombinesValidators:
         obj = CompTestObject()
 
         # Combine with a validator that would fail
-        combined = combines_validators(
-            is_instance_of(CompTestObject), mock_failing_validator
-        )
+        combined = combines_validators(is_instance_of(CompTestObject), mock_failing_validator)
 
         # Should not raise exception when is_collection_phase is True
         try:
@@ -301,9 +295,7 @@ class TestCombinesValidators:
             pytest.fail("Validator was not skipped during collection phase")
 
         # Should raise exception when is_collection_phase is False
-        with pytest.raises(
-            AssertionError, match="Should fail only in non-collection phase"
-        ):
+        with pytest.raises(AssertionError, match="Should fail only in non-collection phase"):
             combined(obj, is_collection_phase=False)
 
     def test_empty_combines_validators(self):

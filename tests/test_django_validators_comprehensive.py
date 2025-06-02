@@ -5,8 +5,6 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 from django.conf import settings
-from django.core.exceptions import ValidationError
-from django.db import models
 
 from pytest_fixturecheck import fixturecheck
 from pytest_fixturecheck.django_validators import (
@@ -106,9 +104,7 @@ def mock_django_modules():
     django_modules["django.db.models"].Model = model_class
 
     # Create a fully mocked 'django.db.models.fields' submodule
-    mock_fields_submodule = MagicMock(
-        name="mock_django_db_models_fields_module", spec=True
-    )
+    mock_fields_submodule = MagicMock(name="mock_django_db_models_fields_module", spec=True)
     mock_fields_submodule.Field = type("MockField", (), {})
     mock_fields_submodule.AutoField = type("MockAutoField", (), {})
     mock_fields_submodule.BigAutoField = type("MockBigAutoField", (), {})
@@ -132,12 +128,8 @@ def mock_django_modules():
         name="mock_big_auto_field_model_instance_returned_by_get_model"
     )
     # Ensure this mock instance, when its _meta.pk.__class__ is accessed, returns our BigAutoField_class_mock.
-    mock_big_auto_field_model_instance._meta = MagicMock(
-        name="_meta_for_big_auto_field_model"
-    )
-    mock_big_auto_field_model_instance._meta.pk = MagicMock(
-        name="_pk_for_big_auto_field_model"
-    )
+    mock_big_auto_field_model_instance._meta = MagicMock(name="_meta_for_big_auto_field_model")
+    mock_big_auto_field_model_instance._meta.pk = MagicMock(name="_pk_for_big_auto_field_model")
     mock_big_auto_field_model_instance._meta.pk.__class__ = BigAutoField_class_mock
 
     # Configure apps.get_model's behavior
@@ -176,10 +168,7 @@ def mock_django_modules():
         "pytest_fixturecheck.django_validators.ValidationError", MockValidationError
     ), patch(
         "pytest_fixturecheck.django_validators.FieldDoesNotExist", MockFieldDoesNotExist
-    ), patch.dict(
-        "sys.modules", django_modules
-    ):
-
+    ), patch.dict("sys.modules", django_modules):
         # Patch sys.modules to include our mocks
         sys.modules["django.core.exceptions"] = django_modules["django.core.exceptions"]
         sys.modules["django.db.models"] = django_modules["django.db.models"]
@@ -232,9 +221,7 @@ def check_model_has_required_fields(obj, is_collection_phase=False):
     required_fields = ["name", "age", "email"]
     for field in required_fields:
         if field not in obj._fields:
-            raise AttributeError(
-                f"Required field '{field}' not found on {obj.__class__.__name__}"
-            )
+            raise AttributeError(f"Required field '{field}' not found on {obj.__class__.__name__}")
 
 
 # Test django_model_has_fields validator
@@ -253,9 +240,7 @@ class TestDjangoModelHasFields:
 
         # Should not raise during collection when calling the validator logic
         # with is_collection_phase=True
-        validator_logic(
-            model, is_collection_phase=True
-        )  # Call with is_collection_phase=True
+        validator_logic(model, is_collection_phase=True)  # Call with is_collection_phase=True
 
     def test_valid_fields(self, test_model):
         validator = django_model_has_fields("name", "email", "age")
@@ -330,9 +315,7 @@ class TestValidateModelFields:
     def test_collection_phase(self):
         @fixturecheck(validate_model_fields)
         def fixture_func():
-            return MockDjangoModel(
-                fields=["name", "email", "age"]
-            )  # Use MockDjangoModel
+            return MockDjangoModel(fields=["name", "email", "age"])  # Use MockDjangoModel
 
         # Should not raise during collection
         fixture_func()
@@ -360,9 +343,7 @@ class TestDjangoIntegration:
             fields=["name", "email", "age"]
         )  # Use MockDjangoModel also here for consistency
 
-    def test_validated_fixture_with_validation(
-        self, validated_model_fixture_with_validation
-    ):
+    def test_validated_fixture_with_validation(self, validated_model_fixture_with_validation):
         # The django_model_validates validator ensures full_clean() passes.
         # If the fixture is successfully created and passed, the validation passed.
         assert isinstance(validated_model_fixture_with_validation, MockDjangoModel)
@@ -374,9 +355,7 @@ class TestDjangoErrorHandling:
 
     def test_import_error_without_django(self, monkeypatch):
         """Test that when Django is not available, the validator doesn't raise an ImportError."""
-        monkeypatch.setattr(
-            "pytest_fixturecheck.django_validators.DJANGO_AVAILABLE", False
-        )
+        monkeypatch.setattr("pytest_fixturecheck.django_validators.DJANGO_AVAILABLE", False)
         # Current behavior is to skip validation, not raise ImportError
         validator = django_model_validates()
 

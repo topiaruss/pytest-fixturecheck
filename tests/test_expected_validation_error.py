@@ -4,7 +4,7 @@ import inspect
 
 import pytest
 
-from pytest_fixturecheck import fixturecheck, has_required_fields
+from pytest_fixturecheck import fixturecheck
 
 
 class User:

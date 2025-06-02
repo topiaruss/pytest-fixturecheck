@@ -1,8 +1,9 @@
 def test_is_excluded_path():
     """Test the is_excluded_path function with various path patterns."""
-    from pytest_fixturecheck.utils import is_excluded_path
     from pathlib import Path
-    
+
+    from pytest_fixturecheck.utils import is_excluded_path
+
     # Test virtual environment patterns
     venv_paths = [
         Path(".venv/lib/python3.13/test.py"),
@@ -14,10 +15,10 @@ def test_is_excluded_path():
         Path(".pyenv/test.py"),
         Path("pyenv/test.py"),
     ]
-    
+
     for path in venv_paths:
         assert is_excluded_path(path), f"Path {path} should be excluded"
-    
+
     # Test package patterns
     package_paths = [
         Path("lib/python3.13/site-packages/test.py"),
@@ -32,10 +33,10 @@ def test_is_excluded_path():
         Path("htmlcov/test.html"),
         Path("mypackage.egg-info/test.py"),
     ]
-    
+
     for path in package_paths:
         assert is_excluded_path(path), f"Path {path} should be excluded"
-    
+
     # Test legitimate paths that should NOT be excluded
     legitimate_paths = [
         Path("tests/test_example.py"),
@@ -46,10 +47,10 @@ def test_is_excluded_path():
         Path("unit/test_basic.py"),
         Path("integration/test_api.py"),
     ]
-    
+
     for path in legitimate_paths:
         assert not is_excluded_path(path), f"Path {path} should NOT be excluded"
-    
+
     # Test edge cases
     edge_cases = [
         (Path("test_env.py"), False),  # Contains "env" but not as directory
@@ -58,7 +59,9 @@ def test_is_excluded_path():
         (Path("some/deep/.venv/nested/test.py"), True),  # Nested .venv
         (Path("dist_packages/test.py"), False),  # Similar but not exact match
     ]
-    
+
     for path, should_exclude in edge_cases:
         result = is_excluded_path(path)
-        assert result == should_exclude, f"Path {path} exclusion should be {should_exclude}, got {result}" 
+        assert result == should_exclude, (
+            f"Path {path} exclusion should be {should_exclude}, got {result}"
+        )

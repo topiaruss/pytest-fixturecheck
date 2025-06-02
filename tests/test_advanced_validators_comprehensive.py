@@ -1,13 +1,10 @@
 from typing import Any, Optional, Union
-from unittest.mock import MagicMock
 
 import pytest
 
 from pytest_fixturecheck import fixturecheck
-from pytest_fixturecheck.utils import creates_validator
 from pytest_fixturecheck.validators import (
     combines_validators,
-    has_required_fields,
     is_instance_of,
 )
 from pytest_fixturecheck.validators_advanced import (
@@ -45,9 +42,7 @@ class Address:
 
 
 class AdvUser:
-    def __init__(
-        self, username: str, email: str, age: int, address: Optional[Address] = None
-    ):
+    def __init__(self, username: str, email: str, age: int, address: Optional[Address] = None):
         self.username = username
         self.email = email
         self.age = age
@@ -56,9 +51,7 @@ class AdvUser:
 
 # Then fixtures
 @pytest.fixture
-@with_nested_properties(
-    name="Test", config__resolution="1280x720", config__frame_rate=30
-)
+@with_nested_properties(name="Test", config__resolution="1280x720", config__frame_rate=30)
 def camera_fixture():
     return Camera("Test", Config("1280x720", 30))
 
@@ -76,15 +69,11 @@ def camera():
 
 
 # Define the validator instance separately for invalid_camera_fixture
-_invalid_camera_validator_instance = nested_property_validator(
-    config__resolution="1920x1080"
-)
+_invalid_camera_validator_instance = nested_property_validator(config__resolution="1920x1080")
 
 
 @pytest.fixture
-@fixturecheck(
-    validator=_invalid_camera_validator_instance, expect_validation_error=ValueError
-)
+@fixturecheck(validator=_invalid_camera_validator_instance, expect_validation_error=ValueError)
 def invalid_camera_fixture(camera):
     # This fixture will provide a camera with resolution "1280x720" from the 'camera' fixture,
     # but fixturecheck expects "1920x1080", so it should raise ValueError during validation.
@@ -92,15 +81,11 @@ def invalid_camera_fixture(camera):
 
 
 # Define the validator instance separately for missing_property_camera_fixture
-_missing_prop_validator_instance = nested_property_validator(
-    config__non_existent_prop="foo"
-)
+_missing_prop_validator_instance = nested_property_validator(config__non_existent_prop="foo")
 
 
 @pytest.fixture
-@fixturecheck(
-    validator=_missing_prop_validator_instance, expect_validation_error=AttributeError
-)
+@fixturecheck(validator=_missing_prop_validator_instance, expect_validation_error=AttributeError)
 def missing_property_camera_fixture(camera):
     return camera
 
@@ -182,9 +167,7 @@ _missing_prop_type_checker = type_check_properties(non_existent_prop__type=str)
 
 
 @pytest.fixture
-@fixturecheck(
-    validator=_missing_prop_type_checker, expect_validation_error=AttributeError
-)
+@fixturecheck(validator=_missing_prop_type_checker, expect_validation_error=AttributeError)
 def missing_property_user_fixture():
     return AdvUser(
         username="missingprop",
@@ -277,9 +260,7 @@ class TestNestedPropertyValidator:
         # The fixturecheck plugin itself doesn't seem to automatically catch/assert warnings
         # via expect_validation_error in the same way it does errors.
         # So, we just assert the fixture is usable and has its original, non-validated state.
-        assert (
-            non_strict_validator_camera_fixture.config.resolution == "1280x720"
-        )  # Original value
+        assert non_strict_validator_camera_fixture.config.resolution == "1280x720"  # Original value
         # The warning would have been emitted during fixture setup/validation by fixturecheck.
         # If we wanted to assert the warning was raised, we'd need to do it around the fixture
         # consumption, but that's tricky as fixturecheck does it during collection/setup.

@@ -48,9 +48,7 @@ def non_strict_fixture():
 
 
 # Test with default strict fixture - should fail
-@pytest.mark.xfail(
-    reason="This test should fail because the fixture has default strict validation"
-)
+@pytest.mark.xfail(reason="This test should fail because the fixture has default strict validation")
 def test_default_fixture(default_fixture):
     """Test that default strict validation fails the test."""
     # This test should never run because fixture validation fails
@@ -58,9 +56,7 @@ def test_default_fixture(default_fixture):
 
 
 # Test with explicit strict=True fixture - should fail
-@pytest.mark.xfail(
-    reason="This test should fail because the fixture has strict=True validation"
-)
+@pytest.mark.xfail(reason="This test should fail because the fixture has strict=True validation")
 def test_strict_fixture(strict_fixture):
     """Test that strict=True validation fails the test."""
     # This test should never run because fixture validation fails

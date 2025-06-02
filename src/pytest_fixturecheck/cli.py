@@ -1,10 +1,9 @@
 """Command-line interface for fixturecheck."""
 
-import ast
-import click
-import inspect
 from pathlib import Path
-from typing import List, Optional, Dict, Any, Tuple
+from typing import Any, Dict
+
+import click
 
 from .plugin import FixtureCheckPlugin
 from .utils import find_test_files
@@ -54,12 +53,8 @@ def report(path: str, pattern: str, verbose: int):
 
         if verbose > 0:
             # Get detailed fixture information
-            opportunities_details = plugin.get_opportunities_details(
-                content, str(test_file)
-            )
-            existing_details = plugin.get_existing_checks_details(
-                content, str(test_file)
-            )
+            opportunities_details = plugin.get_opportunities_details(content, str(test_file))
+            existing_details = plugin.get_existing_checks_details(content, str(test_file))
 
             if opportunities_details or existing_details:
                 click.echo(f"\nFile: {test_file}")

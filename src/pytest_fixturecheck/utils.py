@@ -2,7 +2,7 @@
 
 import inspect
 from pathlib import Path
-from typing import Any, Callable, Optional, TypeVar, List
+from typing import Any, Callable, List, TypeVar
 
 # Type variables for better typing
 F = TypeVar("F", bound=Callable[..., Any])
@@ -50,9 +50,7 @@ def creates_validator(func: Callable) -> Callable:
     import functools  # Import locally to avoid unused import warning
 
     @functools.wraps(func)
-    def validator_factory(
-        *factory_args: Any, **factory_kwargs: Any
-    ) -> Callable[[Any, bool], None]:
+    def validator_factory(*factory_args: Any, **factory_kwargs: Any) -> Callable[[Any, bool], None]:
         """Factory function that creates and returns a validator function.
 
         This is called when the @creates_validator decorated function is invoked.
@@ -64,17 +62,11 @@ def creates_validator(func: Callable) -> Callable:
 
         # Special case handling: If the function only has one parameter (obj) and is called with no args,
         # it's likely a direct validator function like in test_creates_validator_basic
-        if (
-            len(sig.parameters) == 1
-            and len(factory_args) == 0
-            and len(factory_kwargs) == 0
-        ):
+        if len(sig.parameters) == 1 and len(factory_args) == 0 and len(factory_kwargs) == 0:
             # This is a direct validator that takes an object to validate
             # We'll return a wrapper that calls this function directly with the object
             @functools.wraps(func)
-            def direct_validator_wrapper(
-                obj: Any, is_collection_phase: bool = False
-            ) -> None:
+            def direct_validator_wrapper(obj: Any, is_collection_phase: bool = False) -> None:
                 if is_collection_phase:
                     return None  # Skip validation during collection phase
 
@@ -94,11 +86,7 @@ def creates_validator(func: Callable) -> Callable:
 
         # If the function expects more than one parameter and no parameters were provided,
         # return a no-op validator to avoid errors
-        elif (
-            len(sig.parameters) > 1
-            and len(factory_args) == 0
-            and len(factory_kwargs) == 0
-        ):
+        elif len(sig.parameters) > 1 and len(factory_args) == 0 and len(factory_kwargs) == 0:
             # If the function requires multiple arguments but none were provided,
             # return a no-op validator instead of raising an error
             def noop_validator(obj: Any, is_collection_phase: bool = False) -> None:
@@ -127,9 +115,7 @@ def creates_validator(func: Callable) -> Callable:
             return inner_validator
 
         # Create a wrapper for the inner validator to make it phase-aware
-        @functools.wraps(
-            inner_validator if hasattr(inner_validator, "__name__") else func
-        )
+        @functools.wraps(inner_validator if hasattr(inner_validator, "__name__") else func)
         def validator_wrapper(obj: Any, is_collection_phase: bool = False) -> None:
             """The actual validator function that will be called by fixturecheck."""
             if is_collection_phase:

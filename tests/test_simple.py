@@ -1,7 +1,5 @@
 """Simple test file to verify the basic functionality of the plugin."""
 
-import pytest
-
 
 def test_plugin_exists():
     """Test that the plugin can be imported."""

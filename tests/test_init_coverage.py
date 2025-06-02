@@ -2,8 +2,6 @@
 
 import importlib
 
-import pytest
-
 
 def test_import_module():
     """Test importing the module to get coverage for imports."""
@@ -20,16 +18,6 @@ def test_package_interface():
     # Access the version
     from pytest_fixturecheck import (
         __version__,
-        combines_validators,
-        creates_validator,
-        django_model_has_fields,
-        django_model_validates,
-        fixturecheck,
-        has_property_values,
-        has_required_fields,
-        has_required_methods,
-        is_django_model,
-        is_instance_of,
     )
 
     assert __version__

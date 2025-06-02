@@ -1,7 +1,5 @@
 """Simple tests for the decorator behavior."""
 
-import pytest
-
 from pytest_fixturecheck.decorator import fixturecheck
 
 

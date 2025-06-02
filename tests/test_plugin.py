@@ -1,7 +1,5 @@
 """Tests for the pytest-fixturecheck plugin."""
 
-import builtins as real_builtins  # Import with an alias to ensure access to original
-import inspect
 import unittest.mock as mock  # Import with an alias for unittest.mock
 from unittest.mock import MagicMock, patch
 
@@ -9,7 +7,6 @@ import pytest
 
 from pytest_fixturecheck import fixturecheck
 from pytest_fixturecheck.plugin import (
-    PYTEST_ASYNCIO_INSTALLED,
     is_async_fixture,
     pytest_collection_finish,
     pytest_fixture_setup,
@@ -38,9 +35,7 @@ class TestIsAsyncFixture:
 
     def test_regular_function(self):
         """Test with a regular synchronous function."""
-        mock_fixturedef = MagicMock(
-            spec=["func", "argname", "unittest", "_pytest_asyncio_scope"]
-        )
+        mock_fixturedef = MagicMock(spec=["func", "argname", "unittest", "_pytest_asyncio_scope"])
 
         def sync_func():
             pass
@@ -84,17 +79,13 @@ class TestIsAsyncFixture:
         mock_fixturedef.func = sync_func
         mock_fixturedef.argname = "unittest_style_fixture"
         mock_unittest_attr = MagicMock()
-        mock_unittest_attr.__str__ = MagicMock(
-            return_value="<UnittestAsyncFixture something>"
-        )
+        mock_unittest_attr.__str__ = MagicMock(return_value="<UnittestAsyncFixture something>")
         mock_fixturedef.unittest = mock_unittest_attr
         assert is_async_fixture(mock_fixturedef)
 
     def test_unittest_non_async_fixture(self):
         """Test with a simulated unittest non-async fixture."""
-        mock_fixturedef = MagicMock(
-            spec=["func", "argname", "unittest", "_pytest_asyncio_scope"]
-        )
+        mock_fixturedef = MagicMock(spec=["func", "argname", "unittest", "_pytest_asyncio_scope"])
 
         def sync_func():
             pass
@@ -102,9 +93,7 @@ class TestIsAsyncFixture:
         mock_fixturedef.func = sync_func
         mock_fixturedef.argname = "sync_fixture"
         mock_unittest_attr = MagicMock()
-        mock_unittest_attr.__str__ = MagicMock(
-            return_value="<UnittestFixture something>"
-        )
+        mock_unittest_attr.__str__ = MagicMock(return_value="<UnittestFixture something>")
         mock_fixturedef.unittest = mock_unittest_attr
         if hasattr(mock_fixturedef, "_pytest_asyncio_scope"):
             delattr(mock_fixturedef, "_pytest_asyncio_scope")
@@ -153,9 +142,7 @@ class TestIsAsyncFixture:
     # This is the correct and final version of this test
     @patch("pytest_fixturecheck.plugin.PYTEST_ASYNCIO_INSTALLED", True)
     @patch("builtins.hasattr", autospec=True)
-    def test_pytest_asyncio_installed_with_scope_attr_error(
-        self, mock_autospecced_hasattr
-    ):
+    def test_pytest_asyncio_installed_with_scope_attr_error(self, mock_autospecced_hasattr):
         """Test a scenario where checking for _pytest_asyncio_scope causes an error."""
 
         class PlainFixtureDefForTest:
@@ -174,9 +161,7 @@ class TestIsAsyncFixture:
                 if attribute_name == "unittest":
                     return False
                 if attribute_name == "_pytest_asyncio_scope":
-                    raise AttributeError(
-                        "Deliberate error checking _pytest_asyncio_scope"
-                    )
+                    raise AttributeError("Deliberate error checking _pytest_asyncio_scope")
             return mock.DEFAULT
 
         mock_autospecced_hasattr.side_effect = controlled_hasattr_side_effect
@@ -200,11 +185,7 @@ class TestPytestFixtureSetup:
         if hasattr(mock_fixturedef.func, "__wrapped__"):
             current = mock_fixturedef.func.__wrapped__
             while current:
-                (
-                    delattr(current, "_fixturecheck")
-                    if hasattr(current, "_fixturecheck")
-                    else None
-                )
+                (delattr(current, "_fixturecheck") if hasattr(current, "_fixturecheck") else None)
                 current = getattr(current, "__wrapped__", None)
 
         mock_request = MagicMock()
@@ -218,9 +199,7 @@ class TestPytestFixtureSetup:
             not hasattr(mock_request.config, "_fixturecheck_fixtures")
             or mock_fixturedef not in mock_request.config._fixturecheck_fixtures
         )
-        assert not hasattr(
-            mock_fixturedef, "_fixturecheck_skip"
-        )  # Should not be marked for skip
+        assert not hasattr(mock_fixturedef, "_fixturecheck_skip")  # Should not be marked for skip
 
     def test_fixture_marked_directly_non_async(self):
         """Test a non-async fixture marked directly with _fixturecheck."""
@@ -367,14 +346,10 @@ class TestPytestCollectionFinish:
         """Test auto_skip=false: pytest.exit is called on validation failure."""
         mock_session = MagicMock()
         mock_session.config = MagicMock()
-        mock_session.config.getini = MagicMock(
-            return_value="false"
-        )  # auto_skip is false
+        mock_session.config.getini = MagicMock(return_value="false")  # auto_skip is false
 
         failing_validator = MagicMock(side_effect=ValueError("Validation failed"))
-        mock_fixture_func = MagicMock(
-            _validator=failing_validator, _expect_validation_error=False
-        )
+        mock_fixture_func = MagicMock(_validator=failing_validator, _expect_validation_error=False)
 
         # To handle the wrapper logic in pytest_collection_finish correctly:
         # Ensure func does not have __wrapped__ or if it does, configure it appropriately.
@@ -408,18 +383,14 @@ class TestPytestCollectionFinish:
     @patch("pytest_fixturecheck.plugin.report_fixture_errors")
     @patch("pytest_fixturecheck.plugin._mark_dependent_tests_for_skip")
     @patch("pytest.exit")
-    def test_auto_skip_true_one_failure(
-        self, mock_pytest_exit, mock_mark_skip, mock_report_errors
-    ):
+    def test_auto_skip_true_one_failure(self, mock_pytest_exit, mock_mark_skip, mock_report_errors):
         """Test auto_skip=true: _mark_dependent_tests_for_skip is called."""
         mock_session = MagicMock()
         mock_session.config = MagicMock()
         mock_session.config.getini = MagicMock(return_value="true")  # auto_skip is true
 
         failing_validator = MagicMock(side_effect=ValueError("Validation failed"))
-        mock_fixture_func = MagicMock(
-            _validator=failing_validator, _expect_validation_error=False
-        )
+        mock_fixture_func = MagicMock(_validator=failing_validator, _expect_validation_error=False)
         (
             delattr(mock_fixture_func, "__wrapped__")
             if hasattr(mock_fixture_func, "__wrapped__")
@@ -452,9 +423,7 @@ class TestPytestCollectionFinish:
         mock_pytest_exit.assert_not_called()
 
     # Tests for collection phase validation (validator(fixture_func, True))
-    @patch(
-        "pytest_fixturecheck.plugin.report_fixture_errors"
-    )  # To prevent printing errors
+    @patch("pytest_fixturecheck.plugin.report_fixture_errors")  # To prevent printing errors
     @patch("pytest.exit")  # To prevent exit in case of unexpected failures
     def test_collection_validation_passes_not_expected_error(
         self, mock_pytest_exit, mock_report_errors
@@ -465,9 +434,7 @@ class TestPytestCollectionFinish:
         mock_session.config.getini = MagicMock(return_value="false")  # auto_skip false
 
         mock_validator = MagicMock(return_value=None)  # Validator passes
-        mock_fixture_func = MagicMock(
-            _validator=mock_validator, _expect_validation_error=False
-        )
+        mock_fixture_func = MagicMock(_validator=mock_validator, _expect_validation_error=False)
         (
             delattr(mock_fixture_func, "__wrapped__")
             if hasattr(mock_fixture_func, "__wrapped__")
@@ -530,16 +497,12 @@ class TestPytestCollectionFinish:
         ]  # (fixturedef, error, traceback_str)
         assert failed_fixture_arg[0] == mock_fdef
         assert isinstance(failed_fixture_arg[1], AssertionError)
-        assert "Expected validation error but none occurred" in str(
-            failed_fixture_arg[1]
-        )
+        assert "Expected validation error but none occurred" in str(failed_fixture_arg[1])
         mock_pytest_exit.assert_called_once()  # Because a failure was recorded and auto_skip=false
 
     @patch("pytest_fixturecheck.plugin.report_fixture_errors")
     @patch("pytest.exit")
-    def test_collection_validation_fails_expected_error(
-        self, mock_pytest_exit, mock_report_errors
-    ):
+    def test_collection_validation_fails_expected_error(self, mock_pytest_exit, mock_report_errors):
         """Collection validation: validator fails, error WAS expected (success)."""
         mock_session = MagicMock()
         mock_session.config = MagicMock()
@@ -574,9 +537,9 @@ class TestPytestCollectionFinish:
                 for f_def, err, tb_str in mock_report_errors.call_args_list[0][0][0]
                 if f_def == mock_fdef
             ]
-            assert (
-                not errors_for_this_fixture
-            ), "Failure was reported for a fixture that expected an error which occurred."
+            assert not errors_for_this_fixture, (
+                "Failure was reported for a fixture that expected an error which occurred."
+            )
         else:
             pass  # No errors reported at all, correct.
         mock_pytest_exit.assert_not_called()
@@ -614,9 +577,7 @@ class TestPytestCollectionFinish:
         mock_report_errors.assert_called_once()
         failed_fixture_arg = mock_report_errors.call_args[0][0][0]
         assert failed_fixture_arg[0] == mock_fdef
-        assert (
-            failed_fixture_arg[1] is original_error
-        )  # Check it's the exact error instance
+        assert failed_fixture_arg[1] is original_error  # Check it's the exact error instance
         mock_pytest_exit.assert_called_once()
 
     # Tests for skip conditions before fixture execution
@@ -627,9 +588,7 @@ class TestPytestCollectionFinish:
         mock_session.config.getini = MagicMock(return_value="false")
 
         mock_validator = MagicMock()  # Validator exists
-        mock_fixture_func = MagicMock(
-            _validator=mock_validator, _expect_validation_error=False
-        )
+        mock_fixture_func = MagicMock(_validator=mock_validator, _expect_validation_error=False)
         (
             delattr(mock_fixture_func, "__wrapped__")
             if hasattr(mock_fixture_func, "__wrapped__")
@@ -662,9 +621,7 @@ class TestPytestCollectionFinish:
         mock_session.config.getini = MagicMock(return_value="false")
 
         mock_validator = MagicMock()
-        mock_fixture_func = MagicMock(
-            _validator=mock_validator, _expect_validation_error=False
-        )
+        mock_fixture_func = MagicMock(_validator=mock_validator, _expect_validation_error=False)
         (
             delattr(mock_fixture_func, "__wrapped__")
             if hasattr(mock_fixture_func, "__wrapped__")
@@ -697,9 +654,7 @@ class TestPytestCollectionFinish:
         mock_session.config.getini = MagicMock(return_value="false")
 
         mock_validator = MagicMock()
-        mock_fixture_func = MagicMock(
-            _validator=mock_validator, _expect_validation_error=False
-        )
+        mock_fixture_func = MagicMock(_validator=mock_validator, _expect_validation_error=False)
         (
             delattr(mock_fixture_func, "__wrapped__")
             if hasattr(mock_fixture_func, "__wrapped__")
@@ -748,9 +703,7 @@ class TestPytestCollectionFinish:
         )
 
         mock_validator = MagicMock(name="exec_validator_for_coroutine_test")
-        mock_fixture_func = MagicMock(
-            _validator=mock_validator, _expect_validation_error=False
-        )
+        mock_fixture_func = MagicMock(_validator=mock_validator, _expect_validation_error=False)
         (
             delattr(mock_fixture_func, "__wrapped__")
             if hasattr(mock_fixture_func, "__wrapped__")
@@ -763,9 +716,7 @@ class TestPytestCollectionFinish:
             delattr(mock_fdef, "unittest")
         mock_fdef._fixturecheck_skip = False
 
-        coroutine_obj = MagicMock(
-            name="coroutine_object"
-        )  # Simulate a coroutine object
+        coroutine_obj = MagicMock(name="coroutine_object")  # Simulate a coroutine object
         mock_fdef.execute = MagicMock(return_value=coroutine_obj)
         mock_is_coroutine.return_value = True
 
@@ -822,23 +773,17 @@ class TestPytestCollectionFinish:
             if hasattr(fixture_func_mock, "__wrapped__")
             else None
         )
-        if hasattr(
-            fixture_func_mock, "_error_message_match"
-        ):  # Ensure clean state for this attr
+        if hasattr(fixture_func_mock, "_error_message_match"):  # Ensure clean state for this attr
             delattr(fixture_func_mock, "_error_message_match")
 
         fdef_mock = MagicMock(name="exec_phase_fdef")
         fdef_mock.func = fixture_func_mock
 
-        if hasattr(
-            fdef_mock, "unittest"
-        ):  # Ensure unittest attr is not present by default
+        if hasattr(fdef_mock, "unittest"):  # Ensure unittest attr is not present by default
             delattr(fdef_mock, "unittest")
         fdef_mock._fixturecheck_skip = False
 
-        actual_fixture_result_for_assertion = (
-            None  # Default if execute raises or returns None
-        )
+        actual_fixture_result_for_assertion = None  # Default if execute raises or returns None
 
         if isinstance(fixture_exec_behavior, Exception):
             fdef_mock.execute = MagicMock(side_effect=fixture_exec_behavior)
@@ -858,9 +803,7 @@ class TestPytestCollectionFinish:
     @patch("pytest_fixturecheck.plugin.report_fixture_errors")
     @patch("pytest.exit")
     @patch("pytest_fixturecheck.plugin.is_coroutine", return_value=False)
-    def test_exec_validation_passes_not_expected(
-        self, mock_is_coro, mock_py_exit, mock_rep_err
-    ):
+    def test_exec_validation_passes_not_expected(self, mock_is_coro, mock_py_exit, mock_rep_err):
         """Exec validation: validator passes, error NOT expected."""
         mock_session = MagicMock()
         mock_session.config = MagicMock()
@@ -880,9 +823,7 @@ class TestPytestCollectionFinish:
     @patch("pytest_fixturecheck.plugin.report_fixture_errors")
     @patch("pytest.exit")
     @patch("pytest_fixturecheck.plugin.is_coroutine", return_value=False)
-    def test_exec_validation_passes_expected_error(
-        self, mock_is_coro, mock_py_exit, mock_rep_err
-    ):
+    def test_exec_validation_passes_expected_error(self, mock_is_coro, mock_py_exit, mock_rep_err):
         """Exec validation: validator passes, error WAS expected (failure)."""
         mock_session = MagicMock()
         mock_session.config = MagicMock()
@@ -906,9 +847,7 @@ class TestPytestCollectionFinish:
         found_execution_phase_error = False
         found_collection_phase_error = False
         # Ensure reported_errors_list is not empty before iterating
-        assert (
-            reported_errors_list
-        ), "report_fixture_errors was called with an empty list"
+        assert reported_errors_list, "report_fixture_errors was called with an empty list"
         for reported_fdef, err, tb_str in reported_errors_list:
             if reported_fdef == fdef and isinstance(err, AssertionError):
                 if "execution phase" in str(err):
@@ -916,20 +855,18 @@ class TestPytestCollectionFinish:
                 if "collection phase" in str(err):
                     found_collection_phase_error = True
 
-        assert (
-            found_execution_phase_error
-        ), "Execution phase 'expected error but none occurred' not reported."
-        assert (
-            found_collection_phase_error
-        ), "Collection phase 'expected error but none occurred' not reported."
+        assert found_execution_phase_error, (
+            "Execution phase 'expected error but none occurred' not reported."
+        )
+        assert found_collection_phase_error, (
+            "Collection phase 'expected error but none occurred' not reported."
+        )
         mock_py_exit.assert_called_once()  # Because errors were reported and auto_skip=false
 
     @patch("pytest_fixturecheck.plugin.report_fixture_errors")
     @patch("pytest.exit")
     @patch("pytest_fixturecheck.plugin.is_coroutine", return_value=False)
-    def test_exec_validation_fails_expected_error(
-        self, mock_is_coro, mock_py_exit, mock_rep_err
-    ):
+    def test_exec_validation_fails_expected_error(self, mock_is_coro, mock_py_exit, mock_rep_err):
         """Exec validation: validator fails, error WAS expected (success)."""
         mock_session = MagicMock()
         mock_session.config = MagicMock()
@@ -997,9 +934,7 @@ class TestPytestCollectionFinish:
     @patch("pytest_fixturecheck.plugin.report_fixture_errors")
     @patch("pytest.exit")
     @patch("pytest_fixturecheck.plugin.is_coroutine", return_value=False)
-    def test_exec_execute_fails_not_expected(
-        self, mock_is_coro, mock_py_exit, mock_rep_err
-    ):
+    def test_exec_execute_fails_not_expected(self, mock_is_coro, mock_py_exit, mock_rep_err):
         """Test exec phase: fixture.execute() fails, error was NOT expected."""
         mock_session = MagicMock()
         mock_session.config = MagicMock()
@@ -1016,9 +951,7 @@ class TestPytestCollectionFinish:
         with patch("pytest_fixturecheck.plugin.is_async_fixture", return_value=False):
             pytest_collection_finish(mock_session)
 
-        validator_assertion_obj.assert_called_once_with(
-            ff_mock, True
-        )  # Collection validator runs
+        validator_assertion_obj.assert_called_once_with(ff_mock, True)  # Collection validator runs
         fdef.execute.assert_called_once()  # execute was called
         # Execution phase validator should not be called because execute failed before it
         assert validator_assertion_obj.call_count == 1
@@ -1071,16 +1004,12 @@ class TestPytestCollectionFinish:
     @patch("pytest_fixturecheck.plugin.report_fixture_errors")
     @patch("pytest.exit")
     @patch("pytest_fixturecheck.plugin.is_coroutine", return_value=False)
-    def test_exec_execute_fails_expected(
-        self, mock_is_coro, mock_py_exit, mock_rep_err
-    ):
+    def test_exec_execute_fails_expected(self, mock_is_coro, mock_py_exit, mock_rep_err):
         """Test exec phase: fixture.execute() fails, error WAS expected."""
         mock_session = MagicMock()
         mock_session.config = MagicMock()
         exec_error = RuntimeError("Fixture execution failed as expected")
-        collection_error = ValueError(
-            "Collection error also, as expect_error_flag is True"
-        )
+        collection_error = ValueError("Collection error also, as expect_error_flag is True")
 
         fdef, validator_assertion_obj, ff_mock, _ = self._setup_execution_phase_test(
             mock_session,
@@ -1106,9 +1035,7 @@ class TestPytestCollectionFinish:
     @patch("pytest_fixturecheck.plugin.report_fixture_errors")
     @patch("pytest.exit")
     @patch("pytest_fixturecheck.plugin.is_coroutine", return_value=False)
-    def test_exec_execute_fails_async_error_type(
-        self, mock_is_coro, mock_py_exit, mock_rep_err
-    ):
+    def test_exec_execute_fails_async_error_type(self, mock_is_coro, mock_py_exit, mock_rep_err):
         """Test exec phase: fixture.execute() fails with an async-like error message."""
         mock_session = MagicMock()
         mock_session.config = MagicMock()
@@ -1121,16 +1048,12 @@ class TestPytestCollectionFinish:
         with patch("pytest_fixturecheck.plugin.is_async_fixture", return_value=False):
             pytest_collection_finish(mock_session)
 
-        validator_assertion_obj.assert_called_once_with(
-            ff_mock, True
-        )  # Collection validator
+        validator_assertion_obj.assert_called_once_with(ff_mock, True)  # Collection validator
         fdef.execute.assert_called_once()
         assert validator_assertion_obj.call_count == 1  # Execution validator not called
 
         assert hasattr(fdef, "_fixturecheck_skip")
-        assert (
-            fdef._fixturecheck_skip is True
-        )  # Should be marked for skip due to async error type
+        assert fdef._fixturecheck_skip is True  # Should be marked for skip due to async error type
 
         mock_rep_err.assert_not_called()
         mock_py_exit.assert_not_called()
@@ -1141,9 +1064,7 @@ class TestPytestCollectionFinish:
     @patch("pytest_fixturecheck.plugin.report_fixture_errors")
     @patch("pytest.exit")
     # No need to patch is_coroutine or is_async_fixture as we fail before execute
-    def test_exec_getfixturerequest_fails_not_expected(
-        self, mock_py_exit, mock_rep_err
-    ):
+    def test_exec_getfixturerequest_fails_not_expected(self, mock_py_exit, mock_rep_err):
         """Test exec phase: getfixturerequest() fails, error was NOT expected."""
         mock_session = MagicMock()
         mock_session.config = MagicMock()
@@ -1162,12 +1083,8 @@ class TestPytestCollectionFinish:
         with patch("pytest_fixturecheck.plugin.is_async_fixture", return_value=False):
             pytest_collection_finish(mock_session)
 
-        validator_assertion_obj.assert_called_once_with(
-            ff_mock, True
-        )  # Collection validator runs
-        mock_session._fixturemanager.getfixturerequest.assert_called_once_with(
-            mock_session
-        )
+        validator_assertion_obj.assert_called_once_with(ff_mock, True)  # Collection validator runs
+        mock_session._fixturemanager.getfixturerequest.assert_called_once_with(mock_session)
         fdef.execute.assert_not_called()  # Execute should not be reached
         # Validator should only have been called for collection phase
         assert validator_assertion_obj.call_count == 1
@@ -1198,9 +1115,7 @@ class TestPytestCollectionFinish:
             pytest_collection_finish(mock_session)
 
         validator_assertion_obj.assert_called_once_with(ff_mock, True)
-        mock_session._fixturemanager.getfixturerequest.assert_called_once_with(
-            mock_session
-        )
+        mock_session._fixturemanager.getfixturerequest.assert_called_once_with(mock_session)
         fdef.execute.assert_not_called()
         assert validator_assertion_obj.call_count == 1
 
@@ -1221,9 +1136,7 @@ class TestPytestCollectionFinish:
         mock_session = MagicMock()
         mock_session.config = MagicMock()
         get_request_error = ValueError("getfixturerequest failed as expected")
-        collection_error = ValueError(
-            "Collection error also, as expect_error_flag is True"
-        )
+        collection_error = ValueError("Collection error also, as expect_error_flag is True")
 
         fdef, validator_assertion_obj, ff_mock, _ = self._setup_execution_phase_test(
             mock_session,
@@ -1237,9 +1150,7 @@ class TestPytestCollectionFinish:
         with patch("pytest_fixturecheck.plugin.is_async_fixture", return_value=False):
             pytest_collection_finish(mock_session)
 
-        validator_assertion_obj.assert_called_once_with(
-            ff_mock, True
-        )  # Collection validator
+        validator_assertion_obj.assert_called_once_with(ff_mock, True)  # Collection validator
         # getfixturerequest is not called because collection phase failed as expected and continued to next fixture.
         mock_session._fixturemanager.getfixturerequest.assert_not_called()
         fdef.execute.assert_not_called()
@@ -1253,23 +1164,19 @@ class TestPytestCollectionFinish:
     @patch("pytest_fixturecheck.plugin.report_fixture_errors")
     @patch("pytest.exit")
     @patch("pytest_fixturecheck.plugin.is_coroutine", return_value=False)
-    def test_exec_validator_is_none_not_expected(
-        self, mock_is_coro, mock_py_exit, mock_rep_err
-    ):
+    def test_exec_validator_is_none_not_expected(self, mock_is_coro, mock_py_exit, mock_rep_err):
         """Exec phase: fixture_func._validator is None, error NOT expected."""
         mock_session = MagicMock()
         mock_session.config = MagicMock()
 
         # validator_behavior="VALIDATOR_IS_NONE", expect_error_flag=False
         # fixture_exec_behavior=None means execute() returns "fixture_result_value" (default for non-exception)
-        fdef, validator_assertion_obj, ff_mock, f_res = (
-            self._setup_execution_phase_test(
-                mock_session,
-                "VALIDATOR_IS_NONE",
-                False,
-                fixture_exec_behavior=None,
-                auto_skip_str="false",
-            )
+        fdef, validator_assertion_obj, ff_mock, f_res = self._setup_execution_phase_test(
+            mock_session,
+            "VALIDATOR_IS_NONE",
+            False,
+            fixture_exec_behavior=None,
+            auto_skip_str="false",
         )
         # ff_mock._validator should be None due to helper logic
 
@@ -1286,21 +1193,17 @@ class TestPytestCollectionFinish:
     @patch("pytest_fixturecheck.plugin.report_fixture_errors")
     @patch("pytest.exit")
     @patch("pytest_fixturecheck.plugin.is_coroutine", return_value=False)
-    def test_exec_validator_is_none_expected_error(
-        self, mock_is_coro, mock_py_exit, mock_rep_err
-    ):
+    def test_exec_validator_is_none_expected_error(self, mock_is_coro, mock_py_exit, mock_rep_err):
         """Exec phase: fixture_func._validator is None, error WAS expected."""
         mock_session = MagicMock()
         mock_session.config = MagicMock()
 
-        fdef, validator_assertion_obj, ff_mock, f_res = (
-            self._setup_execution_phase_test(
-                mock_session,
-                "VALIDATOR_IS_NONE",
-                True,
-                fixture_exec_behavior=None,
-                auto_skip_str="false",
-            )
+        fdef, validator_assertion_obj, ff_mock, f_res = self._setup_execution_phase_test(
+            mock_session,
+            "VALIDATOR_IS_NONE",
+            True,
+            fixture_exec_behavior=None,
+            auto_skip_str="false",
         )
 
         with patch("pytest_fixturecheck.plugin.is_async_fixture", return_value=False):
@@ -1315,23 +1218,19 @@ class TestPytestCollectionFinish:
     @patch("pytest_fixturecheck.plugin.report_fixture_errors")
     @patch("pytest.exit")
     @patch("pytest_fixturecheck.plugin.is_coroutine", return_value=False)
-    def test_exec_result_is_none_not_expected(
-        self, mock_is_coro, mock_py_exit, mock_rep_err
-    ):
+    def test_exec_result_is_none_not_expected(self, mock_is_coro, mock_py_exit, mock_rep_err):
         """Exec phase: fixture.execute() returns None, error NOT expected."""
         mock_session = MagicMock()
         mock_session.config = MagicMock()
 
         # fixture_exec_behavior=None results in execute() returning None (explicitly)
         # validator_behavior=None means validator mock passes when called.
-        fdef, validator_assertion_obj, ff_mock, f_res = (
-            self._setup_execution_phase_test(
-                mock_session,
-                None,
-                False,
-                fixture_exec_behavior=None,
-                auto_skip_str="false",
-            )
+        fdef, validator_assertion_obj, ff_mock, f_res = self._setup_execution_phase_test(
+            mock_session,
+            None,
+            False,
+            fixture_exec_behavior=None,
+            auto_skip_str="false",
         )
         assert f_res is None  # Ensure execute() is configured to return None
 
@@ -1339,9 +1238,7 @@ class TestPytestCollectionFinish:
             pytest_collection_finish(mock_session)
 
         fdef.execute.assert_called_once()
-        validator_assertion_obj.assert_called_once_with(
-            ff_mock, True
-        )  # Collection validator runs
+        validator_assertion_obj.assert_called_once_with(ff_mock, True)  # Collection validator runs
         # Execution validator not called because result is None
         assert validator_assertion_obj.call_count == 1
         mock_rep_err.assert_not_called()
@@ -1350,23 +1247,19 @@ class TestPytestCollectionFinish:
     @patch("pytest_fixturecheck.plugin.report_fixture_errors")
     @patch("pytest.exit")
     @patch("pytest_fixturecheck.plugin.is_coroutine", return_value=False)
-    def test_exec_result_is_none_expected_error(
-        self, mock_is_coro, mock_py_exit, mock_rep_err
-    ):
+    def test_exec_result_is_none_expected_error(self, mock_is_coro, mock_py_exit, mock_rep_err):
         """Exec phase: fixture.execute() returns None, error WAS expected."""
         mock_session = MagicMock()
         mock_session.config = MagicMock()
 
         # If error is expected, and collection validator passes, then an error is reported for collection phase.
         # Execution phase (result is None) will then be skipped for this specific error reporting logic.
-        fdef, validator_assertion_obj, ff_mock, f_res = (
-            self._setup_execution_phase_test(
-                mock_session,
-                None,
-                True,
-                fixture_exec_behavior=None,
-                auto_skip_str="false",
-            )
+        fdef, validator_assertion_obj, ff_mock, f_res = self._setup_execution_phase_test(
+            mock_session,
+            None,
+            True,
+            fixture_exec_behavior=None,
+            auto_skip_str="false",
         )
         assert f_res is None
 
@@ -1374,9 +1267,7 @@ class TestPytestCollectionFinish:
             pytest_collection_finish(mock_session)
 
         fdef.execute.assert_called_once()
-        validator_assertion_obj.assert_called_once_with(
-            ff_mock, True
-        )  # Collection validator
+        validator_assertion_obj.assert_called_once_with(ff_mock, True)  # Collection validator
         # Execution validator not called as result is None
         assert validator_assertion_obj.call_count == 1
 
@@ -1385,9 +1276,8 @@ class TestPytestCollectionFinish:
         failed_arg_tuple = mock_rep_err.call_args[0][0][0]
         assert failed_arg_tuple[0] == fdef
         assert isinstance(failed_arg_tuple[1], AssertionError)
-        assert (
-            "Expected validation error but none occurred during collection phase"
-            in str(failed_arg_tuple[1])
+        assert "Expected validation error but none occurred during collection phase" in str(
+            failed_arg_tuple[1]
         )
         mock_py_exit.assert_called_once()  # Because auto_skip is false and error reported
 
@@ -1415,11 +1305,7 @@ class TestPytestCollectionFinish:
         inner_wrapper._fixturecheck = True
         inner_wrapper._validator = inner_validator_mock
         inner_wrapper._expect_validation_error = True  # Error is expected
-        (
-            delattr(inner_wrapper, "side_effect")
-            if hasattr(inner_wrapper, "side_effect")
-            else None
-        )
+        (delattr(inner_wrapper, "side_effect") if hasattr(inner_wrapper, "side_effect") else None)
 
         outer_wrapper = MagicMock(name="outer_wrapper")
         outer_wrapper.__wrapped__ = inner_wrapper
@@ -1428,16 +1314,8 @@ class TestPytestCollectionFinish:
             if hasattr(outer_wrapper, "_fixturecheck")
             else None
         )
-        (
-            delattr(outer_wrapper, "_validator")
-            if hasattr(outer_wrapper, "_validator")
-            else None
-        )
-        (
-            delattr(outer_wrapper, "side_effect")
-            if hasattr(outer_wrapper, "side_effect")
-            else None
-        )
+        (delattr(outer_wrapper, "_validator") if hasattr(outer_wrapper, "_validator") else None)
+        (delattr(outer_wrapper, "side_effect") if hasattr(outer_wrapper, "side_effect") else None)
 
         mock_fdef = MagicMock(name="deeply_wrapped_fdef_inner_marker", spec=["func"])
         mock_fdef.func = outer_wrapper

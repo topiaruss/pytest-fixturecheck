@@ -1,10 +1,8 @@
 """Test file that demonstrates the phase-aware validation in pytest-fixturecheck."""
 
-from typing import Any, Callable
+from typing import Any
 
 import pytest
-
-from pytest_fixturecheck import fixturecheck
 
 
 def phase_aware_validator(obj: Any, is_collection_phase: bool = False) -> None:

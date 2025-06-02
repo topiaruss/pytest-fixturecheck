@@ -40,8 +40,7 @@ asyncio = [
 ]
 dev = [
     "pytest>=6.0.0",
-    "black",
-    "flake8",
+    "ruff",
     "mypy",
     "build",
     "twine",
@@ -66,6 +65,36 @@ fixturecheck = "pytest_fixturecheck.plugin"
 
 [project.scripts]
 fixturecheck = "pytest_fixturecheck.cli:fixturecheck"
+
+[tool.ruff]
+line-length = 100
+target-version = "py38"
+
+[tool.ruff.lint]
+select = [
+    "E",   # pycodestyle errors
+    "W",   # pycodestyle warnings
+    "F",   # pyflakes
+]
+ignore = [
+    "E501",  # line too long, handled by formatter
+    "E402",  # module level import not at top of file
+    "F401",  # imported but unused
+    "F841",  # local variable assigned but never used
+    "W291",  # trailing whitespace
+    "E731",  # do not assign a lambda to a variable
+    "B007",  # unused loop control variable
+    "B018",  # useless expression
+    "B028",  # no explicit stacklevel keyword argument
+    "B904",  # raise without from inside except
+    "E712",  # avoid equality comparisons to True/False
+]
+
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"
+skip-magic-trailing-comma = false
+line-ending = "auto"
 
 [tool.bandit]
 exclude_dirs = ["tests", ".tox", ".venv"]

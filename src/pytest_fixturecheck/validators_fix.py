@@ -7,8 +7,6 @@ import functools
 import warnings
 from typing import Any, Callable, Dict
 
-from .utils import creates_validator
-
 
 def property_values_validator(
     expected_values: Dict[str, Any],
@@ -50,12 +48,10 @@ def property_values_validator(
             actual_value = getattr(obj, prop_name)
             if actual_value != expected_value:
                 if strict:
-                    raise ValueError(
-                        f"Expected {prop_name}={expected_value}, got {actual_value}"
-                    )
+                    raise ValueError(f"Expected {prop_name}={expected_value}, got {actual_value}")
                 else:
                     warnings.warn(
-                        f"Expected {prop_name}={expected_value}, got {actual_value}"
+                        f"Expected {prop_name}={expected_value}, got {actual_value}", stacklevel=2
                     )
 
     return validator
