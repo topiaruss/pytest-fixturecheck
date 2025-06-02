@@ -298,6 +298,35 @@ fixturecheck report --pattern "*_test.py"      # Includes: *_test.py + conftest.
 fixturecheck report --pattern "unit_*.py"      # Includes: unit_*.py + conftest.py
 ```
 
+### Automatic Exclusions
+
+The CLI automatically excludes common directories that shouldn't be analyzed for fixtures:
+
+**Virtual Environment Directories:**
+- `.venv`, `venv`, `.env`, `env`
+- `.virtualenv`, `virtualenv`
+- `.pyenv`, `pyenv`
+
+**Package and Build Directories:**
+- `site-packages`, `dist-packages`
+- `node_modules`
+- `__pycache__`
+- `.tox`, `tox`, `.nox`, `nox`
+- `.pytest_cache`, `.mypy_cache`
+- `build`, `dist`
+- `.git`, `.svn`, `.hg`
+- `.coverage`, `htmlcov`
+- `eggs`, `*.egg-info`
+
+This prevents the CLI from analyzing third-party packages, build artifacts, and other directories that contain irrelevant test files.
+
+**Example:**
+```bash
+# These directories will be automatically skipped:
+fixturecheck report  # Excludes .venv/lib/python3.13/site-packages/*/test_*.py
+fixturecheck add     # Excludes build/lib/mypackage/test_*.py
+```
+
 ## Best Practices
 
 ### 1. Start with Dry Run

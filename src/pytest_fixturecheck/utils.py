@@ -187,8 +187,56 @@ def is_coroutine(obj: Any) -> bool:
     return inspect.iscoroutine(obj)
 
 
+def is_excluded_path(path: Path) -> bool:
+    """Check if a path should be excluded from test file search.
+    
+    Args:
+        path: The path to check
+        
+    Returns:
+        True if the path should be excluded, False otherwise
+    """
+    path_parts = path.parts
+    
+    # Exclude common virtual environment directories
+    venv_patterns = {
+        '.venv', 'venv', '.env', 'env',
+        '.virtualenv', 'virtualenv',
+        '.pyenv', 'pyenv'
+    }
+    
+    # Exclude package/dependency directories  
+    package_patterns = {
+        'site-packages', 'dist-packages',
+        'node_modules',
+        '__pycache__',
+        '.tox', 'tox',
+        '.nox', 'nox',
+        '.pytest_cache',
+        '.mypy_cache',
+        'build', 'dist',
+        '.git', '.svn', '.hg',
+        '.coverage',
+        'htmlcov',
+        'eggs'
+    }
+    
+    # Check if any part of the path matches exclusion patterns exactly
+    for part in path_parts:
+        if part in venv_patterns or part in package_patterns:
+            return True
+        # Handle egg-info pattern with wildcard
+        if part.endswith('.egg-info'):
+            return True
+            
+    return False
+
+
 def find_test_files(path: Path, pattern: str = "test_*.py") -> List[Path]:
     """Find all test files in a directory matching the given pattern.
+    
+    Excludes virtual environments, site-packages, and other common directories
+    that shouldn't be analyzed.
     
     Args:
         path: The directory to search in
@@ -204,11 +252,18 @@ def find_test_files(path: Path, pattern: str = "test_*.py") -> List[Path]:
         return []
     
     if path.is_file():
+        # For single files, check if they should be excluded
+        if is_excluded_path(path):
+            return []
         return [path] if (path.match(pattern) or path.name == "conftest.py") else []
     
     # Find both test files and conftest.py files
     test_files = list(path.glob(f"**/{pattern}"))
     conftest_files = list(path.glob("**/conftest.py"))
     
-    # Combine and deduplicate the results
-    return list(set(test_files + conftest_files))
+    # Combine and filter out excluded paths
+    all_files = test_files + conftest_files
+    filtered_files = [f for f in all_files if not is_excluded_path(f)]
+    
+    # Deduplicate the results
+    return list(set(filtered_files))

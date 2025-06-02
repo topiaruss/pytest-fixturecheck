@@ -425,3 +425,122 @@ def scoped_fixture():
     
     modified = plugin.add_fixture_checks(content)
     assert modified.count("@fixturecheck()") == 4  # All fixtures should have it 
+
+
+def test_exclusion_patterns(tmp_path):
+    """Test that virtual environments and package directories are excluded."""
+    runner = CliRunner()
+    
+    # Create various directories that should be excluded
+    excluded_dirs = [
+        ".venv", "venv", ".env", "env",
+        "site-packages", "node_modules", "__pycache__",
+        ".tox", ".pytest_cache", ".mypy_cache",
+        "build", "dist", ".git"
+    ]
+    
+    for dirname in excluded_dirs:
+        exclude_dir = tmp_path / dirname
+        exclude_dir.mkdir()
+        
+        # Create a test file in the excluded directory
+        test_file = exclude_dir / "test_excluded.py"
+        test_file.write_text("""
+import pytest
+
+@pytest.fixture
+def excluded_fixture():
+    return "should_not_be_found"
+""")
+    
+    # Create a legitimate test file
+    legitimate_test = tmp_path / "test_legitimate.py"
+    legitimate_test.write_text("""
+import pytest
+
+@pytest.fixture
+def legitimate_fixture():
+    return "should_be_found"
+""")
+    
+    # Run report command
+    result = runner.invoke(fixturecheck, ["report", "--path", str(tmp_path)])
+    
+    assert result.exit_code == 0
+    # Should only find the legitimate fixture, not the excluded ones
+    assert "Found 1 opportunities for fixture checks" in result.output
+    assert "Found 0 existing fixture checks" in result.output
+
+
+def test_exclusion_with_verbose(tmp_path):
+    """Test exclusion with verbose output."""
+    runner = CliRunner()
+    
+    # Create .venv directory with test file
+    venv_dir = tmp_path / ".venv" / "lib" / "python3.13" / "site-packages" / "somepackage"
+    venv_dir.mkdir(parents=True)
+    
+    venv_test = venv_dir / "test_package.py"
+    venv_test.write_text("""
+import pytest
+
+@pytest.fixture
+def package_fixture():
+    return "from_package"
+""")
+    
+    # Create legitimate test file
+    legitimate_test = tmp_path / "test_real.py"
+    legitimate_test.write_text("""
+import pytest
+
+@pytest.fixture
+def real_fixture():
+    return "real"
+""")
+    
+    # Run verbose report
+    result = runner.invoke(fixturecheck, ["report", "-v", "--path", str(tmp_path)])
+    
+    assert result.exit_code == 0
+    # Should only show the legitimate test file
+    assert "test_real.py" in result.output
+    assert "test_package.py" not in result.output
+    assert ".venv" not in result.output
+
+
+def test_exclusion_conftest_in_venv(tmp_path):
+    """Test that conftest.py files in virtual environments are also excluded."""
+    runner = CliRunner()
+    
+    # Create conftest.py in .venv (should be excluded)
+    venv_dir = tmp_path / ".venv" / "lib" / "python3.13" / "site-packages"
+    venv_dir.mkdir(parents=True)
+    
+    venv_conftest = venv_dir / "conftest.py"
+    venv_conftest.write_text("""
+import pytest
+
+@pytest.fixture
+def venv_shared_fixture():
+    return "from_venv_conftest"
+""")
+    
+    # Create legitimate conftest.py (should be included)
+    legitimate_conftest = tmp_path / "conftest.py"
+    legitimate_conftest.write_text("""
+import pytest
+
+@pytest.fixture
+def real_shared_fixture():
+    return "from_real_conftest"
+""")
+    
+    # Run report
+    result = runner.invoke(fixturecheck, ["report", "-v", "--path", str(tmp_path)])
+    
+    assert result.exit_code == 0
+    # Should only include the legitimate conftest.py
+    assert str(legitimate_conftest) in result.output
+    assert ".venv" not in result.output
+    assert "Found 1 opportunities for fixture checks" in result.output 
