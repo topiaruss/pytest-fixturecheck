@@ -32,9 +32,13 @@ jobs:
         uses: astral-sh/setup-uv@v4
         with:
           enable-cache: true
+          cache-suffix: ${{ matrix.python-version }}-${{ matrix.tox-env }}
 
       - name: Set up Python ${{ matrix.python-version }}
         run: uv python install ${{ matrix.python-version }}
+
+      - name: Sync dependencies
+        run: uv sync --python ${{ matrix.python-version }}
 
       - name: Install tox and dependencies
         run: uv tool install tox --with tox-gh-actions
@@ -64,9 +68,13 @@ jobs:
         uses: astral-sh/setup-uv@v4
         with:
           enable-cache: true
+          cache-suffix: build
 
       - name: Set up Python
         run: uv python install 3.13
+
+      - name: Sync dependencies
+        run: uv sync
 
       - name: Run build check with tox
         run: |
