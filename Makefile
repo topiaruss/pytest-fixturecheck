@@ -4,49 +4,53 @@
 #   UV_PUBLISH_TOKEN - PyPI API token for publishing (get from https://pypi.org/manage/account/#api-tokens)
 #
 # Usage:
+#   make sync          - Install and sync dependencies
 #   make build         - Build the package
 #   make publish-test  - Publish to TestPyPI 
 #   make publish       - Publish to PyPI
 #   make release       - Full release process
 
-.PHONY: clean install install-dev test test-all test-specific check format mypy build publish publish-test tox pre-commit version-patch version-minor version-major release tag update-badge
+.PHONY: clean sync install install-dev test test-all test-specific check format mypy build publish publish-test tox pre-commit version-patch version-minor version-major release tag update-badge
 
 clean:
 	rm -rf build/ dist/ *.egg-info/ .pytest_cache/ .coverage htmlcov/ .tox/ __pycache__/ */__pycache__/ */*/__pycache__/
 
+sync:
+	uv sync
+
 install:
-	uv pip install -e .
+	uv sync --no-dev
 
 install-dev:
-	uv pip install -e ".[dev]"
+	uv sync
 
 test:
-	PYTHONPATH=src pytest -xvs
+	uv run pytest -xvs
 
 test-all:
-	PYTHONPATH=src pytest -xvs tests/
+	uv run pytest -xvs tests/
 
 test-specific:
-	PYTHONPATH=src pytest -xvs $(filter-out $@,$(MAKECMDGOALS))
+	uv run pytest -xvs $(filter-out $@,$(MAKECMDGOALS))
 
 check:
-	ruff check src tests
+	uv run ruff check src tests
 
 format:
-	ruff format src tests
+	uv run ruff format src tests
 
 mypy:
-	mypy src
+	uv run mypy src
 
 pre-commit:
-	pre-commit run --all-files
+	uv run pre-commit run --all-files
 
 tox:
 	tox
 
 # Update the PyPI badge in README.md to match the current version
 update-badge:
-	python3 scripts/update_badge.py
+	uv run python scripts/update_badge.py
 
 build:
 	uv build
@@ -66,13 +70,13 @@ release: update-badge clean build publish tag
 	@echo "Release process completed!"
 
 version-patch:
-	python scripts/bump_version.py patch
+	uv run python scripts/bump_version.py patch
 
 version-minor:
-	python scripts/bump_version.py minor
+	uv run python scripts/bump_version.py minor
 
 version-major:
-	python scripts/bump_version.py major
+	uv run python scripts/bump_version.py major
 
 %:
 	@:
