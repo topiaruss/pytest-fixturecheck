@@ -12,7 +12,7 @@ def simple_fixture():
 
 
 @pytest.fixture
-@fixturecheck
+@fixturecheck()
 def checked_fixture():
     """A fixture checked with the fixturecheck decorator."""
     return "checked hello world"

@@ -22,15 +22,15 @@ pytestmark = pytest.mark.asyncio
 
 
 @pytest_asyncio.fixture
-@fixturecheck
+@fixturecheck()
 async def async_fixture():
     """An async fixture that returns a string after an await."""
     await asyncio.sleep(0.01)
     return "async result"
 
 
-@fixturecheck
 @pytest_asyncio.fixture
+@fixturecheck()
 async def async_fixture_order2():
     """An async fixture with different decorator order."""
     await asyncio.sleep(0.01)

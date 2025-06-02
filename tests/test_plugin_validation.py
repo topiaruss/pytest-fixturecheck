@@ -73,8 +73,8 @@ def test_pytest_fixture_setup():
     """Test that pytest_fixture_setup registers fixtures correctly."""
 
     # Create a fixture function with _fixturecheck attribute
-    @fixturecheck
     @pytest.fixture
+    @fixturecheck()
     def marked_fixture():
         return "test"
 

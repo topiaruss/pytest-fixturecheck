@@ -17,7 +17,7 @@ async def simple_async_fixture():
 
 # Test using a fixture with @fixturecheck
 @pytest.fixture
-@fixturecheck
+@fixturecheck()
 def normal_fixture():
     """A regular fixture that works with fixturecheck."""
     return "normal value"

@@ -6,7 +6,7 @@ from pytest_fixturecheck import fixturecheck
 
 
 @pytest.fixture
-@fixturecheck
+@fixturecheck()
 def checked_fixture():
     """A fixture that uses the fixturecheck decorator."""
     return "hello world"

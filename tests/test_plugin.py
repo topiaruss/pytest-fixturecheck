@@ -21,8 +21,8 @@ def test_fixturecheck_decorator_exists():
     assert callable(fixturecheck)
 
 
-@fixturecheck
 @pytest.fixture
+@fixturecheck()
 def simple_fixture():
     """A simple fixture that returns a string."""
     return "test"

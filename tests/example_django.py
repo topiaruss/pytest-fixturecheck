@@ -37,8 +37,8 @@ def publisher():
 
 
 # Using fixturecheck without model validation
-@fixturecheck
 @pytest.fixture
+@fixturecheck()
 def author():
     # This would work with real Django models
     # return Author.objects.create(name="Marian Brook")

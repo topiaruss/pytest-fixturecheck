@@ -34,7 +34,7 @@ def simple_fixture():
 
 
 @pytest.fixture
-@fixturecheck
+@fixturecheck()
 def checked_fixture():
     """A fixture with the fixturecheck decorator."""
     return User(username="testuser")

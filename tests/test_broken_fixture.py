@@ -12,8 +12,8 @@ class Item:
         self.name = name
 
 
-@fixturecheck
 @pytest.fixture
+@fixturecheck()
 def broken_fixture():
     """This fixture is broken and will raise an exception."""
     # Simulate a broken fixture by trying to access a non-existent attribute
